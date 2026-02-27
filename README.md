@@ -67,6 +67,7 @@ Before you begin, make sure your environment meets these requirements:
 | GitHub Token | Push knowledge to GitHub repos | GitHub Settings → Developer Settings → Tokens (repo write) |
 | Telegram Bot Token | Send daily intelligence updates | Telegram → search @BotFather → /newbot |
 | Telegram Chat ID | Target channel or user ID | Telegram → search @userinfobot, send any message |
+| Tophub API Key *(optional)* | Trending tech article feed (AI pipeline) | [tophubdata.com](https://www.tophubdata.com/) |
 
 ---
 
@@ -99,6 +100,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
 TELEGRAM_BOT_TOKEN=xxxxxxxxx:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TELEGRAM_CHAT_ID=YOUR_CHAT_ID
 MOLTBOT_GATEWAY_PORT=18789
+TOPHUB_API_KEY=your_tophubdata_api_key   # optional: trending tech articles
 ```
 
 > 💡 **Tip**: Telegram Chat ID is a positive integer for users, negative for channels. For channels, add the Bot as an admin first.
