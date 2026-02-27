@@ -15,7 +15,10 @@ Changelog:
   2026-02-27: Add tophub.today /topics (hot topic clusters) via HTML scraping.
               Each topic cluster has <h3> title + multiple <a class="doc-title"> links;
               keyword-match on topic title, use first doc-title URL as representative.
-  2026-02-27: Add tophub.today scraping (/c/developer + /c/tech) via POST API.
+  2026-02-27: Migrate ithome/huxiu/36kr to official tophubdata.com API; add geekpark/csdn/sspai.
+              Key read from TOPHUB_API_KEY env var. juejin/oschina/woshipm/readhub kept on AJAX
+              (not available via official API).
+  2026-02-27: Add tophub.today scraping (/c/developer + /c/tech) via POST AJAX.
               Uses /node-items-by-date endpoint; no external libs (curl POST).
   2026-02-23: Add pub_date parsing (pubDate/published/updated) to all items.
               This enables downstream date-filtering to reject stale articles.
@@ -77,19 +80,27 @@ REDDIT_FEEDS = [
     ("reddit-ClaudeAI", "https://www.reddit.com/r/ClaudeAI/.rss"),
 ]
 
-# Tophub nodes: POST /node-items-by-date?p=1&date=YYYY-MM-DD&nodeid=N
-# Covers /c/developer (掘金, 开源中国, 人人都是产品经理) and
-#         /c/tech     (IT之家, 虎嗅网, 36氪, Readhub)
-# Node IDs verified 2026-02-27 via the AJAX API (sitename cross-checked).
+# Tophub Official API (api.tophubdata.com) — hashid → source_name
+# Auth: Authorization: <key> header (read from TOPHUB_API_KEY env var)
+# Endpoint: GET https://api.tophubdata.com/nodes/{hashid}
+# Sources verified 2026-02-27 via /nodes list (cid=2 tech, cid=7 dev)
+TOPHUB_API_NODES = {
+    "74Kvx59dkx": "tophub-ithome",    # IT之家  日榜
+    "5VaobgvAj1": "tophub-huxiu",     # 虎嗅网  热文
+    "Q1Vd5Ko85R": "tophub-36kr",      # 36氪    24小时热榜
+    "NRrvWYDe5z": "tophub-geekpark",  # 极客公园 每日最新
+    "n3moBVoN5O": "tophub-csdn",      # CSDN   今日头条热点
+    "Y2KeDGQdNP": "tophub-sspai",     # 少数派  热门文章
+}
+
+# Tophub AJAX nodes: POST /node-items-by-date (not in official API)
+# Node IDs verified 2026-02-27.
 TOPHUB_NODES = {
-    100: "tophub-juejin",    # 掘金  (/c/developer)
-    96:  "tophub-juejin-b",  # 掘金 热榜  (/c/developer)
-    310: "tophub-oschina",   # 开源中国  (/c/developer)
-    213: "tophub-woshipm",   # 人人都是产品经理  (/c/developer)
-    119: "tophub-ithome",    # IT之家  (/c/tech)
-    32:  "tophub-huxiu",     # 虎嗅网  (/c/tech)
-    345: "tophub-36kr",      # 36氪  (/c/tech)
-    209: "tophub-readhub",   # Readhub  (/c/tech)
+    100: "tophub-juejin",    # 掘金  热门
+    96:  "tophub-juejin-b",  # 掘金  热榜
+    310: "tophub-oschina",   # 开源中国
+    213: "tophub-woshipm",   # 人人都是产品经理
+    209: "tophub-readhub",   # Readhub
 }
 
 GH_RELEASE_REPOS = [
@@ -200,6 +211,41 @@ def _curl_fetch(url, timeout_sec=25):
     if not text.strip():
         return "", None
     return text, None
+
+
+def _tophub_api(hashid):
+    """GET https://api.tophubdata.com/nodes/{hashid} with official API key.
+    Returns (items_list, error_str|None). Key from TOPHUB_API_KEY env var.
+    """
+    key = os.environ.get("TOPHUB_API_KEY", "")
+    if not key:
+        # Fallback: read from .env file
+        env_path = os.path.expanduser("~/.clawdbot/.env")
+        try:
+            for line in open(env_path).read().splitlines():
+                if line.startswith("TOPHUB_API_KEY="):
+                    key = line.split("=", 1)[1].strip()
+                    break
+        except Exception:
+            pass
+    if not key:
+        return [], "no_api_key"
+    cmd = [
+        "/usr/bin/curl", "-fsSL", "--max-time", "30",
+        "-H", "Authorization: %s" % key,
+        "https://api.tophubdata.com/nodes/%s" % hashid,
+    ]
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    if p.returncode != 0:
+        return [], "curl_exit_%d" % p.returncode
+    try:
+        resp = json.loads(p.stdout)
+        if resp.get("error"):
+            return [], "api_err:%s" % str(resp.get("msg", ""))[:60]
+        items = (resp.get("data") or {}).get("items") or []
+        return items, None
+    except Exception as e:
+        return [], "json_err:%s" % str(e)[:60]
 
 
 def _tophub_topics():
@@ -520,7 +566,38 @@ def main():
                 }
             )
 
-    # 4) Tophub (/c/developer + /c/tech) via POST API
+    # 4a) Tophub official API (tophubdata.com) — ithome/huxiu/36kr/geekpark/csdn/sspai
+    for hashid, src_name in TOPHUB_API_NODES.items():
+        items_raw, err = _tophub_api(hashid)
+        if err is not None:
+            source_status[src_name] = "failed:%s" % err
+            continue
+        source_status[src_name] = "ok:%d" % len(items_raw)
+        raw_total += len(items_raw)
+        for it in items_raw:
+            title = (it.get("title") or "").strip()
+            link = (it.get("url") or "").strip()
+            summ = _strip_tags(it.get("description") or "")
+            if not link or not title:
+                continue
+            lvl, matched = _match_keywords(title, summ, kw_a, kw_b)
+            if not lvl:
+                continue
+            nu = _norm(link)
+            nt = _norm(title)
+            already = (nu in covered_urls) or (nt and (nt in covered_titles))
+            kept.append({
+                "title": title,
+                "url": link,
+                "source": src_name,
+                "match_level": lvl,
+                "keywords_matched": matched,
+                "already_covered": bool(already),
+                "pub_date": today,
+                "summary_snippet": summ[:240] if summ else "",
+            })
+
+    # 4b) Tophub AJAX nodes (not in official API) — juejin/oschina/woshipm/readhub
     for nodeid, src_name in TOPHUB_NODES.items():
         items_raw, err = _tophub_post(nodeid, today)
         if err is not None:
