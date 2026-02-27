@@ -52,6 +52,46 @@ Pulsar is a server-side domain intelligence pipeline. **You define the domain; P
 
 ## Quick Start
 
+### 🤖 AI-Assisted Setup (Cursor · Claude · ChatGPT)
+
+Use this prompt with any AI coding assistant to get guided, interactive setup:
+
+```
+I've cloned Pulsar (https://github.com/sou350121/Pulsar) — an automated domain intelligence pipeline.
+Please help me set it up for my research domain.
+
+First, read these files:
+- AGENTS.md               — verified deployment guide
+- config/active-config.template.json  — domain config (RSS feeds, keywords, hypotheses)
+- config/github-config.template.json  — GitHub push target config
+- .env.example            — required API keys
+
+Then help me complete these steps:
+
+1. Configure my domain (memory/active-config.json):
+   - My research domain: [describe your domain — e.g. "biomedical AI", "climate policy", "fintech"]
+   - RSS feeds to monitor: [list your feeds, or ask me for suggestions]
+   - Institutions/orgs to prioritize in ratings: [e.g. "NIH", "Fed", "TSMC"]
+   - 3–5 domain hypotheses I want to track and calibrate monthly
+
+2. Set up .env:
+   - LLM provider: [OpenAI / DeepSeek / Moonshot / DashScope / Groq / self-hosted]
+   - I will provide my API key when ready
+
+3. Configure GitHub push target (memory/github-config-primary.json):
+   - My knowledge-base repo: [your-username/your-repo]
+
+4. Update path references if I cloned outside ~/clawd/:
+   MYUSER=$(whoami)
+   find scripts/ -name "*.py" | xargs sed -i "s|/home/admin|/home/$MYUSER|g"
+
+5. Verify setup by running the first pipeline step.
+
+After reading the config files, ask me the questions needed to fill in the blanks.
+```
+
+---
+
 ### Prerequisites
 
 - **OS**: Linux (recommended), macOS
