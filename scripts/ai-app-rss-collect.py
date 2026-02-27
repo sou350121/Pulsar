@@ -203,7 +203,7 @@ def _tophub_post(nodeid, date, page=1):
     """POST to tophub /node-items-by-date. Returns (items_list, error_str|None)."""
     body = "p=%d&date=%s&nodeid=%d" % (page, date, int(nodeid))
     cmd = [
-        "/usr/bin/curl", "-fsSL", "--max-time", "20",
+        "/usr/bin/curl", "-fsSL", "--max-time", "45",
         "-X", "POST",
         "-H", "Content-Type: application/x-www-form-urlencoded",
         "-H", "X-Requested-With: XMLHttpRequest",
