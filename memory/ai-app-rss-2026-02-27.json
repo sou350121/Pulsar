@@ -1,0 +1,3265 @@
+{
+  "tag": "ai-app-rss-2026-02-27",
+  "date": "2026-02-27",
+  "source_status": {
+    "producthunt": "ok",
+    "hn": "ok",
+    "hf-blog": "ok",
+    "blog-simonwillison": "ok",
+    "blog-minimaxir": "ok",
+    "blog-lilianweng": "failed:http_404",
+    "blog-karpathy": "ok",
+    "blog-openai": "ok",
+    "blog-anthropic-eng": "failed:http_404",
+    "blog-deepmind": "ok",
+    "blog-google-research": "ok",
+    "blog-qwen": "failed:http_404",
+    "blog-together-ai": "ok",
+    "blog-aws-ai": "ok",
+    "blog-bair": "ok",
+    "blog-stanford-ai": "failed:http_404",
+    "blog-langchain": "ok",
+    "blog-qdrant": "failed:http_404",
+    "blog-weaviate": "ok",
+    "blog-replicate": "failed:http_404",
+    "blog-vercel": "failed:http_404",
+    "blog-supabase": "ok",
+    "blog-cloudflare": "ok",
+    "blog-hf-papers": "ok",
+    "reddit-LocalLLaMA": "failed:http_403",
+    "reddit-ClaudeAI": "failed:http_403",
+    "gh-trending": "ok",
+    "gh-release:langchain-ai/langchain": "ok",
+    "gh-release:run-llama/llama_index": "ok",
+    "gh-release:microsoft/autogen": "ok",
+    "gh-release:crewAIInc/crewAI": "ok",
+    "gh-release:langgenius/dify": "ok",
+    "gh-release:open-webui/open-webui": "ok",
+    "gh-release:BerriAI/litellm": "ok",
+    "gh-release:vercel/ai": "ok",
+    "gh-release:langfuse/langfuse": "ok",
+    "gh-release:promptfoo/promptfoo": "ok",
+    "tophub-juejin": "ok:4",
+    "tophub-juejin-b": "ok:1",
+    "tophub-oschina": "ok:9",
+    "tophub-woshipm": "ok:30",
+    "tophub-ithome": "ok:17",
+    "tophub-huxiu": "ok:3",
+    "tophub-36kr": "ok:30",
+    "tophub-readhub": "ok:30"
+  },
+  "total_fetched": 2571,
+  "after_filter": 264,
+  "items": [
+    {
+      "title": "Claude Code Remote Access",
+      "url": "https://www.producthunt.com/products/claude-code-remote-access",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-24",
+      "summary_snippet": "Monitor & control your agent from anywhere. Discussion | Link"
+    },
+    {
+      "title": "HelixDB",
+      "url": "https://www.producthunt.com/products/helixdb",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "vector"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-21",
+      "summary_snippet": "An open-source OLTP graph-vector database built in Rust. Discussion | Link"
+    },
+    {
+      "title": "Mastra Code",
+      "url": "https://www.producthunt.com/products/mastra",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-24",
+      "summary_snippet": "The AI coding agent that never compacts Discussion | Link"
+    },
+    {
+      "title": "Superset",
+      "url": "https://www.producthunt.com/products/superset-5",
+      "source": "producthunt",
+      "match_level": "B",
+      "keywords_matched": [
+        "claude"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-10",
+      "summary_snippet": "Run an army of Claude Code, Codex, etc. on your machine Discussion | Link"
+    },
+    {
+      "title": "Flarehawk",
+      "url": "https://www.producthunt.com/products/flarehawk",
+      "source": "producthunt",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-26",
+      "summary_snippet": "Monitors security tools, probes threats, + prompts action Discussion | Link"
+    },
+    {
+      "title": "MaxClaw by MiniMax",
+      "url": "https://www.producthunt.com/products/minimax-agent",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-25",
+      "summary_snippet": "Always-on managed agent based on OpenClaw powered by MiniMax Discussion | Link"
+    },
+    {
+      "title": "muno",
+      "url": "https://www.producthunt.com/products/muno-2",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-16",
+      "summary_snippet": "AI agents that talk to your team & complete tasks for you. Discussion | Link"
+    },
+    {
+      "title": "Rover by rtrvr.ai",
+      "url": "https://www.producthunt.com/products/rtrvr-ai",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-01",
+      "summary_snippet": "Turn your website into an AI agent with one script tag. Discussion | Link"
+    },
+    {
+      "title": "Tessl",
+      "url": "https://www.producthunt.com/products/tessl",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-12",
+      "summary_snippet": "Optimize agents skills, ship 3× better code. Discussion | Link"
+    },
+    {
+      "title": "Playground by Natoma",
+      "url": "https://www.producthunt.com/products/playground-by-natoma",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "mcp"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-25",
+      "summary_snippet": "Simple, fast way to find and try any MCP server. No setup. Discussion | Link"
+    },
+    {
+      "title": "API Pick",
+      "url": "https://www.producthunt.com/products/api-pick",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-22",
+      "summary_snippet": "Data APIs for AI agents & developers — free to start Discussion | Link"
+    },
+    {
+      "title": "gpt-realtime-1.5 by OpenAI",
+      "url": "https://www.producthunt.com/products/openai",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-23",
+      "summary_snippet": "Tighter instruction adherence in speech agents Discussion | Link"
+    },
+    {
+      "title": "DeltaMemory",
+      "url": "https://www.producthunt.com/products/deltamemory",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-25",
+      "summary_snippet": "Fastest cognitive memory for AI Agents Discussion | Link"
+    },
+    {
+      "title": "OpenClawCity",
+      "url": "https://www.producthunt.com/products/openclawcity",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-25",
+      "summary_snippet": "A persistent city where AI agents live, create, and evolve Discussion | Link"
+    },
+    {
+      "title": "Qwarm",
+      "url": "https://www.producthunt.com/products/qwarm",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-21",
+      "summary_snippet": "Write tests in plain English AI agents run them in browsers Discussion | Link"
+    },
+    {
+      "title": "Heimdall",
+      "url": "https://www.producthunt.com/products/heimdall-3",
+      "source": "producthunt",
+      "match_level": "B",
+      "keywords_matched": [
+        "telemetry"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-25",
+      "summary_snippet": "See the real-time telemetry for objects in Earth's orbit Discussion | Link"
+    },
+    {
+      "title": "Notion Custom Agents",
+      "url": "https://www.producthunt.com/products/notion",
+      "source": "producthunt",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-24",
+      "summary_snippet": "Anything you can do in Notion, your Agent can do for you. Discussion | Link"
+    },
+    {
+      "title": "PeonPing",
+      "url": "https://www.producthunt.com/products/peonping",
+      "source": "producthunt",
+      "match_level": "B",
+      "keywords_matched": [
+        "claude"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-24",
+      "summary_snippet": "Stop babysitting Claude Code (or Codex, Cursor, + more) Discussion | Link"
+    },
+    {
+      "title": "Google workers seek 'red lines' on military A.I., echoing Anthropic",
+      "url": "https://www.nytimes.com/2026/02/26/technology/google-deepmind-letter-pentagon.html",
+      "source": "hn",
+      "match_level": "B",
+      "keywords_matched": [
+        "anthropic"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "https://notdivided.org/ Comments URL: https://news.ycombinator.com/item?id=47175931 Points: 252 # Comments: 117"
+    },
+    {
+      "title": "Anthropic says company 'cannot in good conscience accede' to Pentagon's demands",
+      "url": "https://apnews.com/article/anthropic-ai-pentagon-hegseth-dario-amodei-9b28dda41bdb52b6a378fa9fc80b8fda",
+      "source": "hn",
+      "match_level": "B",
+      "keywords_matched": [
+        "anthropic"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-26",
+      "summary_snippet": "Article URL: https://apnews.com/article/anthropic-ai-pentagon-hegseth-dario-amodei-9b28dda41bdb52b6a378fa9fc80b8fda Comments URL: https://news.ycombinator.com/item?id=47173559 Points: 78 # Comments: 4"
+    },
+    {
+      "title": "Statement from Dario Amodei on our discussions with the Department of War",
+      "url": "https://www.anthropic.com/news/statement-department-of-war",
+      "source": "hn",
+      "match_level": "B",
+      "keywords_matched": [
+        "anthropic"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-26",
+      "summary_snippet": "Article URL: https://www.anthropic.com/news/statement-department-of-war Comments URL: https://news.ycombinator.com/item?id=47173121 Points: 2125 # Comments: 1151"
+    },
+    {
+      "title": "Launch HN: Cardboard (YC W26) – Agentic video editor",
+      "url": "https://www.usecardboard.com/",
+      "source": "hn",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "agentic",
+        "orchestration",
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-26",
+      "summary_snippet": "Hey HN - we're Saksham and Ishan, and we’re building Cardboard ( https://www.usecardboard.com ). It lets you go from raw footage to an edited video by describing what you want in natural language. There’s a demo video at https://www.usecard"
+    },
+    {
+      "title": "OsmAnd’s Faster Offline Navigation (2025)",
+      "url": "https://osmand.net/blog/fast-routing/",
+      "source": "hn",
+      "match_level": "B",
+      "keywords_matched": [
+        "routing"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-26",
+      "summary_snippet": "Article URL: https://osmand.net/blog/fast-routing/ Comments URL: https://news.ycombinator.com/item?id=47170157 Points: 191 # Comments: 67"
+    },
+    {
+      "title": "Deploying Open Source Vision Language Models (VLM) on Jetson",
+      "url": "https://huggingface.co/blog/nvidia/cosmos-on-jetson",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "GGML and llama.cpp join HF to ensure the long-term progress of Local AI",
+      "url": "https://huggingface.co/blog/ggml-joins-hf",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "IBM and UC Berkeley Diagnose Why Enterprise Agents Fail Using IT-Bench and MAST",
+      "url": "https://huggingface.co/blog/ibm-research/itbenchandmast",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Custom Kernels for All from Codex and Claude",
+      "url": "https://huggingface.co/blog/custom-cuda-kernels-agent-skills",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "claude"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-13",
+      "summary_snippet": ""
+    },
+    {
+      "title": "OpenEnv in Practice: Evaluating Tool-Using Agents in Real-World Environments",
+      "url": "https://huggingface.co/blog/openenv-turing",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Community Evals: Because we're done trusting black-box leaderboards over the community",
+      "url": "https://huggingface.co/blog/community-evals",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-02-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "The Future of the Global Open-Source AI Ecosystem: From DeepSeek to AI+",
+      "url": "https://huggingface.co/blog/huggingface/one-year-since-the-deepseek-moment-blog-3",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "We Got Claude to Build CUDA Kernels and teach open models!",
+      "url": "https://huggingface.co/blog/upskill",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "claude"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-01-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Architectural Choices in China's Open-Source AI Ecosystem: Building Beyond DeepSeek",
+      "url": "https://huggingface.co/blog/huggingface/one-year-since-the-deepseek-moment-blog-2",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-01-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Alyah ⭐️: Toward Robust Evaluation of Emirati Dialect Capabilities in Arabic LLMs",
+      "url": "https://huggingface.co/blog/tiiuae/emirati-benchmarks",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation",
+        "llm"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-01-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Unlocking Agentic RL Training for GPT-OSS: A Practical Retrospective",
+      "url": "https://huggingface.co/blog/LinkedIn/gpt-oss-agentic-rl",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "agentic"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-01-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "AssetOpsBench: Bridging the Gap Between AI Agent Benchmarks and Industrial Reality",
+      "url": "https://huggingface.co/blog/ibm-research/assetopsbench-playground-on-hugging-face",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-01-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "One Year Since the “DeepSeek Moment”",
+      "url": "https://huggingface.co/blog/huggingface/one-year-since-the-deepseek-moment",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-01-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "NVIDIA brings agents to life with DGX Spark and Reachy Mini",
+      "url": "https://huggingface.co/blog/nvidia-reachy-mini",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2026-01-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "AprielGuard: A Guardrail for Safety and Adversarial Robustness in Modern LLM Systems",
+      "url": "https://huggingface.co/blog/ServiceNow-AI/aprielguard",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "guardrail",
+        "llm"
+      ],
+      "already_covered": true,
+      "pub_date": "2025-12-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "The Open Evaluation Standard: Benchmarking NVIDIA Nemotron 3 Nano with NeMo Evaluator",
+      "url": "https://huggingface.co/blog/nvidia/nemotron-3-nano-evaluation-recipe",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-12-17",
+      "summary_snippet": ""
+    },
+    {
+      "title": "CUGA on Hugging Face: Democratizing Configurable AI Agents",
+      "url": "https://huggingface.co/blog/ibm-research/cuga-on-hugging-face",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2025-12-15",
+      "summary_snippet": ""
+    },
+    {
+      "title": "New in llama.cpp: Model Management",
+      "url": "https://huggingface.co/blog/ggml-org/model-management-in-llamacpp",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-12-11",
+      "summary_snippet": ""
+    },
+    {
+      "title": "DeepMath: A lightweight math reasoning Agent with smolagents",
+      "url": "https://huggingface.co/blog/intel-deepmath",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2025-12-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "We Got Claude to Fine-Tune an Open Source LLM",
+      "url": "https://huggingface.co/blog/hf-skills-training",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-12-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Open ASR Leaderboard: Trends and Insights with New Multilingual & Long-Form Tracks",
+      "url": "https://huggingface.co/blog/open-asr-leaderboard",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-11-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing AnyLanguageModel: One API for Local and Remote LLMs on Apple Platforms",
+      "url": "https://huggingface.co/blog/anylanguagemodel",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-11-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Apriel-H1: The Surprising Key to Distilling Efficient Reasoning Models",
+      "url": "https://huggingface.co/blog/ServiceNow-AI/apriel-h1",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "reasoning model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-11-19",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Aligning to What? Rethinking Agent Generalization in MiniMax M2",
+      "url": "https://huggingface.co/blog/MiniMax-AI/aligning-to-what",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-10-30",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Building a Healthcare Robot from Simulation to Deployment with NVIDIA Isaac",
+      "url": "https://huggingface.co/blog/lerobotxnvidia-healthcare",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "deployment"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-10-29",
+      "summary_snippet": ""
+    },
+    {
+      "title": "How to Build a Healthcare Robot from Simulation to Deployment with NVIDIA Isaac for Healthcare",
+      "url": "https://huggingface.co/blog/nvidia/nvidia-isaac-for-healthcare",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "deployment"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-10-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Streaming datasets: 100x More Efficient",
+      "url": "https://huggingface.co/blog/streaming-datasets",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "streaming"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-10-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Building the Open Agent Ecosystem Together: Introducing OpenEnv",
+      "url": "https://huggingface.co/blog/openenv",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-10-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Hugging Face and VirusTotal collaborate to strengthen AI security",
+      "url": "https://huggingface.co/blog/virustotal",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-10-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Google Cloud C4 Brings a 70% TCO improvement on GPT OSS with Intel and Hugging Face",
+      "url": "https://huggingface.co/blog/gpt-oss-on-intel-xeon",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "gpt"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-10-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing RTEB: A New Standard for Retrieval Evaluation",
+      "url": "https://huggingface.co/blog/rteb",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "retrieval",
+        "evaluation"
+      ],
+      "already_covered": true,
+      "pub_date": "2025-10-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Accelerating Qwen3-8B Agent on Intel® Core™ Ultra with Depth-Pruned Draft Models",
+      "url": "https://huggingface.co/blog/intel-qwen3-agent",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-09-29",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Smol2Operator: Post-Training GUI Agents for Computer Use",
+      "url": "https://huggingface.co/blog/smol2operator",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2025-09-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "SyGra: The One-Stop Framework for Building Data for LLMs and SLMs",
+      "url": "https://huggingface.co/blog/ServiceNow-AI/sygra-data-gen-framework",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-09-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Gaia2 and ARE: Empowering the community to study agents",
+      "url": "https://huggingface.co/blog/gaia2",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-09-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Tricks from OpenAI gpt-oss YOU 🫵 can use with transformers",
+      "url": "https://huggingface.co/blog/faster-transformers",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "gpt",
+        "openai"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-09-11",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fine-tune Any LLM from the Hugging Face Hub with Together AI",
+      "url": "https://huggingface.co/blog/togethercomputer/together-ft",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-09-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Jupyter Agents: training LLMs to reason with notebooks",
+      "url": "https://huggingface.co/blog/jupyter-agent-2",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-09-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome EmbeddingGemma, Google's new efficient embedding model",
+      "url": "https://huggingface.co/blog/embeddinggemma",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-09-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Generate Images with Claude and Hugging Face",
+      "url": "https://huggingface.co/blog/claude-and-mcp",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "claude"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-19",
+      "summary_snippet": ""
+    },
+    {
+      "title": "MCP for Research: How to Connect AI to Research Tools",
+      "url": "https://huggingface.co/blog/mcp-for-research",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "mcp"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "TextQuests: How Good are LLMs at Text-Based Video Games?",
+      "url": "https://huggingface.co/blog/textquests",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "🇵🇭 FilBench - Can LLMs Understand and Generate Filipino?",
+      "url": "https://huggingface.co/blog/filbench",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Vision Language Model Alignment in TRL ⚡️",
+      "url": "https://huggingface.co/blog/trl-vlm-alignment",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-07",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome GPT OSS, the new open-source model family from OpenAI!",
+      "url": "https://huggingface.co/blog/welcome-openai-gpt-oss",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "gpt",
+        "openai"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Measuring Open-Source Llama Nemotron Models on DeepResearch Bench",
+      "url": "https://huggingface.co/blog/nvidia/ai-q-top-ranking-open-portable-deep-research-agent",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "📚 3LM: A Benchmark for Arabic LLMs in STEM and Code",
+      "url": "https://huggingface.co/blog/tiiuae/3lm-benchmark",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-08-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Implementing MCP Servers in Python: An AI Shopping Assistant with Gradio",
+      "url": "https://huggingface.co/blog/gradio-vton-mcp",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "mcp"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-31",
+      "summary_snippet": ""
+    },
+    {
+      "title": "TimeScope: How Long Can Your Video Large Multimodal Model Go?",
+      "url": "https://huggingface.co/blog/timescope-video-lmm-benchmark",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "multimodal model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Accelerate a World of LLMs on Hugging Face with NVIDIA NIM",
+      "url": "https://huggingface.co/blog/nvidia/multi-llm-nim",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Consilium: When Multiple LLMs Collaborate",
+      "url": "https://huggingface.co/blog/consilium-multi-llm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-17",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Back to The Future: Evaluating AI Agents on Predicting Future Events",
+      "url": "https://huggingface.co/blog/futurebench",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-17",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Five Big Improvements to Gradio MCP Servers",
+      "url": "https://huggingface.co/blog/gradio-mcp-updates",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "mcp"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-17",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Kimina-Prover: Applying Test-time RL Search on Large Formal Reasoning Models",
+      "url": "https://huggingface.co/blog/AI-MO/kimina-prover",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "reasoning model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "ScreenEnv: Deploy your full stack Desktop Agent",
+      "url": "https://huggingface.co/blog/screenenv",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2025-07-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Building the Hugging Face MCP Server",
+      "url": "https://huggingface.co/blog/building-hf-mcp",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "mcp"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Upskill your LLMs With Gradio MCP Servers",
+      "url": "https://huggingface.co/blog/gradio-mcp-servers",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "mcp",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-09",
+      "summary_snippet": ""
+    },
+    {
+      "title": "SmolLM3: smol, multilingual, long-context reasoner",
+      "url": "https://huggingface.co/blog/smollm3",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-08",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Announcing NeurIPS 2025 E2LM Competition: Early Training Evaluation of Language Models",
+      "url": "https://huggingface.co/blog/tiiuae/e2lm-competition",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Training and Finetuning Sparse Embedding Models with Sentence Transformers v5",
+      "url": "https://huggingface.co/blog/train-sparse-encoder",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-07-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome the NVIDIA Llama Nemotron Nano VLM to Hugging Face Hub",
+      "url": "https://huggingface.co/blog/nvidia/llama-nemotron-nano-vl",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-06-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "How Long Prompts Block Other Requests - Optimizing LLM Performance",
+      "url": "https://huggingface.co/blog/tngtech/llm-performance-blocked-by-long-prompts",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-06-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "ScreenSuite - The most comprehensive evaluation suite for GUI Agents!",
+      "url": "https://huggingface.co/blog/screensuite",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "evaluation"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-06-06",
+      "summary_snippet": ""
+    },
+    {
+      "title": "KV Cache from scratch in nanoVLM",
+      "url": "https://huggingface.co/blog/kv-cache",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "cache"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-06-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Holo1: New family of GUI automation VLMs powering GUI agent Surfer-H",
+      "url": "https://huggingface.co/blog/Hcompany/holo1",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": true,
+      "pub_date": "2025-06-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "No GPU left behind: Unlocking Efficiency with Co-located vLLM in TRL",
+      "url": "https://huggingface.co/blog/vllm-colocate",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-06-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "CodeAgents + Structure: A Better Way to Execute Actions",
+      "url": "https://huggingface.co/blog/structured-codeagent",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-05-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Tiny Agents in Python: a MCP-powered agent in ~70 lines of code",
+      "url": "https://huggingface.co/blog/python-tiny-agents",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "mcp"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-05-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Falcon-H1: A Family of Hybrid-Head Language Models Redefining Efficiency and Performance",
+      "url": "https://huggingface.co/blog/tiiuae/falcon-h1",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-05-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Falcon-Arabic: A Breakthrough in Arabic Language Models",
+      "url": "https://huggingface.co/blog/tiiuae/falcon-arabic",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-05-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Falcon-Edge: A series of powerful, universal, fine-tunable 1.58bit language models.",
+      "url": "https://huggingface.co/blog/tiiuae/falcon-edge",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-05-15",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Vision Language Models (Better, faster, stronger)",
+      "url": "https://huggingface.co/blog/vlms-2025",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-05-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "How to Build an MCP Server with Gradio",
+      "url": "https://huggingface.co/blog/gradio-mcp",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "mcp"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-30",
+      "summary_snippet": ""
+    },
+    {
+      "title": "The 4 Things Qwen-3’s Chat Template Teaches Us",
+      "url": "https://huggingface.co/blog/qwen-3-chat-template-deep-dive",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "qwen"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-30",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcoming Llama Guard 4 on Hugging Face Hub",
+      "url": "https://huggingface.co/blog/llama-guard-4",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-29",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing AutoRound: Intel’s Advanced Quantization for LLMs and VLMs",
+      "url": "https://huggingface.co/blog/autoround",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-29",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Tiny Agents: an MCP-powered agent in 50 lines of code",
+      "url": "https://huggingface.co/blog/tiny-agents",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "mcp"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-25",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Prefill and Decode for Concurrent Requests - Optimizing LLM Performance",
+      "url": "https://huggingface.co/blog/tngtech/llm-performance-prefill-decode-concurrent-requests",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing HELMET: Holistically Evaluating Long-context Language Models",
+      "url": "https://huggingface.co/blog/helmet",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Arabic Leaderboards: Introducing Arabic Instruction Following, Updating AraGen, and More",
+      "url": "https://huggingface.co/blog/leaderboard-3c3h-aragen-ifeval",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-08",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome Llama 4 Maverick & Scout on Hugging Face",
+      "url": "https://huggingface.co/blog/llama4-release",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "The NLP Course is becoming the LLM Course",
+      "url": "https://huggingface.co/blog/llm-course",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Efficient Request Queueing – Optimizing LLM Performance",
+      "url": "https://huggingface.co/blog/tngtech/llm-performance-request-queueing",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-04-02",
+      "summary_snippet": ""
+    },
+    {
+      "title": "🚀 Accelerating LLM Inference with TGI on Intel Gaudi",
+      "url": "https://huggingface.co/blog/intel-gaudi-backend-for-tgi",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-03-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome Gemma 3: Google's all new multimodal, multilingual, long context open LLM",
+      "url": "https://huggingface.co/blog/gemma3",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-03-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "LLM Inference on Edge: A Fun and Easy Guide to run LLMs via React Native on your Phone!",
+      "url": "https://huggingface.co/blog/llm-inference-on-edge",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-03-07",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Hugging Face and JFrog partner to make AI Security more transparent",
+      "url": "https://huggingface.co/blog/jfrog",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-03-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Trace & Evaluate your Agent with Arize Phoenix",
+      "url": "https://huggingface.co/blog/smolagents-phoenix",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-02-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "PaliGemma 2 Mix - New Instruction Vision Language Models by Google",
+      "url": "https://huggingface.co/blog/paligemma2mix",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-02-19",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fixing Open LLM Leaderboard with Math-Verify",
+      "url": "https://huggingface.co/blog/math_verify_leaderboard",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-02-14",
+      "summary_snippet": ""
+    },
+    {
+      "title": "The Open Arabic LLM Leaderboard 2",
+      "url": "https://huggingface.co/blog/leaderboard-arabic-v2",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-02-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Open-source DeepResearch – Freeing our search agents",
+      "url": "https://huggingface.co/blog/open-deep-research",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-02-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "DABStep: Data Agent Benchmark for Multi-step Reasoning",
+      "url": "https://huggingface.co/blog/dabstep",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-02-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Mini-R1: Reproduce Deepseek R1 „aha moment“ a RL tutorial",
+      "url": "https://huggingface.co/blog/open-r1/mini-r1-contdown-game",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-31",
+      "summary_snippet": ""
+    },
+    {
+      "title": "How to deploy and fine-tune DeepSeek models on AWS",
+      "url": "https://huggingface.co/blog/deepseek-r1-aws",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-30",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Open-R1: a fully open reproduction of DeepSeek-R1",
+      "url": "https://huggingface.co/blog/open-r1",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "We now support VLMs in smolagents!",
+      "url": "https://huggingface.co/blog/smolagents-can-see",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Mastering Long Contexts in LLMs with KVPress",
+      "url": "https://huggingface.co/blog/nvidia/kvpress",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Hugging Face and FriendliAI partner to supercharge model deployment on the Hub",
+      "url": "https://huggingface.co/blog/friendliai-partnership",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "deployment"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing multi-backends (TRT-LLM, vLLM) support for Text Generation Inference",
+      "url": "https://huggingface.co/blog/tgi-multi-backend",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Train 400x faster Static Embedding Models with Sentence Transformers",
+      "url": "https://huggingface.co/blog/static-embeddings",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-15",
+      "summary_snippet": ""
+    },
+    {
+      "title": "AI Agents Are Here. What Now?",
+      "url": "https://huggingface.co/blog/ethics-soc-7",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-13",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Visual Document Retrieval Goes Multilingual",
+      "url": "https://huggingface.co/blog/vdr-2b-multilingual",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "retrieval"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "CO₂ Emissions and Models Performance: Insights from the Open LLM Leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-emissions-analysis",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2025-01-09",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing smolagents: simple agents that write actions in code.",
+      "url": "https://huggingface.co/blog/smolagents",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-12-31",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Controlling Language Model Generation with NVIDIA's LogitsProcessorZoo",
+      "url": "https://huggingface.co/blog/logits-processor-zoo",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-12-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Benchmarking Language Model Performance on 5th Gen Xeon at GCP",
+      "url": "https://huggingface.co/blog/intel-gcp-c4",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-12-17",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome PaliGemma 2 – New vision language models by Google",
+      "url": "https://huggingface.co/blog/paligemma2",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-12-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "How good are LLMs at fixing their mistakes? A chatbot arena experiment with Keras and TPUs",
+      "url": "https://huggingface.co/blog/keras-chatbot-arena",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-12-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Rethinking LLM Evaluation with 3C3H: AraGen Benchmark and Leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-3c3h-aragen",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag",
+        "evaluation",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-12-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Investing in Performance: Fine-tune small models with LLM insights - a CFM case study",
+      "url": "https://huggingface.co/blog/cfm-case-study",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-12-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "SmolVLM - small yet mighty Vision Language Model",
+      "url": "https://huggingface.co/blog/smolvlm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-11-26",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Letting Large Models Debate: The First Multilingual LLM Debate Competition",
+      "url": "https://huggingface.co/blog/debate",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-11-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "From Files to Chunks: Improving HF Storage Efficiency",
+      "url": "https://huggingface.co/blog/from-files-to-chunks",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-11-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Open Leaderboard for Japanese LLMs!",
+      "url": "https://huggingface.co/blog/leaderboard-japanese",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-11-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Judge Arena: Benchmarking LLMs as Evaluators",
+      "url": "https://huggingface.co/blog/arena-atla",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-11-19",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Argilla 2.4: Easily Build Fine-Tuning and Evaluation Datasets on the Hub — No Code Required",
+      "url": "https://huggingface.co/blog/argilla-ui-hub",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-11-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Expert Support case study: Bolstering a RAG app with LLM-as-a-Judge",
+      "url": "https://huggingface.co/blog/digital-green-llm-judge",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-10-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Hugging Face Teams Up with Protect AI: Enhancing Model Security for the ML Community",
+      "url": "https://huggingface.co/blog/protectai",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-10-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Transformers.js v3: WebGPU Support, New Models & Tasks, and More…",
+      "url": "https://huggingface.co/blog/transformersjs-v3",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "new model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-10-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "“Llama 3.2 in Keras”",
+      "url": "https://huggingface.co/blog/keras-llama-32",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-10-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "A Security Review of Gradio 5",
+      "url": "https://huggingface.co/blog/gradio-5-security",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-10-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Open FinLLM Leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-finbench",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-10-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "🇨🇿 BenCzechMark - Can your LLM Understand Czech?",
+      "url": "https://huggingface.co/blog/benczechmark",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-10-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Llama can now see and run on your device - welcome Llama 3.2",
+      "url": "https://huggingface.co/blog/llama32",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-09-25",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fine-tuning LLMs to 1.58bit: extreme quantization made easy",
+      "url": "https://huggingface.co/blog/1_58_llm_extreme_quantization",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-09-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Deploy Meta Llama 3.1 405B on Google Cloud Vertex AI",
+      "url": "https://huggingface.co/blog/llama31-on-vertex-ai",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-08-19",
+      "summary_snippet": ""
+    },
+    {
+      "title": "2024 Security Feature Highlights",
+      "url": "https://huggingface.co/blog/2024-security-features",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-08-06",
+      "summary_snippet": ""
+    },
+    {
+      "title": "LAVE: Zero-shot VQA Evaluation on Docmatix with LLMs - Do We Still Need Fine-Tuning?",
+      "url": "https://huggingface.co/blog/zero-shot-vqa-docmatix",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-25",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Llama 3.1 - 405B, 70B & 8B with multilinguality and long context",
+      "url": "https://huggingface.co/blog/llama31",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "WWDC 24: Running Mistral 7B with Core ML",
+      "url": "https://huggingface.co/blog/mistral-coreml",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "mistral"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "SmolLM - blazingly fast and remarkably powerful",
+      "url": "https://huggingface.co/blog/smollm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "How we leveraged distilabel to create an Argilla 2.0 Chatbot",
+      "url": "https://huggingface.co/blog/argilla-chatbot",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Experimenting with Automatic PII Detection on the Hub using Presidio",
+      "url": "https://huggingface.co/blog/presidio-pii-detection",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "pii"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Preference Optimization for Vision Language Models",
+      "url": "https://huggingface.co/blog/dpo_vlm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Accelerating Protein Language Model ProtST on Intel Gaudi 2",
+      "url": "https://huggingface.co/blog/intel-protein-language-model-protst",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Our Transformers Code Agent beats the GAIA benchmark 🏅",
+      "url": "https://huggingface.co/blog/beating-gaia",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-07-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome Gemma 2 - Google’s new open LLM",
+      "url": "https://huggingface.co/blog/gemma2",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "XLSCOUT Unveils ParaEmbed 2.0: a Powerful Embedding Model Tailored for Patents and IP with Expert Support from Hugging Face",
+      "url": "https://huggingface.co/blog/xlscout-case-study",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-25",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fine-tuning Florence-2 - Microsoft's Cutting-edge Vision Language Models",
+      "url": "https://huggingface.co/blog/finetune-florence2",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Going multimodal: How Prezi is leveraging the Hub and the Expert Support Program to accelerate their ML roadmap",
+      "url": "https://huggingface.co/blog/prezi-case-study",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-19",
+      "summary_snippet": ""
+    },
+    {
+      "title": "BigCodeBench: The Next Generation of HumanEval",
+      "url": "https://huggingface.co/blog/leaderboard-bigcodebench",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "humaneval"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Hugging Face Embedding Container for Amazon SageMaker",
+      "url": "https://huggingface.co/blog/sagemaker-huggingface-embedding",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-07",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Launching the Artificial Analysis Text to Image Leaderboard & Arena",
+      "url": "https://huggingface.co/blog/leaderboard-artificial-analysis2",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-06",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing NPC-Playground, a 3D playground to interact with LLM-powered NPCs",
+      "url": "https://huggingface.co/blog/npc-gigax-cubzh",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-06-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Space secrets security update",
+      "url": "https://huggingface.co/blog/space-secrets-disclosure",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-31",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Benchmarking Text Generation Inference",
+      "url": "https://huggingface.co/blog/tgi-benchmarking",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "benchmark"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-29",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Training and Finetuning Embedding Models with Sentence Transformers v3",
+      "url": "https://huggingface.co/blog/train-sentence-transformers",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Falcon 2: An 11B parameter pretrained language model and VLM, trained on over 5000B tokens and 11 languages",
+      "url": "https://huggingface.co/blog/falcon2-11b",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "CyberSecEval 2 - A Comprehensive Evaluation Framework for Cybersecurity Risks and Capabilities of Large Language Models",
+      "url": "https://huggingface.co/blog/leaderboard-llamaguard",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation",
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Unlocking Longer Generation with Key-Value Cache Quantization",
+      "url": "https://huggingface.co/blog/kv-cache-quantization",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "cache"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "PaliGemma – Google's Cutting-Edge Open Vision Language Model",
+      "url": "https://huggingface.co/blog/paligemma",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-14",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Open Arabic LLM Leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-arabic",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-14",
+      "summary_snippet": ""
+    },
+    {
+      "title": "License to Call: Introducing Transformers Agents 2.0",
+      "url": "https://huggingface.co/blog/agents",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-13",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Building Cost-Efficient Enterprise RAG applications with Intel Gaudi 2 and Intel Xeon",
+      "url": "https://huggingface.co/blog/cost-efficient-rag-applications-with-intel",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-09",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Open Leaderboard for Hebrew LLMs!",
+      "url": "https://huggingface.co/blog/leaderboard-hebrew",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Bringing the Artificial Analysis LLM Performance Leaderboard to Hugging Face",
+      "url": "https://huggingface.co/blog/leaderboard-artificial-analysis",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-05-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Open Chain of Thought Leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-cot",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Jack of All Trades, Master of Some, a Multi-Purpose Transformer Agent",
+      "url": "https://huggingface.co/blog/jat",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "The Open Medical-LLM Leaderboard: Benchmarking Large Language Models in Healthcare",
+      "url": "https://huggingface.co/blog/leaderboard-medicalllm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm",
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-19",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome Llama 3 - Meta's new open LLM",
+      "url": "https://huggingface.co/blog/llama3",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the LiveCodeBench Leaderboard - Holistic and Contamination-Free Evaluation of Code LLMs",
+      "url": "https://huggingface.co/blog/leaderboard-livecodebench",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-16",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing Idefics2: A Powerful 8B Vision-Language Model for the community",
+      "url": "https://huggingface.co/blog/idefics2",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-15",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Vision Language Models Explained",
+      "url": "https://huggingface.co/blog/vlms",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-11",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Making thousands of open LLMs bloom in the Vertex AI Model Garden",
+      "url": "https://huggingface.co/blog/google-cloud-model-garden",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "CodeGemma - an official Google release for code LLMs",
+      "url": "https://huggingface.co/blog/codegemma",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-09",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Hugging Face partners with Wiz Research to Improve AI Security",
+      "url": "https://huggingface.co/blog/hugging-face-wiz-security-blog",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "security"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-04-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Pollen-Vision: Unified interface for Zero-Shot vision models in robotics",
+      "url": "https://huggingface.co/blog/pollen-vision",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "vision model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-03-25",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Binary and Scalar Embedding Quantization for Significantly Faster & Cheaper Retrieval",
+      "url": "https://huggingface.co/blog/embedding-quantization",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "retrieval",
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-03-22",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Chatbot Guardrails Arena",
+      "url": "https://huggingface.co/blog/arena-lighthouz",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "guardrail"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-03-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "A Chatbot on your Laptop: Phi-2 on Intel Meteor Lake",
+      "url": "https://huggingface.co/blog/phi2-intel-meteor-lake",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "phi"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-03-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Cosmopedia: how to create large-scale synthetic data for pre-training Large Language Models",
+      "url": "https://huggingface.co/blog/cosmopedia",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-03-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "CPU Optimized Embeddings with 🤗 Optimum Intel and fastRAG",
+      "url": "https://huggingface.co/blog/intel-fast-embedding",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag",
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-03-15",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing ConTextual: How well can your Multimodal model jointly reason over text and image in text-rich scenes?",
+      "url": "https://huggingface.co/blog/leaderboard-contextual",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "multimodal model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-03-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "TTS Arena: Benchmarking Text-to-Speech Models in the Wild",
+      "url": "https://huggingface.co/blog/arena-tts",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "benchmark",
+        "speech model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Red-Teaming Resistance Leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-haizelab",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "🪆 Introduction to Matryoshka Embedding Models",
+      "url": "https://huggingface.co/blog/matryoshka",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Welcome Gemma - Google’s new open LLM",
+      "url": "https://huggingface.co/blog/gemma",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-21",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Open Ko-LLM Leaderboard: Leading the Korean LLM Evaluation Ecosystem",
+      "url": "https://huggingface.co/blog/leaderboard-upstage",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "evaluation",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-20",
+      "summary_snippet": ""
+    },
+    {
+      "title": "From OpenAI to Open LLMs with Messages API on Hugging Face",
+      "url": "https://huggingface.co/blog/tgi-messages-api",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-08",
+      "summary_snippet": ""
+    },
+    {
+      "title": "NPHardEval Leaderboard: Unveiling the Reasoning Abilities of Large Language Models through Complexity Classes and Dynamic Updates",
+      "url": "https://huggingface.co/blog/leaderboard-nphardeval",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-02",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Constitutional AI with Open LLMs",
+      "url": "https://huggingface.co/blog/constitutional_ai",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-02-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Enterprise Scenarios Leaderboard: a Leaderboard for Real World Use Cases",
+      "url": "https://huggingface.co/blog/leaderboard-patronus",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-31",
+      "summary_snippet": ""
+    },
+    {
+      "title": "The Hallucinations Leaderboard, an Open Effort to Measure Hallucinations in Large Language Models",
+      "url": "https://huggingface.co/blog/leaderboard-hallucinations",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-29",
+      "summary_snippet": ""
+    },
+    {
+      "title": "An Introduction to AI Secure LLM Safety Leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-decodingtrust",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-26",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Open-source LLMs as LangChain Agents",
+      "url": "https://huggingface.co/blog/open-source-llms-as-agents",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Preference Tuning LLMs with Direct Preference Optimization Methods",
+      "url": "https://huggingface.co/blog/pref-tuning",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Run ComfyUI workflows for free with Gradio on Hugging Face Spaces",
+      "url": "https://huggingface.co/blog/run-comfyui-workflows-on-spaces",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "workflow"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-14",
+      "summary_snippet": ""
+    },
+    {
+      "title": "A guide to setting up your own Hugging Face leaderboard: an end-to-end example with Vectara's hallucination leaderboard",
+      "url": "https://huggingface.co/blog/leaderboard-vectara",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Make LLM Fine-tuning 2x faster with Unsloth and 🤗 TRL",
+      "url": "https://huggingface.co/blog/unsloth-trl",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2024-01-10",
+      "summary_snippet": ""
+    },
+    {
+      "title": "2023, year of open LLMs",
+      "url": "https://huggingface.co/blog/2023-in-llms",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-12-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "AMD + 🤗: Large Language Models Out-of-the-Box Acceleration with AMD GPU",
+      "url": "https://huggingface.co/blog/huggingface-and-optimum-amd",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-12-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Optimum-NVIDIA Unlocking blazingly fast LLM inference in just 1 line of code",
+      "url": "https://huggingface.co/blog/optimum-nvidia",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-12-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Open LLM Leaderboard: DROP deep dive",
+      "url": "https://huggingface.co/blog/open-llm-leaderboard-drop",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-12-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Make your llama generation time fly with AWS Inferentia2",
+      "url": "https://huggingface.co/blog/inferentia-llama2",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-11-07",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Comparing the Performance of LLMs: A Deep Dive into Roberta, Llama 2, and Mistral for Disaster Tweets Analysis with Lora",
+      "url": "https://huggingface.co/blog/Lora-for-sequence-classification-with-Roberta-Llama-Mistral",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-11-07",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing Storage Regions on the HF Hub",
+      "url": "https://huggingface.co/blog/regions",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-11-03",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Deploy Embedding Models with Hugging Face Inference Endpoints",
+      "url": "https://huggingface.co/blog/inference-endpoints-embeddings",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "embedding"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-10-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Non-engineers guide: Train a LLaMA 2 chatbot",
+      "url": "https://huggingface.co/blog/Llama2-for-non-engineers",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-09-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Llama 2 on Amazon SageMaker a Benchmark",
+      "url": "https://huggingface.co/blog/llama-sagemaker-benchmark",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama",
+        "benchmark"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-09-26",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Object Detection Leaderboard",
+      "url": "https://huggingface.co/blog/object-detection-leaderboard",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "leaderboard"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-09-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Optimizing your LLM in production",
+      "url": "https://huggingface.co/blog/optimize-llm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-09-15",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fine-tuning Llama 2 70B using PyTorch FSDP",
+      "url": "https://huggingface.co/blog/ram-efficient-pytorch-fsdp",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-09-13",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fetch Cuts ML Processing Latency by 50% Using Amazon SageMaker & Hugging Face",
+      "url": "https://huggingface.co/blog/fetch-case-study",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "latency"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-09-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Code Llama: Llama 2 learns to code",
+      "url": "https://huggingface.co/blog/codellama",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-08-25",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Making LLMs lighter with AutoGPTQ and transformers",
+      "url": "https://huggingface.co/blog/gptq-integration",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-08-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fine-tune Llama 2 with DPO",
+      "url": "https://huggingface.co/blog/dpo-trl",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-08-08",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Releasing Swift Transformers: Run On-Device LLMs in Apple Devices",
+      "url": "https://huggingface.co/blog/swift-coreml-llm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-08-08",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Towards Encrypted Large Language Models with FHE",
+      "url": "https://huggingface.co/blog/encrypted-llm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-08-02",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing Agents.js: Give tools to your LLMs using JavaScript",
+      "url": "https://huggingface.co/blog/agents-js",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-07-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Llama 2 is here - get it on Hugging Face",
+      "url": "https://huggingface.co/blog/llama2",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-07-18",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Open-Source Text Generation & LLM Ecosystem at Hugging Face",
+      "url": "https://huggingface.co/blog/os-llms",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-07-17",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Deploy LLMs with Hugging Face Inference Endpoints",
+      "url": "https://huggingface.co/blog/inference-endpoints-llm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-07-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Leveraging Hugging Face for complex generative AI use cases",
+      "url": "https://huggingface.co/blog/writer-case-study",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "rag"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-07-01",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Accelerating Vision-Language Models: BridgeTower on Habana Gaudi2",
+      "url": "https://huggingface.co/blog/bridgetower",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-06-29",
+      "summary_snippet": ""
+    },
+    {
+      "title": "What's going on with the Open LLM Leaderboard?",
+      "url": "https://huggingface.co/blog/open-llm-leaderboard-mmlu",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-06-23",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Can foundation models label data like humans?",
+      "url": "https://huggingface.co/blog/open-llm-leaderboard-rlhf",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "foundation model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-06-12",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Introducing the Hugging Face LLM Inference Container for Amazon SageMaker",
+      "url": "https://huggingface.co/blog/sagemaker-huggingface-llm",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-05-31",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Making LLMs even more accessible with bitsandbytes, 4-bit quantization and QLoRA",
+      "url": "https://huggingface.co/blog/4bit-transformers-bitsandbytes",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-05-24",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Run a Chatgpt-like Chatbot on a Single GPU with ROCm",
+      "url": "https://huggingface.co/blog/chatbot-amd-gpu",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "gpt"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-05-15",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Assisted Generation: a new direction toward low-latency text generation",
+      "url": "https://huggingface.co/blog/assisted-generation",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "latency"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-05-11",
+      "summary_snippet": ""
+    },
+    {
+      "title": "StarCoder: A State-of-the-Art LLM for Code",
+      "url": "https://huggingface.co/blog/starcoder",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-05-04",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Training a language model with 🤗 Transformers using TensorFlow and TPUs",
+      "url": "https://huggingface.co/blog/tf_tpu",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-04-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Databricks ❤️ Hugging Face: up to 40% faster training and tuning of Large Language Models",
+      "url": "https://huggingface.co/blog/databricks-case-study",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-04-26",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Snorkel AI x Hugging Face: unlock foundation models for enterprises",
+      "url": "https://huggingface.co/blog/snorkel-case-study",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "foundation model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-04-06",
+      "summary_snippet": ""
+    },
+    {
+      "title": "StackLLaMA: A hands-on guide to train LLaMA with RLHF",
+      "url": "https://huggingface.co/blog/stackllama",
+      "source": "hf-blog",
+      "match_level": "B",
+      "keywords_matched": [
+        "llama"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-04-05",
+      "summary_snippet": ""
+    },
+    {
+      "title": "Fast Inference on Large Language Models: BLOOMZ on Habana Gaudi2 Accelerator",
+      "url": "https://huggingface.co/blog/habana-gaudi-2-bloom",
+      "source": "hf-blog",
+      "match_level": "A",
+      "keywords_matched": [
+        "large language model",
+        "language model"
+      ],
+      "already_covered": false,
+      "pub_date": "2023-03-28",
+      "summary_snippet": ""
+    },
+    {
+      "title": "阿里出手了！终于不怕OpenClaw烧token啦，直接算力自由～",
+      "url": "https://juejin.cn/post/7610637031321698330",
+      "source": "tophub-juejin",
+      "match_level": "B",
+      "keywords_matched": [
+        "qwen"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "阿里云推出全新CodingPlan服务，整合Qwen-3.5、Kimi-K2.5和GLM-4.7等国内顶尖AI编程模型，采用按请求次数计费模式，解决传统Token计费的高成本问题。"
+    },
+    {
+      "title": "🔥从聊天到干活：三分钟搞懂 LLM、Agent、RAG、Skill",
+      "url": "https://juejin.cn/post/7608782906941308968",
+      "source": "tophub-juejin",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent",
+        "function calling",
+        "rag",
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "面试官:现在大家聊的 LLM、Agent、RAG、Function Calling、Skill 这些你怎么看？"
+    },
+    {
+      "title": "Skills 实战:让 AI 成为你的领域专家",
+      "url": "https://juejin.cn/post/7608382961723555890",
+      "source": "tophub-juejin",
+      "match_level": "B",
+      "keywords_matched": [
+        "claude"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "深入讲解 Claude Code 的 Skills 系统,包括核心概念、渐进式披露架构、创建自定义 Skills、最佳实践,以及如何让 Claude 从通用助手进化为领域专家。"
+    },
+    {
+      "title": "Argo Workflows 4.0 发布",
+      "url": "https://www.oschina.net/news/406058",
+      "source": "tophub-oschina",
+      "match_level": "A",
+      "keywords_matched": [
+        "workflow"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "Argo Workflows 4.0 现已正式发布。本次更新带来了 24 项新功能，122 个问题修复，包含大量易用性、安全性和性能的提升，使得运行大规模流水线比以往更简单。无论你是在编排 AI/ML 工作流、扩展数据流水线，还是跨多集群驱动 CI/CD，4.0 的新功能都能让你更快更安全地创建和编排工作流。 Argo Workflows 4.0 亮点 以插件..."
+    },
+    {
+      "title": ":fire: （Java 版 Claude Code）SolonCode v0.0.14 发布",
+      "url": "https://www.oschina.net/news/406048/soloncode-0-0-14-released",
+      "source": "tophub-oschina",
+      "match_level": "B",
+      "keywords_matched": [
+        "claude"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "大模型会吃掉平台吗？一场关于marketplace生死存亡的深度思考",
+      "url": "https://www.woshipm.com/?p=6345905",
+      "source": "tophub-woshipm",
+      "match_level": "A",
+      "keywords_matched": [
+        "llm"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "当用户不再打开App而是直接对AI说‘帮我订餐’，‘DoorDash问题’宣告了平台经济的生存危机：流量入口被LLM截胡，重复交易变付费获取，广告变现逻辑崩塌。然而，并非所有平台都会消亡。分析师Dan Hockenmaier提出三维防御框架：供应聚合难度（碎片化/异质化越难越安全）、管理程度（重度管理配送/风控者更稳）、客户参与性质（高频低考虑度最抗打）。"
+    },
+    {
+      "title": "Google AI生图模型进化论：从Nano Banana Pro到Gemini 3.1 Flash Image的产品策略解析",
+      "url": "https://www.woshipm.com/?p=6345627",
+      "source": "tophub-woshipm",
+      "match_level": "B",
+      "keywords_matched": [
+        "gemini",
+        "google ai"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "Google的双模型策略揭示了AI产品设计的商业密码：Gemini 3.1 Flash Image与Nano Banana Pro如何在成本与体验间找到平衡？本文将深度解析技术分层背后的经济学原理，以及国内玩家如何在技术差距下实现差异化突围。"
+    },
+    {
+      "title": "从“话语审计”到“行为治理”：2026年AI Agent时代的PM生存指南",
+      "url": "https://www.woshipm.com/?p=6332993",
+      "source": "tophub-woshipm",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "2026年的AI战场已从参数竞赛转向应用闭环，Agent化的AI不再仅是聊天工具，而是具备规划、记忆和工具调用能力的数字员工。当AI开始替用户下单、调API、改数据时，传统的安全审计手段已彻底失效。本文深度解析Agent时代PM如何重新定义安全边界，从风险‘降维打击’到实际治理死角，再到2026年通用的‘双环四层’防御架构，为产品经理提供深水区的生存法则。"
+    },
+    {
+      "title": "互联网正在死去",
+      "url": "https://www.woshipm.com/?p=6345608",
+      "source": "tophub-woshipm",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "互联网的隐形革命正在爆发：AI Agent悄然接管我们的数字生活，从订票到购物，网页界面正在消失。这场静悄悄的数字大迁徙彻底颠覆了流量经济法则，DAU让位于TPD，SEO被GEO取代。当商业闭环被重塑，超级入口吞噬一切时，人类将面临全新的Token焦虑与信任危机。本文深度解析这场技术革命如何重构互联网底层逻辑，以及我们该如何在新大陆找到立足之地。"
+    },
+    {
+      "title": "Agent的“记忆”到底怎么来？",
+      "url": "https://www.woshipm.com/?p=6345225",
+      "source": "tophub-woshipm",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "目前AI模型的智能发展到现在，Agent已成为最热门的产品形态。在Agent类产品的实现过程中，有两个关键要素：一是允许模型调用各类工具，二是赋予模型\"记忆\"能力以支持复杂任务的规划和长期操作。那么，Agent的记忆到底是什么？很多人说自己\"训练\"了一个Agent，实际上发生了什么？本文尝试解读Agent实现中主要的记忆来源和处理方式。"
+    },
+    {
+      "title": "撕下“全能 Agent”的伪装：从 OpenClaw 现象看大模型时代的“API炸弹”与伪创新",
+      "url": "https://www.woshipm.com/?p=6338383",
+      "source": "tophub-woshipm",
+      "match_level": "A",
+      "keywords_matched": [
+        "agent"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": "OpenClaw等全自动智能体产品凭借\"彻底解放双手\"的诱人承诺迅速走红，然而剥开华丽的外衣，它们不过是依赖外部API堆砌的\"缝合怪\"。本文深度剖析这类产品的技术本质，揭示其作为\"API炸弹\"的致命缺陷：失控的ReAct循环、指数级账单成本以及薛定谔式的执行效果，为狂热追捧AI自动化的市场注入一剂清醒剂。"
+    },
+    {
+      "title": "消息称 DeepSeek V4 模型打破惯例：华为等国内厂商可早期访问，不让英伟达 AMD 先用",
+      "url": "https://m.ithome.com/html/924077.htm",
+      "source": "tophub-ithome",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "DeepSeek V4 Lite 原生多模态 AI 曝光：百万 tokens 上下文，非思考生图秒杀前代",
+      "url": "https://m.ithome.com/html/923893.htm",
+      "source": "tophub-ithome",
+      "match_level": "B",
+      "keywords_matched": [
+        "deepseek"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": ""
+    },
+    {
+      "title": "OpenAI在加拿大深陷舆论漩涡，承诺强化安全举措引关注",
+      "url": "https://36kr.com/newsflashes/3701498307997833?f=rss",
+      "source": "tophub-36kr",
+      "match_level": "B",
+      "keywords_matched": [
+        "openai"
+      ],
+      "already_covered": false,
+      "pub_date": "2026-02-27",
+      "summary_snippet": ""
+    }
+  ]
+}
