@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/banner.svg" width="100%" alt="Pulsar · 照见"></p>
+
 # Pulsar · 照见: Automated Domain Intelligence Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
