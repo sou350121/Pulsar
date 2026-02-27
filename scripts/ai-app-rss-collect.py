@@ -12,6 +12,9 @@ Design goals:
   - Output schema compatible with downstream tasks (keywords_matched/source_status/items)
 
 Changelog:
+  2026-02-27: Add tophub.today /topics (hot topic clusters) via HTML scraping.
+              Each topic cluster has <h3> title + multiple <a class="doc-title"> links;
+              keyword-match on topic title, use first doc-title URL as representative.
   2026-02-27: Add tophub.today scraping (/c/developer + /c/tech) via POST API.
               Uses /node-items-by-date endpoint; no external libs (curl POST).
   2026-02-23: Add pub_date parsing (pubDate/published/updated) to all items.
@@ -197,6 +200,51 @@ def _curl_fetch(url, timeout_sec=25):
     if not text.strip():
         return "", None
     return text, None
+
+
+def _tophub_topics():
+    """GET tophub /topics, parse <li topicid=N> clusters.
+    Returns list of dicts: {title, url, summary, topic_id}.
+    Each entry represents a hot topic cluster; url is first doc-title link.
+    """
+    cmd = [
+        "/usr/bin/curl", "-fsSL", "--max-time", "45",
+        "-A", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "https://tophub.today/topics",
+    ]
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    if p.returncode != 0:
+        return [], "curl_exit_%d" % p.returncode
+    html = p.stdout
+    results = []
+    # Split on <li topicid= boundaries; skip first (not a topic)
+    parts = re.split(r'<li\s+topicid="?(\d+)"?', html)
+    # parts: [pre, topicid1, body1, topicid2, body2, ...]
+    i = 1
+    while i + 1 < len(parts):
+        topic_id = parts[i]
+        body = parts[i + 1]
+        i += 2
+        # Extract <h3> title
+        m_h3 = re.search(r'<h3>([^<]+)</h3>', body)
+        if not m_h3:
+            continue
+        topic_title = m_h3.group(1).strip()
+        # Extract all doc-title links
+        links = re.findall(r'<a\s+class="doc-title"[^>]*href="([^"]+)"[^>]*>([^<]*)</a>', body)
+        if not links:
+            continue
+        first_url, first_text = links[0]
+        first_url = first_url.strip()
+        # Build summary from first two article texts
+        snippet = " | ".join(t.strip() for _, t in links[:2] if t.strip())
+        results.append({
+            "topic_id": topic_id,
+            "title": topic_title,
+            "url": first_url,
+            "summary": snippet[:240],
+        })
+    return results, None
 
 
 def _tophub_post(nodeid, date, page=1):
@@ -496,6 +544,36 @@ def main():
                 "title": title,
                 "url": link,
                 "source": src_name,
+                "match_level": lvl,
+                "keywords_matched": matched,
+                "already_covered": bool(already),
+                "pub_date": today,
+                "summary_snippet": summ[:240] if summ else "",
+            })
+
+    # 5) Tophub /topics — hot topic clusters (HTML-scraped)
+    topics_raw, topics_err = _tophub_topics()
+    if topics_err is not None:
+        source_status["tophub-topics"] = "failed:%s" % topics_err
+    else:
+        source_status["tophub-topics"] = "ok:%d" % len(topics_raw)
+        raw_total += len(topics_raw)
+        for it in topics_raw:
+            title = it.get("title", "").strip()
+            link = it.get("url", "").strip()
+            summ = it.get("summary", "")
+            if not link or not title:
+                continue
+            lvl, matched = _match_keywords(title, summ, kw_a, kw_b)
+            if not lvl:
+                continue
+            nu = _norm(link)
+            nt = _norm(title)
+            already = (nu in covered_urls) or (nt and (nt in covered_titles))
+            kept.append({
+                "title": title,
+                "url": link,
+                "source": "tophub-topics",
                 "match_level": lvl,
                 "keywords_matched": matched,
                 "already_covered": bool(already),
