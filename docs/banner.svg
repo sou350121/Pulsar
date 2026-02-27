@@ -23,13 +23,13 @@
   <!-- Subtitle -->
   <text x="640" y="163" text-anchor="middle" fill="#9CA3AF" font-size="19" font-family="system-ui,-apple-system,sans-serif">为领域研究者而生的自动情报引擎</text>
   <!-- Tags -->
-  <rect x="430" y="200" width="145" height="28" rx="14" fill="#292006" stroke="#F59E0B" stroke-width="1" opacity="0.8"/>
-  <text x="502" y="219" text-anchor="middle" fill="#FCD34D" font-size="12" font-family="system-ui,sans-serif">33 自动 cron job</text>
-  <rect x="590" y="200" width="120" height="28" rx="14" fill="#292006" stroke="#F59E0B" stroke-width="1" opacity="0.8"/>
-  <text x="650" y="219" text-anchor="middle" fill="#FCD34D" font-size="12" font-family="system-ui,sans-serif">自我进化</text>
-  <rect x="725" y="200" width="145" height="28" rx="14" fill="#292006" stroke="#F59E0B" stroke-width="1" opacity="0.8"/>
-  <text x="797" y="219" text-anchor="middle" fill="#FCD34D" font-size="12" font-family="system-ui,sans-serif">月度假设校准</text>
+  <rect x="420" y="200" width="148" height="28" rx="14" fill="#292006" stroke="#F59E0B" stroke-width="1" opacity="0.8"/>
+  <text x="494" y="219" text-anchor="middle" fill="#FCD34D" font-size="12" font-family="system-ui,sans-serif">领域可自定义</text>
+  <rect x="584" y="200" width="132" height="28" rx="14" fill="#292006" stroke="#F59E0B" stroke-width="1" opacity="0.8"/>
+  <text x="650" y="219" text-anchor="middle" fill="#FCD34D" font-size="12" font-family="system-ui,sans-serif">自我进化闭环</text>
+  <rect x="732" y="200" width="132" height="28" rx="14" fill="#292006" stroke="#F59E0B" stroke-width="1" opacity="0.8"/>
+  <text x="798" y="219" text-anchor="middle" fill="#FCD34D" font-size="12" font-family="system-ui,sans-serif">知识写入 Git</text>
   <!-- Bottom bar -->
   <rect x="0" y="278" width="1200" height="2" fill="#F59E0B" opacity="0.25"/>
-  <text x="640" y="294" text-anchor="middle" fill="#4B5563" font-size="11" font-family="monospace">github.com/sou350121/Pulsar-KenVersion · MIT License · 2026</text>
+  <text x="640" y="294" text-anchor="middle" fill="#4B5563" font-size="11" font-family="monospace">github.com/sou350121/Pulsar · MIT License · 2026</text>
 </svg>
