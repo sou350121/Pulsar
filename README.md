@@ -47,6 +47,9 @@ Pulsar is a server-side domain intelligence pipeline. **You define the domain; P
 
 ---
 
+<details>
+<summary><b>🚀 Quick Start (click to expand)</b></summary>
+
 ## Quick Start
 
 ### Prerequisites
@@ -294,6 +297,7 @@ Congratulations — Pulsar is live! 🎉
 
 ---
 
+</details>
 ## Core Concepts
 
 ### 1. Signal Rating Engine
