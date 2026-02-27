@@ -72,20 +72,27 @@ The system doesn't just run — it learns which of its own beliefs need more evi
 
 ## How Pulsar Compares
 
+Each tool has a real sweet spot. Here's an honest breakdown:
+
+**Pick Feedly AI if** you want zero setup, a polished mobile experience, team collaboration, and access to 1M+ curated sources — it's a mature product that just works.  
+**Pick ResearchRabbit if** you're doing academic literature reviews — its visual citation graph and 270M+ paper index are genuinely hard to beat for systematic discovery.  
+**Pick MineContext if** you want to capture *your own* reading and work history — it's local-first, private, and doesn't require you to define a domain upfront.  
+**Pick Pulsar if** you need a server-side pipeline that autonomously generates knowledge assets, self-heals when it breaks, and improves its own accuracy over time.
+
 | Dimension | Feedly AI | ResearchRabbit | MineContext | **Pulsar** |
 |-----------|-----------|---------------|-------------|------------|
-| **Purpose** | Market/threat intel feeds | Paper citation discovery | Personal desktop context | Domain intelligence pipeline |
+| **Best at** | Team intel feeds, mobile | Academic citation mapping | Personal context capture | Autonomous domain pipeline |
 | **Hosting** | ☁️ SaaS only | ☁️ SaaS only | ✅ Local / OSS | ✅ Self-hosted / OSS |
 | **Cost** | $1,600–3,200 / month | Closed pricing | Free | Free |
+| **Setup effort** | ✅ Zero — works immediately | ✅ Zero | ✅ Desktop install | ⚠️ ~1 hour config |
+| **Source coverage** | ✅ 1M+ curated sources | ✅ 270M academic papers | Your own files/screens | arXiv · GitHub · RSS · community |
 | **Signal rating** | ❌ | ❌ | ❌ | ✅ ⚡/🔧/📖/❌ before LLM |
-| **LLM reasoning** | ⚠️ Summaries only | ❌ | ⚠️ Single-pass | ✅ 3-stage pipeline |
+| **LLM reasoning** | ⚠️ AI summaries | ❌ | ⚠️ Single-pass VLM | ✅ 3-stage pipeline |
 | **Self-healing** | ❌ | ❌ | ❌ | ✅ 7 auto-recovery paths |
 | **Belief calibration** | ❌ | ❌ | ❌ | ✅ 19 hypotheses, monthly |
 | **Prediction tracking** | ❌ | ❌ | ❌ | ✅ ✅/❌ every 2 weeks |
-| **Knowledge output** | Feed / inbox | Graph view | Local summaries | Structured Markdown → Git |
+| **Knowledge output** | Feed / inbox | Graph visualization | Local summaries | Structured Markdown → Git |
 | **RAM footprint** | N/A (cloud) | N/A (cloud) | Desktop app | **2 GB VPS** |
-
-> Feedly AI costs more per month than most engineers earn in a week — and still can't tell you if its own assessments were right.
 
 ---
 
