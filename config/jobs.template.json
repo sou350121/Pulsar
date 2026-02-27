@@ -1,0 +1,879 @@
+{
+  "jobs": [
+    {
+      "id": "a63e051a-5813-4069-b2ae-15967709a7a1",
+      "agentId": "reports",
+      "name": "VLA Daily Hotspots",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "15 9 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时两阶段任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/run-vla-daily-two-phase.py --no-web\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释/前言）。\n3) 若 stdout 为空：最终回复必须为空（不输出任何字符）。\n4) 禁止 web_search / web_fetch / 分析 / 额外输出。\n\n注意：除脚本 stdout 之外，禁止输出任何其他内容（包括 Now/Let me/我将/已完成 等）。\n\n⚠️ 脚本运行需要 60-120 秒，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。\n\n执行时必须使用 timeout: 900。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 900,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "bestEffortDeliver": true
+      },
+      "timeoutMs": 360000
+    },
+    {
+      "id": "824a3683-8622-4e48-9175-734156dc7103",
+      "agentId": "reports",
+      "name": "VLA-Handbook Biweekly Report",
+      "enabled": true,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 1209600000,
+        "anchorMs": 1770775200000
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "【核心原则】\n\n这个任务不再是“列论文清单”。\n输入：过去 14 天 VLA-Handbook 仓库的新增/修改内容（commit + diff 里的新增段落/要点）。\n输出：跨内容推理（模式/矛盾/机会/缺口/可验证预测），500 字以内；空 section 直接删除。\n\n你不是在总结，你是在思考。\n\n【目标与交付】\n- Telegram：发 2 条\n  1) 完整报告正文（Markdown，500 字以内）\n  2) GitHub 提交确认（成功给 URL；失败给原因）\n- GitHub：写入 `reports/biweekly/{today}.md` 并更新 `reports/biweekly/README.md`\n- Memory：写入 `/home/admin/clawd/memory/biweekly-reasoning.json`（按 date 追加或替换同日）\n\n【强制执行（避免“没读数据就乱写”）】\n1) 你必须先运行收集器脚本，并读取它 stdout 的“一行 JSON 汇总”（包含 commits_analyzed 等计数）。\n   - 若该行 JSON 的 ok=true：视为 GitHub 变更数据可用；不得再写“数据收集限制/无法访问 token”等。\n   - 若 ok!=true：进入“失败兜底”，并在报告中标注数据不足。\n2) 为了省 token：不要把 `/tmp/handbook_changes_{today}.json` 全量读入上下文。\n   你必须先用下面的 digest 提取脚本输出“精简 digest JSON”，并仅基于 digest 做推理。\n\n【时间范围】\n- 以 Asia/Shanghai 为准\n- today=YYYY-MM-DD\n- start=today 往前 13 天（含 today，共 14 天区间）\n\n---\n【步骤 1：运行变更收集器（优先）】\n\n执行：\npython3 /home/admin/clawd/scripts/gh-handbook-changes-collect.py --out /tmp/handbook_changes_{today}.json\n\n你会在 stdout 得到一行 JSON（示例）：\n{\"ok\":true,\"commits_analyzed\":47,\"moltbot_commits\":6,\"manual_commits\":41,\"papers_added\":76,\"papers_added_moltbot\":23,\"papers_added_manual\":53,\"theory_changed_files_moltbot\":2,\"manual_markers_found\":3,\"manual_topics_suggested\":[\"...\"],\"out\":\"/tmp/handbook_changes_2026-02-10.json\"}\n\n- 这行 JSON 的计数是“权威来源”，后续报告、memory、commit 统计必须使用这些数字。\n- 若 ok!=true：不要再尝试读 /tmp 文件，直接走“失败兜底”。\n\n【步骤 2：生成 digest（强制，用于推理输入）】\n\n仅当 ok=true 时执行下面命令，它会把大 JSON 压缩成小的 digest JSON（体积可喂给模型）：\n\npython3 - <<'PY'\nimport json, re\n\ntoday = \"{today}\"\np = \"/tmp/handbook_changes_%s.json\" % today\nobj = json.load(open(p, \"r\", encoding=\"utf-8\"))\n\ndef clean(s, n=160):\n    s = (s or \"\")\n    s = re.sub(r\"\\\\s+\", \" \", s).strip()\n    return (s[:n] + \"…\") if len(s) > n else s\n\npapers = []\nfor it in (obj.get(\"paper_index_additions\") or []):\n    title = (it.get(\"title\") or \"\").strip()\n    url = (it.get(\"url\") or \"\").strip()\n    if not title:\n        continue\n    if title in (\"论文\", \"鏈接\", \"链接\", \"备注\"):\n        continue\n    if not url:\n        continue\n    papers.append({\n        \"title\": clean(title, 120),\n        \"url\": url,\n        \"tags\": it.get(\"tags\") or [],\n        \"source\": it.get(\"source\") or \"\",\n        \"note\": clean(it.get(\"note\") or \"\", 120),\n    })\n    if len(papers) >= 10:\n        break\n\nhl_manual = []\nhl_auto = []\nfor it in (obj.get(\"reading_material\") or []):\n    src = (it.get(\"source\") or \"\").strip()\n    file = (it.get(\"file\") or \"\").strip()\n    headings = [clean(x, 120) for x in (it.get(\"headings\") or [])[:2]]\n    bullets = [clean(x, 150) for x in (it.get(\"bullets\") or [])[:2]]\n    if (not headings) and (not bullets):\n        continue\n    rec = {\"file\": file, \"source\": src, \"headings\": headings, \"bullets\": bullets}\n    if src == \"manual\" and len(hl_manual) < 5:\n        hl_manual.append(rec)\n    elif src == \"moltbot\" and len(hl_auto) < 3:\n        hl_auto.append(rec)\n    if len(hl_manual) >= 5 and len(hl_auto) >= 3:\n        break\n\nchanged = obj.get(\"changed_files\") or {}\ndigest = {\n    \"period\": obj.get(\"period\"),\n    \"counts\": {\n        \"commits_analyzed\": obj.get(\"commits_analyzed\", 0),\n        \"moltbot_commits\": obj.get(\"moltbot_commits\", 0),\n        \"manual_commits\": obj.get(\"manual_commits\", 0),\n        \"papers_added\": obj.get(\"papers_added\", 0),\n        \"papers_added_moltbot\": obj.get(\"papers_added_moltbot\", 0),\n        \"papers_added_manual\": obj.get(\"papers_added_manual\", 0),\n        \"theory_changed_files_moltbot\": obj.get(\"theory_changed_files_moltbot\", 0),\n        \"manual_markers_found\": obj.get(\"manual_markers_found\", 0),\n    },\n    \"manual_topics_suggested\": (obj.get(\"manual_topics_suggested\") or [])[:8],\n    \"top_papers\": papers,\n    \"highlights\": {\"manual\": hl_manual, \"moltbot\": hl_auto},\n    \"changed_files_sample\": {\n        \"theory\": (changed.get(\"theory\") or [])[:10],\n        \"deployment\": (changed.get(\"deployment\") or [])[:10],\n        \"other_md\": (changed.get(\"other_md\") or [])[:10],\n    },\n}\nprint(json.dumps(digest, ensure_ascii=False, indent=2))\nPY\n\n你接下来做“跨内容推理”时，只能使用这个 digest JSON（不要读完整大 JSON）。\n\n【失败兜底（仅当收集器 ok!=true）】\n如果收集器脚本失败（401/403/404/timeout/rate limit 等），改为读取本地 memory 作为替代输入（不要编造）：  \n- /home/admin/clawd/memory/daily-stats.json  \n- /home/admin/clawd/memory/vla-daily-hotspots.json  \n- /home/admin/clawd/memory/vla-code-analysis.json（如有）  \n- /home/admin/clawd/memory/vla-social-intel.json  \n- /home/admin/clawd/memory/ai-daily-pick.json  \n- /home/admin/clawd/memory/vla-sota-tracker.json（步骤 2.5 仍需读取）  \n- /home/admin/clawd/memory/vla-release-tracker.json（步骤 2.5 仍需读取）  \n并在报告中标注“本期数据不充分，分析仅供参考”。\n\n---\n\n---\n【步骤 2.5：读取 SOTA 与 Release Tracker 数据（必做）】\n\n读取以下两个 memory 文件，提取本期（past 14 days）相关数据：\n\n1) `/home/admin/clawd/memory/vla-sota-tracker.json`\n   - key: `vla-sota-tracker`（list）\n   - 筛选 date 在 {start}~{today} 范围内的条目\n   - 按 benchmark 分组，统计各赛道新增 SOTA 变动次数\n   - 标注活跃赛道（🔥 >=2 次变动）与冷却赛道（❄️ 0 次变动）\n\n2) `/home/admin/clawd/memory/vla-release-tracker.json`\n   - key: `vla-release-tracker`（list）\n   - 筛选 date 在 {start}~{today} 范围内的条目\n   - 按 type（hardware/sim/toolchain/dataset）分组\n\n若文件不存在或为空数组，跳过对应 section（不要编造数据）。\n\n【步骤 3：读取上期记录并评估预测（必做）】\n读取 `/home/admin/clawd/memory/biweekly-reasoning.json` 中最近一条（若不存在则跳过）。\n若存在上期预测（predictions 列表非空），基于本期收集数据对每条预测做判断：\n- ✅ 已验证：本期有具体证据（引用论文名/commit/release 名）\n- ❌ 落空：本期有明确反证（同样需引用具体数据）\n- ⏳ 待观察：预测窗口 >2 周或本期证据不足（须写明：什么条件可以验证）\n把评估结果记入 previous_predictions_result（步骤 7），不能再写 {}。\n\n---\n【步骤 4：生成 500 字以内报告（严格模板）】\n\n硬性要求：\n- 不能留任何占位符（例如 {today}/{start}/{N}），必须全部替换。\n- “本期数据不充分”仅在以下情况出现：\n  - commits_analyzed < 5（来自收集器 stdout JSON 的计数）\n  - 或收集器 ok!=true（走失败兜底）\n- 不要堆论文清单；最多点名 1-2 个标题用来支撑推理。\n- 末尾 2 行 commit 统计是“必写”，即使其他 section 被删也要保留。\n- 空 section 直接删掉（不要留标题）。\n\n字数硬性自检（必须做，否则视为失败）：\n- 在发送 Telegram / 上传 GitHub 之前，你必须先把“最终版报告”写入：`/home/admin/clawd/memory/_biweekly_{today}.md`\n- 然后执行下面命令计算字数（chars_no_ws_no_md），要求 **<= 500**：\n\npython3 - <<'PY'\nimport re\np = \"/home/admin/clawd/memory/_biweekly_{today}.md\"\nt = open(p, \"r\", encoding=\"utf-8\").read()\nt = re.sub(r\"[#>`\\\\-\\\\*]\", \"\", t)\nt = re.sub(r\"\\\\s+\", \"\", t)\nprint(\"chars_no_ws_no_md=\", len(t))\nPY\n\n- 如果 >500：你必须压缩内容后覆盖重写该文件，并重新计算，直到 <=500 才能继续后续步骤。\n\n输出模板（按需删 section，但“本期信号/知识缺口/commit统计”至少要有）：\n\n---\n# VLA 双周推理 | {start} – {today}\n\n> 基于 VLA-Handbook 过去 14 天的 {commits_analyzed} 次 commit 变更 | {today}\n> 本期数据不充分，分析仅供参考\n\n## 本期信号\n（最多 2-3 条；每条 1 句；尽量 <=35 字。必须是“推理洞见”，不是摘要。）\n\n## 技术收敛/分歧\n（有则 1-2 句；没有就删。）\n\n## 工程洞见\n（1-2 句；把手动深度笔记里的工程细节与其他变化做关联。）\n\n## 你可能漏掉的\n（仅当本期存在 ✍️/manual_topics_suggested 非空时写 1-2 句；否则删。）\n\n## Benchmark 动态\n（基于 vla-sota-tracker 数据。按赛道分组：活跃🔥/冷却❄️。1-3 句即可。无数据则删除本 section。）\n\n## 平台与硬件变动\n（基于 vla-release-tracker 数据。汇总期间内 release，1-2 句评估对当前研究路线的影响。无数据则删除本 section。）\n\n## 知识缺口\n（1-2 句；明确指出 Handbook 哪些区域需要补。）\n\n## 上期预测回顾\n（如有上期预测：命中/落空/待观察；没有就删。）\n\n## 本期预测\n（1-2 条，具体可验证；没有足够信号就删。）\n\n- Moltbot 自动提交：{moltbot_commits} 次（paper_index +{papers_added_moltbot} 篇，theory 变更 +{theory_changed_files_moltbot} 篇）\n- ✍️ 手动提交：{manual_commits} 次（涉及：{manual_topics_suggested_top3}）\n---\n\n注意：\n- 上面那行“本期数据不充分”只有在需要时才保留；否则删掉这一行。\n- manual_topics_suggested_top3：最多取 3 个主题，用 “、” 连接；若为空写 “—”。\n\n---\n【步骤 5：Telegram 推送（2 条）】\n\n静默开关：如果存在文件 `/home/admin/clawd/memory/_silent_taskB` 且内容包含 `1`，则本次不要发送任何 Telegram（仅在最终回复输出报告与提交结果）。\n否则：\n1) 用 message 工具发送第 1 条：完整报告正文（就是上面的 Markdown）\n2) GitHub 提交完成后发送第 2 条确认：\n   - 成功：`✅ 已提交：{report.url}`（若 README 未更新，补一句 `（README 未更新）`）\n   - 失败：`⚠️ GitHub 提交失败：{原因}`\n\n---\n【步骤 6：GitHub 回写】\n- 用 write 工具把同一份报告写入：`/home/admin/clawd/memory/_biweekly_{today}.md`\n- 用 exec 运行：\n  python3 /home/admin/clawd/scripts/gh-contents-upload.py --report-date \"{today}\" --report-local \"/home/admin/clawd/memory/_biweekly_{today}.md\" --commit-message \"🧠 biweekly reasoning: {start} to {today}\"\n- 解析脚本 stdout JSON（含 report.url / readme_updated / error），用于第 2 条 Telegram。\n\n---\n\n---\n【步骤 6.5：Handbook 文档同步更新（条件触发）】\n\n仅当以下条件同时满足时，才同步更新 Handbook 对应文件：\n- 步骤 2.5 中确认有重大 release（正式发布，非 nightly/beta）\n- 信息量足够写出有价值的内容\n- 确认为正式发布（宁可不写也不写错）\n\n更新规则（使用与步骤 6 同样的 gh-contents-upload.py 脚本）：\n- 硬件发布 → `deployment/robot_hardware_selection_pricing.md` 或 `product/` 下对应文件\n- 仿真平台 release → `deployment/` 下对应文件\n- 公司动态 → `companies/` 下对应文件\n\n操作方式：\n1) 先 GET 现有文件内容\n2) 在对应 section 追加新信息（不覆盖现有内容）\n3) PUT 更新，commit message 格式：`🔧 handbook: update {file} with {release_source} {event}`\n\n注意：不确定的信息不要写入 Handbook。本步骤是可选的，无符合条件的 release 时直接跳过。\n\n【步骤 7：Memory 写入（必须）】\n写入 `/home/admin/clawd/memory/biweekly-reasoning.json`（不存在则创建；顶层结构固定为 {\"biweekly_reasoning\":[...]}）：\n- 若同 date 已存在：替换该条；否则 append。\n- 记录必须使用“收集器 stdout JSON”的真实计数（不要写 0）。\n- key_signals：用你在“本期信号”里写的要点句（2-3 条）。\n- predictions：用“本期预测”（如果该 section 被删则允许空数组）。\n- previous_predictions_result：必须基于步骤 3 的评估结果填写；无上期预测才允许 {}。\n\n条目结构（示例）：\n{\n  \"date\": \"{today}\",\n  \"period\": \"{start} to {today}\",\n  \"commits_analyzed\": {commits_analyzed},\n  \"moltbot_commits\": {moltbot_commits},\n  \"manual_commits\": {manual_commits},\n  \"papers_added\": {papers_added},\n  \"key_signals\": [\"...\"],\n  \"predictions\": [\"...\"],\n  \"previous_predictions_result\": {\n    \"上期预测文本\": \"✅ 已验证：具体证据\",\n    \"另一条预测\": \"⏳ 待观察：验证条件\"\n  },\n  \"sota_changes_count\": 0,\n  \"release_count\": 0\n}\n\n---\n【最终回复】\n- 正常模式：最终回复可以非常简短（例如 done），因为 Telegram 已发送。\n- 静默模式：最终回复必须包含（1）完整报告正文（2）GitHub 提交结果（成功 URL 或失败原因）。\n\n执行时必须使用 timeout: 1200。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 1200,
+        "model": "alibaba-cloud/qwen3.5-plus"
+      }
+    },
+    {
+      "id": "e170613a-61b2-4fb4-9b15-268a4c8d76d8",
+      "agentId": "reports",
+      "name": "VLA Social Intelligence",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 9 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时两阶段任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/run-vla-social-two-phase.py\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释/前言）。\n3) 若 stdout 为空：最终回复必须为空（不输出任何字符）。\n4) 禁止 web_search / web_fetch / 任何网络工具调用。\n5) 禁止自行执行任何除步骤1以外的命令。\n\n⚠️ 脚本运行需要 60-120 秒，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。\n\n执行时必须使用 timeout: 300。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "timeoutSeconds": 720,
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "bestEffortDeliver": true
+      },
+      "timeoutMs": 360000
+    },
+    {
+      "id": "72bb0573-07bb-4b77-a732-871a81284c52",
+      "agentId": "main",
+      "name": "Server Health Check",
+      "enabled": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 * * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "# 服务器健康检查任务（修订版）\n\n## 执行流程\n1. **运行shell脚本**: 执行 `/home/admin/clawd/scripts/server-health-check.sh`\n2. **异常检测**: 脚本只在以下情况输出非空结果：\n   - 磁盘使用率 > 70%\n   - 内存使用率 > 90% \n   - Moltbot Gateway进程不存在\n3. **防重复逻辑**: 脚本内置防重复检查，只有满足以下条件才输出：\n   - 新出现的异常类型\n   - 同一异常数值恶化超过5%\n   - Gateway进程状态从UP变为DOWN\n4. **Agent处理**: 仅当脚本输出非空时，Agent才被触发\n\n## 告警格式\n⚠️ 服务器告警 | {当前时间}\n{异常项目}: {当前值}% / {閾值}%\n建議操作: {針对性建議}\n\n### 异常项目映射\n- DISK → 磁碟使用率过高\n- MEMORY → 記憶体使用率过高  \n- GATEWAY → Moltbot Gateway 进程异常\n\n## 处理邏輯\n- 解析腳本输出的每行格式: `TYPE:CURRENT:THRESHOLD`\n- 根据异常类型提供具体建議操作\n- 更新 `memory/server-alert.json` 記錄本次告警\n- 通过Telegram发送告警消息 (chat_id: 1898430254)\n\n## 靜默原則\n- 腳本返回空結果 → Agent完全不執行，零token消耗\n- 正常狀态下系统完全靜默，無任何输出",
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      }
+    },
+    {
+      "id": "065beb54-81ea-4c45-b6ba-3f9d7b9a12f9",
+      "agentId": "main",
+      "name": "Token Usage Weekly Report",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 10 * * 6",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "执行任务E：Token 用量周报\n\n【频率】每周六 10:30（Asia/Shanghai）\n\n【数据来源】\nsessions.json 路径：\n- main 会话：/home/admin/.openclaw/agents/main/sessions/sessions.json\n- reports 会话：/home/admin/.openclaw/agents/reports/sessions/sessions.json\n- ai_app_monitor 会话：/home/admin/.openclaw/agents/ai_app_monitor/sessions/sessions.json\n- ai_daily_pick 会话：/home/admin/.openclaw/agents/ai_daily_pick/sessions/sessions.json\n\n每个 sessions.json 是一个 dict，key 格式为 \"agent:{agentId}:{sessionKey}\"，value 包含：\ninputTokens、outputTokens、totalTokens、model、updatedAt 等字段。\n\ncron 任务的 key 格式：agent:main:cron:{job_uuid}（主 agent）或 agent:reports:cron:{job_uuid}（reports agent）。\n\n【数据收集】\n1. 用 cron list 获取当前所有 cron job（id、name、enabled、agentId）\n2. 读取所有 sessions.json，按 cron job uuid 匹配 token usage\n3. 计算过去 7 天内每个 job 的运行次数、input/output tokens、费用、单次均价\n4. 单独统计 manual 会话（key 为 agent:main:main 等非 cron 的 key）的 token 消耗\n5. 计算本周总消耗、日均费用\n6. 与 memory 中上周数据对比，计算周环比变化\n\n【模型定价（所有 cron 当前均使用 qwen3.5-plus）】\n- alibaba-cloud/qwen3.5-plus：¥0.8/1M input tokens，¥2.0/1M output tokens\n  换算 $（按 1 USD ≈ 7.2 CNY）：$0.11/1M input，$0.28/1M output\n- 若遇到其他模型，按实际定价计算并注明\n\n【输出格式（推送 Telegram chat_id: 1898430254）】\n💰 Token 用量周报 | {日期范围}\n\n📊 各任务消耗（共 {N} 个 cron 任务 + manual）\n| 任务名 | 运行次数 | Input | Output | 费用(¥) | 单次均价 | 周环比 |\n|--------|---------|-------|--------|---------|---------|--------|\n（动态列出所有 enabled cron job + manual 对话行）\n\n📈 本周总计\n- 总 tokens：xxxK（input xxxK / output xxxK）\n- 总费用：¥x.xx（≈ $x.xx）\n- 日均费用：¥x.xx\n\n⚠️ 异常提醒（如有）\n- 任务费用比上周增长 > 50%：标记 ⬆️\n- 新增任务：标记 🆕\n- 已移除任务：标记 🗑️\n\n💡 趋势\n一句话判断：本周成本是否健康，有无需要关注的任务。\n\n【记忆】\n- 周报存入 /home/admin/clawd/memory/token-usage-weekly-{YYYY-WW}.json\n- 用于下周环比计算\n- 首次运行无上周数据：环比列显示「首周」\n\n【规则】\n- 不要硬编码任务名称；每次动态从 cron list + sessions.json 读取\n- 只统计，不做任何修改操作\n- 如果无法获取精确数据，明确标注「估算」\n- 费用以人民币（¥）为主，括号内附美元（$）参考",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "timeoutMs": 360000
+    },
+    {
+      "id": "8a2d18ea-513a-44eb-b142-d2bc68850114",
+      "agentId": "main",
+      "name": "Server Health Check - Fixed",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 * * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "每小时服务器健康检查（isolated）。严格执行：\n1) 运行：/home/admin/clawd/scripts/server-health-check.sh，并捕获 stdout。\n2) 若 stdout 为空：最终回复必须为空（不输出任何字符），立即结束。\n3) 若 stdout 非空：仅输出告警正文（不得输出任何前言）。\n   - 第 1 行固定为：⚠️ 服务器告警 | <ISO时间>\n   - 其后逐行附上脚本输出（原样）。\n   - 最后给出 1-3 条建议（按 DISK/MEMORY/GATEWAY 对应）。\n\n硬性规则：最终回复中禁止出现任何过程性句子（Now/Let me/我将/让我/已完成）。",
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "account": "new"
+      }
+    },
+    {
+      "id": "55f14513-f512-43d0-8d54-43275edc6f9a",
+      "name": "VLA RSS 信息收集",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 9 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "【执行硬限制（最高优先级）】\n- 只允许调用 1 次 exec 工具，命令必须且只能是：python3 /home/admin/clawd/scripts/vla-rss-collect.py\n- 只返回脚本的 stdout，不添加任何解释文字\n- 如果脚本报错，原样返回 stderr\n\n执行时必须使用 timeout: 180。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      },
+      "timeoutMs": 240000
+    },
+    {
+      "id": "65669bf4-2383-46b0-9c6f-5a79bce98252",
+      "agentId": "ai_daily_pick",
+      "name": "AI Agent 每日精選",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "15 7 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "【时效性硬规则（最高优先级）】\n- 时间基准使用 Asia/Shanghai 当日。\n- 只采集/报告“足够新”的信息：优先近 72 小时，可放宽到近 7 天；超过 30 天默认不收录。\n- 若高价值但超过 7 天，必须在条目末尾标注“（旧闻补充，发布于 YYYY-MM-DD）”，并说明保留理由。\n- 优先一手来源（官方博客 / GitHub Release / arXiv / 会议官网 / 公司公告）；二手转述仅作补充，且需交叉验证至少 1 个一手来源。\n- 禁止占位或模糊来源（如 2602.0xxxx、仅域名根链接、某团队/某公司）。\n- 当日新信息不足时，宁可少报，不要凑数。\n\n【来源质量硬规则（最高优先级）】\n- 每条关键结论至少给出 1 个一手来源（官方博客 / GitHub Release 或仓库 / arXiv 或论文原文 / 会议官网 / 公司公告）。\n- 二手来源（媒体转述、聚合站、博客）只能作补充，不能作为唯一证据。\n- 若使用二手来源，必须再补 1 个可核验的一手来源；做不到就不收录该条。\n- 对无法核验正文的来源（付费墙、403、仅摘要页），不得作为唯一依据。\n- 禁止内容农场/无署名搬运站作为主来源；宁可少报，不要错报。\n\n你是「AI Agent 每日精选」日报任务：我是 VLA 研究者，也关心 AI Agent 应用 / 大模型进展 / 开源工具。目标：每天只选 5-10 条最值得看的 AI 动态（有品味，宁缺毋滥）。\n\n## 0) 防循环与数据源（最高优先级）\n- today 以 Asia/Shanghai 为准，格式 YYYY-MM-DD。\n- 先检查文件是否已存在：/home/admin/clawd/memory/ai-daily-pick-sources-{today}.json\n  - 若已存在：禁止再次运行 ai-daily-pick-collect.py，直接读取该文件作为稳定源候选。\n  - 若不存在：只允许运行 1 次：python3 /home/admin/clawd/scripts/ai-daily-pick-collect.py\n    运行后必须立刻转入后续步骤；禁止重复执行该脚本。\n\n如果你发现自己在重复运行收集脚本、或输出任何前言（Let me/Now/我将）：立刻停止重复动作，改为读取文件并继续完成最终产出。\n\n## 约束（非常重要）\n- 不要报纯论文内容（arXiv / paper / preprint / pdf / 论文解读）。\n  **例外**：大模型/基础模型的正式发布公告（如 Qwen 3.5、Claude 4、GPT-5 等新模型上线/开源/API 开放）属于产品发布，必须收录为 🔴 必选或 🟡 值得选。\n- 若内容同时涉及 VLA/robotics 与 AI agent：只在 VLA 日报报，这里跳过。\n- Web Search 总次数控制在 3-5 次；失败不影响任务。\n- 总 token 预算：<= 7000（输出要紧凑）。\n\n## 1) 稳定源抓取（必须先做）\n运行：python3 /home/admin/clawd/scripts/ai-daily-pick-collect.py\n读取其 stdout JSON（也会写入 /home/admin/clawd/memory/ai-daily-pick-sources-{YYYY-MM-DD}.json）。\n\n## 2) Web Search 补充（3-5 次）\n只补充：新发布 / 新工具 / 行业动态 / 人物观点 / 社区讨论（避免论文）。建议查询：\n- \"AI agent\" OR \"LLM\" new release OR launch this week\n- \"Andrej Karpathy\" OR \"Jim Fan\" OR \"Sam Altman\" AI recent\n- AI open source framework OR tool trending this week\n- 若稳定源出现热门话题，再加 1 次补细节\n\n## 3) 去重与排除（非常重要）\n读取以下文件做跨日去重：\n- /home/admin/clawd/memory/vla-daily-hotspots.json：若标题/链接已在今日 VLA 日报出现 → 跳过。\n- /home/admin/clawd/memory/ai-daily-pick.json：若标题/URL/项目已在过去 7 天的精选中出现 → 跳过。\n  例如：CrewAI/LangGraph/AutoGen 等框架对比文章、Karpathy 同一观点的不同转载，若此前已报过，不要再重复。\n- 同一事件的不同来源只报一次（选最有深度的那个）。\n- \"框架对比 roundup\" 类文章（如 \"Top 5 AI Agent Frameworks 2026\"）最多每周出现 1 次。\n\n## 4) 品味筛选（最终 5-10 条）\n按优先级筛选：\n- 🔴 必选：**大模型/基础模型正式发布（如 Qwen/Claude/GPT/Gemini/Llama/DeepSeek 新版本上线/开源/API 开放）**；重大开源首发；重大行业新闻（>1e8 融资/收购/核心人物动向）；突破性 benchmark 或 demo\n- 🟡 值得选：有趣 agent 应用/demo；重要框架大版本（LangChain/LlamaIndex/CrewAI 等）；大佬深度观点；社区高热（Reddit>200 或 HN>100）\n- 🔵 偶尔选：好玩的实验/玩具；政策监管；真正有趣的梗/文化\n\n## 5) 输出（按下述版式，强调“好读”）\n输出到 Telegram 的正文必须严格使用下面结构与排版规则：\n- 不要写长前言/寒暄\n- 不要用“+”把句子和链接串在同一行\n- 每条信息固定 2-3 行：\n  - 第 1 行：标题（必要时加 1 个很短的标签）\n  - 第 2 行：一句话（为什么重要 / 摘要 / 核心争论点）\n  - 第 3 行（可选）：链接（必须独立成行）\n\n模板如下（日期用 YYYY-MM-DD）：\n\n🤖 AI 每日精选 | {日期}\n\n🔥 头条（1-2 条）\n- 标题\n  一句话为什么重要\n  链接\n\n⚡ 精选动态（3-5 条）\n- 【🆕新发布|🔧工具|💬观点|📊趋势|🏢行业|🧪实验】标题\n  一句话摘要（尽量具体）\n  链接\n\n🌟 GitHub Pick（1-2 个）\n- owner/repo  ⭐stars_today(优先) / stars_total / Trending  · 语言\n  一句话描述（来自 repo desc 或你自己的极简概括）\n  链接\n\n💬 社区热议（0-2 条）\n- 话题（Reddit/HN）\n  核心争论点（一句话）\n  链接\n\n---\n规则：如果今天没什么大事，也要精选五小事（3-5 条）；只有在极端情况下才发“今日无重大动态”。\n\n## 6) 记忆（必须通过 memory-upsert 写入，禁止直接覆写）\n把最终选出的条目通过 memory-upsert.py 累计写入，保留历史记录（30 天窗口）。\n\n步骤：\n1. 将选出的所有条目构建为如下 JSON 字符串（单行，PAYLOAD 为变量名）：\n   {\"date\":\"YYYY-MM-DD\",\"items\":[{\"title\":\"...\",\"category\":\"新发布|工具|观点|趋势|行业|实验\",\"source\":\"GitHub|Reddit|HN|HuggingFace|Web\",\"url\":\"...\",\"why_picked\":\"...\"},...]}\n\n2. 执行（必须通过 echo pipe，禁止直接覆写文件）：\n   echo 'PAYLOAD' | python3 /home/admin/clawd/scripts/memory-upsert.py --file ai-daily-pick.json --key daily_picks --max-days 30\n\n3. 检查输出：若 memory-upsert 输出包含 \"ok\": false，任务须报错，不可静默成功。\n\n目标文件结构：{\"daily_picks\":[{\"date\":\"...\",\"items\":[...]},{\"date\":\"...\",\"items\":[...]},...]}（多天累积）\n严禁：python 覆盖写 / write_file 直接写入 / 任何形式的整文件覆盖。\n\n## 7) GitHub 归档（新增，必须执行，失败不阻塞主流程）\n在完成 Step 6（写入 /home/admin/clawd/memory/ai-daily-pick.json）后，且在最终输出正文前，额外执行：\n\n1. 生成归档 Markdown 文本（用于 GitHub）：\n   - 第一行必须是：# 🤖 AI 每日精选 | {YYYY-MM-DD}\n   - 其余正文内容与 Telegram 输出保持一致（同一份内容，不要另写版本）。\n\n2. 写入本地文件：\n   - /home/admin/clawd/memory/_ai_daily_pick_{date}.md\n   - 建议用 Python 覆盖写，UTF-8 编码。\n\n3. 调用上传脚本（复用现有脚本）：\n   - python3 /home/admin/clawd/scripts/gh-contents-upload.py --config /home/admin/clawd/memory/github-config-agent-playbook.json --report-date \"{date}\" --report-local \"/home/admin/clawd/memory/_ai_daily_pick_{date}.md\" --report-dir \"memory/blog/archives/ai-daily-pick\" --readme-path \"memory/blog/archives/ai-daily-pick/README.md\" --commit-message \"🤖 ai daily pick: {date}\"\n\n4. 行为要求：\n   - 上传成功：静默即可，不在 Telegram 正文追加尾行。\n   - 上传失败：仅静默记录失败，不影响主流程，不影响 Telegram 输出，不中断任务。\n   - 同日重复运行允许覆盖更新，不生成重复索引行（由上传脚本处理）。\n\n## 投递\n不要调用任何 Telegram 发送工具；只输出最终正文文本，由 Cron 自动投递。\n\n## 输出自检（硬性，最高优先级）\n- 你的最终回复必须以 `🤖 AI 每日精选 | {日期}` 开头（第一个字符就是 🤖）。\n- 禁止任何前言/过程说明（Now/Let me/我将/已完成）。如有，发送前必须删除，只保留最终正文。\n- 在最终回复前，必须先完成：写入 /home/admin/clawd/memory/ai-daily-pick.json 以及 GitHub 归档（若归档失败可静默，但必须尝试）。\n\n执行时必须使用 timeout: 900。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 900,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "account": "ai_agent_dailybot"
+      }
+    },
+    {
+      "id": "03bdb20f-c583-4334-82fa-0f97c304d671",
+      "agentId": "reports",
+      "name": "VLA 代碼深度分析",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 14 * * 5",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「VLA 代码深度分析」定时任务（每周一次）。\n\n【核心目标】\n把本周 VLA 日报中标记为 🔧 actionable 的项目，从“知道它存在”提升到“理解它怎么实现的”。\n只读代码，不跑代码。\n\n【重要约束】\n- 这是读代码任务：不要 clone，不要安装依赖，不要运行训练/推理。\n- 不要编造：只报告你在代码/README/配置里看到的内容。\n- web_fetch 次数总计 <= 10 次（分析 1-2 个项目总量）。\n- Token 预算：<= 100,000。\n\n【GitHub 访问认证（可选）】\n- 默认用 web_fetch 读取公开仓库内容即可。\n- 注意：web_fetch **不支持**自定义 Authorization header，因此无法用 token 访问 private repo。\n- 若遇到以下情况：private repo / GitHub API 触发 rate limit / raw 404 但你确定 repo 有权限\n  → 允许改用 shell + curl 走 GitHub API，并从环境变量读取 token：GITHUB_TOKEN\n  - 绝对不要在输出里打印 token，也不要把 token 写进任何文件。\n\n（示例，仅当需要认证时使用；不要硬套）\n- 获取默认分支与 star：\n  curl -fsSL -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\"     https://api.github.com/repos/{owner}/{repo}\n- 获取目录树（用于快速找 config/train/dataset 等核心文件；算一次 fetch）：\n  curl -fsSL -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\"     https://api.github.com/repos/{owner}/{repo}/git/trees/{default_branch}?recursive=1\n- 读取单个文件 raw 内容（适用于 private repo）：\n  curl -fsSL -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github.raw\"     https://api.github.com/repos/{owner}/{repo}/contents/{path}?ref={default_branch}\n\n\n\n## 第一步：收集本周 actionable 项目\n读取：/home/admin/clawd/memory/vla-daily-hotspots.json\n- 从 reported_papers 中筛选最近 7 天（以 Asia/Shanghai 的日期为准）的条目\n- 仅保留 tag == \"actionable\" 的条目\n- 对每条列出：title、repo_url、abstract_snippet（作为“日报摘要”）\n- 若 repo_url 为空：该条不可分析，跳过并记录原因。\n\n如果本周没有任何 actionable 条目：\n- 直接输出并投递到 Telegram：\n  「📝 本週無 actionable 项目，跳过代码分析」\n- 然后结束。\n\n## 第二步：选择 1-2 个做深度分析（不要贪多）\n从 actionable 列表里挑选 1-2 个最值得分析的：\n优先级：\n0) 🎯 primary 方向的项目（最高优先）\n   - 读取 /home/admin/clawd/memory/active-config.json 的 research_directions.primary（若不存在则跳过本规则）。\n   - 在本周 actionable 列表中，用 title + abstract_snippet（大小写不敏感子串匹配）判断是否命中 primary.keywords。\n   - 如果存在命中的 🔧 actionable 项目（且 repo_url 不为空），优先选择它/它们做分析，即使其他项目来自更知名团队。\n   - 若命中集合为空：再按下面 1-4 的原规则挑选。\n1) 与研究方向最相关（VLA、manipulation with tactile、diffusion policy）\n2) 知名团队（更可能代码质量高）\n3) star 数高或社区讨论多\n4) 之前没分析过：读取 code-analysis 记忆避免重复\n\n去重记忆文件（若不存在也不要报错）：/home/admin/clawd/memory/vla-code-analysis.json\n- 若存在，读取其中已分析过的 repo_url / project，避免重复。\n\n## 第三步：用 web_fetch 读 GitHub 核心文件（raw 优先）\n对每个选中的项目，按顺序尽量读取核心文件（总 fetch <=10）：\n\nA) 全局结构\n1) README.md（项目介绍/安装/使用/数据与训练入口）\n2) 目录结构：\n   - 优先从 README 中理解关键目录\n   - 若仍不清楚，可用 GitHub API tree 做一次结构辅助（也算一次 web_fetch）：\n     https://api.github.com/repos/{owner}/{repo}\n     https://api.github.com/repos/{owner}/{repo}/git/trees/{default_branch}?recursive=1\n   - 但不要为了“完整树”而超出 fetch 预算。\n\nB) 配置/依赖\n- config/ 或 configs/ 下的 yaml/json（模型架构/超参）\n- requirements.txt 或 setup.py（依赖/环境）\n\nC) 核心代码（按重要性排序，token/预算不够就停）\n- model 定义（models/ 或 networks/）\n- training script（train.py 或类似入口）\n- data pipeline（dataset.py / dataloader）\n- evaluation（eval.py）\n- inference/demo（如有）\n\n【raw 文件读取规则】\n- 读取文件内容时优先使用 raw.githubusercontent.com，例如：\n  https://raw.githubusercontent.com/{owner}/{repo}/{branch}/README.md\n- 如果默认分支不确定：先通过上面的 repo API 获取 default_branch。\n- 如果某个文件 >500 行：只“使用并总结”前 200 行 + 最后 50 行；中间部分不要硬啃。\n- 如果 repo 只是 placeholder（只有 README、没有实际代码/配置/脚本）：标记为「代码未釋出」，不做深入分析。\n- 任一文件 fetch 失败（404/private/timeout）：记录失败原因并跳过该文件，继续下一个。\n\n## 第四步：产出「实现笔记」并投递\n对每个分析的项目，输出一份结构化笔记（如果分析 2 个项目，就输出 2 份，之间用分隔线隔开）：\n\n📝 VLA 代码分析 | {项目名} | {日期}\n\n📋 基本信息\n- 项目：名称 + repo 链接\n- 团队：谁做的（从 README / repo / 论文作者判断；不确定就写“不确定”）\n- 论文：对应论文链接（若日报里有 url 则用；没有则留空或写“不确定”）\n- 环境需求：Python 版本、GPU 需求、关键依赖\n- 复现难度：🟢 容易 | 🟡 中等 | 🔴 困难（给出理由）\n\n🏗️ 架构概览\n- 用一句话概括模型结构\n- 跟论文/摘要描述一致吗？有没有论文没提的模块？\n\n🔑 论文沒寫的工程细节（最重要）\n逐条列出你在代码中看到、但论文/摘要通常不会明确写的细节：\n- 超参（lr schedule/batch size/action chunk length 等）\n- 数据预处理（normalization/augmentation/history length 等）\n- 训练 trick（grad clip/warmup/EMA 等）\n- 推理优化（diffusion steps/temporal ensemble 等）\n- 任何“论文没提但看起来很关键”的实现点\n\n📊 跟已知方法的对比（可选）\n如果 code-analysis 记忆中有相关项目，做 3-6 行简要对比。\n\n💡 对我的启发\n1-3 句：我最值得借鉴的一点是什么？\n\n---\n\n## 记忆：写入 code-analysis\n把每个项目的结构化摘要写入 /home/admin/clawd/memory/vla-code-analysis.json（不存在则创建）。\n建议文件结构：\n{\n  \"code_analysis\": [\n    {\n      \"date\": \"YYYY-MM-DD\",\n      \"project\": \"项目名\",\n      \"repo_url\": \"...\",\n      \"paper_url\": \"...\",\n      \"reproduction_difficulty\": \"easy|medium|hard\",\n      \"gpu_required\": true/false,\n      \"key_findings\": [\"发现1...\",\"发现2...\"],\n      \"comparison_with\": [\"之前分析过的项目名\"],\n      \"actionable_takeaway\": \"最值得借鉴的一点\"\n    }\n  ]\n}\n写入要求：UTF-8，indent=2；追加写入（不要覆盖丢历史）。",
+        "timeoutSeconds": 1200,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "1b652a9c-dff9-452e-9bf2-388010cffd7e",
+      "agentId": "reports",
+      "name": "系統自省與自動調參",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 1209600000,
+        "anchorMs": 1771124400000
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「系统自省与自动调參」定时任務（任務J）。\n\n【频率】每隔兩週的週日 11:00（Asia/Shanghai；与雙週报告 B 錯开）\n【Session】Isolated\n\n【核心原則】\n这個任務是整個系统的进化引擎。你做三件事：\n1) 观察：讀取过去 14 天的運行数据\n2) 行动：走 P0 option_b（proposal→shadow→promote/rollback；禁止直接覆盖 active-config）\n3) 驗證：对比上一輪的改动效果，确认有效或回滾\n\n这不是「建議报告」——低風險改动你会直接執行，不需要等我批准。\n\n【重要约束】\n- 不要编造：memory 不存在就跳过。\n- 每轮最多自动执行 3 个「低风险」改动。\n- Token 预算：控制在 10,000 以内。\n- 最终回复只输出「Telegram 报告正文」（系统会自动投递）；不要输出过程说明。\n\n【第一步：讀取上輪變更日誌】\n- 讀取：/home/admin/clawd/memory/change-log.json（tag: change-log；不存在则视为首次运行）\n- 建议结构：{\"change_log\": [ ... ]}\n- 若存在，取最近一条（按 date 或列表末尾）作为上一轮 change-log。\n- 若不存在：本轮跳过「效果验证」与「回滚」（首次运行规则）。\n\n【第二步：收集運行数据（过去 14 天）】\n以 Asia/Shanghai 为准，today=YYYY-MM-DD，period=today-13 到 today。\n读取以下 memory（不存在就跳过）：\n1) daily-stats：/home/admin/clawd/memory/daily-stats.json（{\"daily_stats\": [...] }，最多取 14 条）\n2) vla-daily-hotspots：/home/admin/clawd/memory/vla-daily-hotspots.json\n3) social-intel：/home/admin/clawd/memory/vla-social-intel.json\n4) ai-daily-pick：/home/admin/clawd/memory/ai-daily-pick.json\n5) code-analysis：/home/admin/clawd/memory/vla-code-analysis.json\n6) active-config：/home/admin/clawd/memory/active-config.json\n\n如果过去 14 天 daily-stats 数据不足 7 天：在报告中标注「数据不充分，本輪保守调整」，并尽量减少自动改动。\n\n【新增步骤 2.5：视野扫描（Horizon Scan）】\n使用 enable_search 做“视野之外探索”（每轮 2-3 个问题，示例）：\n- \"VLA robotics latest breakthrough this week\"\n- \"what's trending in robot learning community\"\n- \"new benchmark or foundation model in embodied AI\"\n\n对比搜索结果与当前 active-config（/home/admin/clawd/memory/active-config.json）：\n1) 社区变热但我们未覆盖：可建议加入关键词\n2) 我们关键词明显过时：可建议降级或移除\n\n硬约束（防止关键词膨胀）：\n- 每轮最多推荐 1 个新关键词\n- 新关键词默认进入 keywords_B（不要直接进 keywords_A）\n- 若要自动执行关键词变更，必须计入“每轮最多 3 个低风险改动”上限\n\n证据约束（防止搜索噪音）：\n- 每个“建议加入”的关键词，必须提供至少 2 个学术/技术来源证据（arXiv/GitHub/会议/官方技术报告）\n- 若证据不足，标注为“defer（证据不足）”，本轮不执行\n\n在分析与决策中新增 horizon_scan 小结（建议列表 + 证据 + 执行/延期结论）。\n\n【第三步：效果驗證（如果有上輪 change-log）】\n对上一轮 change-log 中的每个改动做验证，给出：\n- ✅ 有效：带来预期效果\n- ❌ 無效：14 天内完全无效果（该类改动需要回滚）\n- ⏳ 待观察：数据不足\n\n无效的改动需要在本轮回滚（从 active-config 中移除）。\n\n【第四步：5维认知框架（核心决策）】\n针对每个需要决策的 stale 关键词或高频新词，你必须在心中运行这 5 维认知，然后再提出增删建议：\n\n- **Dim-A: Thesis Shield (战略保护)** -- 检查该关键词是否存在于 `assumptions.json` 中任何活跃假设的 `keywords` 列表中。如果存在，该关键词获得 \"thesis shield\"，绝对不可自动删除，无论 hit rate 有多低。\n- **Dim-B: Multi-Source Triangulation (多源验证)** -- 如果某个 B 级关键词连续 14 天零命中，但在 `vla-social-intel` 或 `ai-daily-pick` 中高频出现，说明是由于我们的 RSS 源配置偏向导致的“管线内盲区”，此时不应删除该词，而应补充相应 RSS 源。\n- **Dim-C: Source Root Cause (源头诊断)** -- 如果单日有大量词（>5个）同时零命中，不要判定词失效，必须诊断是否是抓取脚本/特定 RSS 源在过去 14 天失效（例如网站改版 403）。\n- **Dim-D: Proactive Expansion (主动扩张)** -- 分析 `vla-daily-hotspots` 和 `social-intel` 的摘要，提取出现 2 次以上的未收录新专业术语，建议加入 keywords_B 进行观察。\n- **Dim-E: Counter-Position Audit (反向指标兜底)** -- 特别留意那些虽然不常命中，但一旦命中就可能推翻我们核心假设的词（如与 `invalidation_conditions` 强相关的生僻词），这类词必须保留在配置中作为兜底雷达。\n\n【第五步：决策与执行（硬性规则 R1-R4）】\n把改动分为三类，并严格遵守以下硬性规则（IF-THEN）进行分类与执行：\n\n🟢 低風險（自动執行，不需要我确认；每轮最多 3 个）：\n- R1: IF (B 级词连续 28 天零命中) AND (未获得 Dim-A 的 Thesis Shield) THEN 自动移除该 B 级关键词。\n- R2: IF (提取到高频新词) AND (提供至少 1 个证据链接) THEN 自动加入 keywords_B。\n- 微调 search_terms_social 中的搜索詞\n- 把某個源从 high→medium 或 medium→low\n\n⚠️ 冷啟动保护：如果 active-config 的 version ≤ 3（即系统上線前三輪 J），禁止刪除任何 B 級关鍵詞，只允許新增。早期数据太少，刪詞容易誤判。\n\n\n🟡 中風險（提案，等我 Telegram 回覆确认后才在下一輪生效）：\n- 新增或移除 A 級关鍵詞\n- 新增或移除 RSS 数据源\n- 把源加入 deprecated_sources\n\n🔴 高風險（只建议，不自动操作）：\n- 任務架構變动（增刪任務、改频率）\n- 根本性的方向轉變\n\n对 🟢 低风险项，必须走 P0 option_b（禁止直接覆盖 active-config）：\n\nA) 先把本轮要执行的低风险改动写成「提案 JSON」，写入：/tmp/j_option_b_proposal.json\n   - 纯 JSON（不要 markdown fence），示例：\n     {\n       \\\"risk\\\": \\\"low\\\",\n       \\\"changes\\\": {\n         \\\"remove_keywords_B\\\": [\\\"...\\\"],\n         \\\"add_keywords_B\\\": [\\\"...\\\"]\n       },\n       \\\"rationale\\\": \\\"一句话理由\\\"\n     }\n\nB) 只通过脚本执行（脚本会：pending 追加 → 写 shadow → gate → promote/rollback）：\n   python3 /home/admin/clawd/scripts/evaluate-shadow-config.py --domain vla --actor \\\"J\\\" --proposal-json /tmp/j_option_b_proposal.json\n\nC) 读取脚本 stdout 的一行 JSON 汇总，把 decision/new_version 写进你的 Telegram 报告。\n\n注意：\n- 若本轮没有任何低风险改动：不要创建 proposal 文件，也不要调用脚本。\n- 冷启动保护、Thesis Shield、以及“窗口内仍有命中”的删除禁令由脚本强制执行。\n\n对 🟡 中风险项：只登记提案，不自动执行（统一走脚本落盘，避免格式漂移）：\n\n1) 把提案写成 /tmp/j_option_b_proposal.json（risk=\\\"medium\\\"），changes/proposals 写清楚即可（字段可自由扩展）。\n2) 执行：\n   python3 /home/admin/clawd/scripts/evaluate-shadow-config.py --domain vla --actor \\\"J\\\" --proposal-json /tmp/j_option_b_proposal.json\n\n脚本会把它追加到 /home/admin/clawd/memory/pending-changes.json 并标记 awaiting_approval，不会修改 active-config。\n\n【第六步：寫入變更日誌】\n把本轮所有已执行/提案/回滚/验证写入 change-log：\n- 文件：/home/admin/clawd/memory/change-log.json\n- 结构建议：{\"change_log\": [ ... ]}\n- 追加一条（示例结构，字段齐全即可，内容可按实际简化）：\n{\n  \"date\": \"YYYY-MM-DD\",\n  \"period\": \"YYYY-MM-DD to YYYY-MM-DD\",\n  \"config_version_before\": 1,\n  \"config_version_after\": 2,\n  \"changes_executed\": [...],\n  \"changes_proposed\": [...],\n  \"rollbacks\": [...],\n  \"verification_of_previous\": [...]\n}\n\n【第七步：输出 Telegram 报告】\n输出以下结构的报告正文（只输出正文，不要输出过程）：\n\n🔬 系统自省报告 | {日期區间}\n\n📊 運行概況\n- 日报穩定度：N/14 天正常執行\n- 论文掃描 → 篩选 → 入报告：平均 X → Y → Z 篇/天\n- actionable 轉化率：N%\n\n🔄 上輪改动效果驗證\n（如有上輪 change-log，逐條列出驗證結果）\n- ✅ ...\n- ❌ ... → 已回滾\n- ⏳ ...\n\n⚡ 本輪已自动執行的调整（🟢 低風險）\n- ...\n- active-config 已更新至 v{N}\n\n⚠️ 待你批准的提案（🟡 中風險）\n- ...\n- 回覆「✅」确认，我下一輪会執行\n\n🌡️ 方向溫度計\n（2-3 句話）\n\n📈 系统健康度\n- 关鍵詞命中率 top 3：{詞}: N 次, ...\n- 零命中 B 級詞：{列表}\n- 数据源效率：{簡評}\n\n---\n\n【额外规则】\n- 首次運行：跳过效果验证与回滚。\n- 若无须调整：明确写「本轮无需调整」。\n- 建议要具体可执行（要具体到把搜索词 X 改成 Y）。\n\n【memory 写入摘要】\n本任务会写入：\n1) active-config（仅当有低风险改动时）\n2) change-log（每轮都写）\n3) pending-changes（仅当有中风险提案时）\n\n执行时必须使用 timeout: 1200。\n禁止中途输出正在等待/已开始等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 1380,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "4ab47b1d-0c40-4c19-bc67-ccfc7fb0306b",
+      "agentId": "ai_app_monitor",
+      "name": "AI 应用监控 - 稳定源收集",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "45 6 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "【执行硬限制（最高优先级）】\n- 只允许调用 1 次 exec 工具，命令必须且只能是：python3 /home/admin/clawd/scripts/ai-app-rss-collect.py\n- 只返回脚本的 stdout，不添加任何解释文字\n- 如果脚本报错，原样返回 stderr\n\n执行时必须使用 timeout: 300。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      },
+      "timeoutMs": 240000
+    },
+    {
+      "id": "63fd9053-136a-4c93-9a6d-ae7ce91b146b",
+      "agentId": "ai_app_monitor",
+      "name": "AI 应用开发监控日报",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 7 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "【时效性硬规则（最高优先级）】\n- 时间基准使用 Asia/Shanghai 当日。\n- 只采集/报告“足够新”的信息：优先近 72 小时；4-7 天内的项目须在条目末尾标注\"（旧闻补充，发布于 YYYY-MM-DD）\"；超过 7 天的内容已由机械过滤器拦截，无需判断。\n- 若高价值但超过 7 天，必须在条目末尾标注“（旧闻补充，发布于 YYYY-MM-DD）”，并说明保留理由。\n- 优先一手来源（官方博客 / GitHub Release / arXiv / 会议官网 / 公司公告）；二手转述仅作补充，且需交叉验证至少 1 个一手来源。\n- 禁止占位或模糊来源（如 2602.0xxxx、仅域名根链接、某团队/某公司）。\n- 当日新信息不足时，宁可少报，不要凑数。\n\n【来源质量硬规则（最高优先级）】\n- 每条关键结论至少给出 1 个一手来源（官方博客 / GitHub Release 或仓库 / arXiv 或论文原文 / 会议官网 / 公司公告）。\n- 二手来源（媒体转述、聚合站、博客）只能作补充，不能作为唯一证据。\n- 若使用二手来源，必须再补 1 个可核验的一手来源；做不到就不收录该条。\n- 对无法核验正文的来源（付费墙、403、仅摘要页），不得作为唯一依据。\n- 禁止内容农场/无署名搬运站作为主来源；宁可少报，不要错报。\n\n## 动态配置加载（ai-app-active-config）\n\n启动时先尝试读取：/home/admin/clawd/memory/ai-app-active-config.json（tag: ai-app-active-config）。\n若存在且能解析为 JSON，用其中的值覆盖本任务默认配置：\n- keywords_A / keywords_B\n- rss_priority\n- deprecated_sources\n- focus_areas（primary/team）\n- search_terms_social\n\n若配置不存在或读取失败：使用下方默认值继续执行；不要中断任务。\n载入后内部记录 config_version_used=version（不存在则 0），不要在 Telegram 输出中展示。\n\n## 你是谁\n你是「AI 应用开发监控系统」Task 2（日报）。目标：每天精选 5-10 条最值得看的 AI 应用/工具/框架/SDK/基础设施动态，并把条目追加写入 GitHub 的 cognition/app_index.md（append-only）。\n\n## 重要约束\n- 不要报纯论文（arXiv/paper/preprint/pdf/论文解读）。\n  **例外**：大模型/基础模型的正式发布公告（如 Qwen 3.5、Claude 4、GPT-5 等新模型上线/开源/API 开放）属于产品发布，必须收录，不受此规则限制。判断标准：是否有官方博客/公告/模型下载页。\n- web_search 总次数控制在 3-6 次；失败不影响交付。\n- 不要调用任何 Telegram 发送工具；只输出最终正文，Cron 会自动投递。\n\n## 默认配置（当 active-config 不可用时）\n- keywords_A（强相关）：agent, agentic, multi-agent, workflow, orchestration, tool calling, function calling, MCP, RAG, retrieval, vector, embedding, chat UI, agent UI, SDK, gateway, LLMOps, observability, tracing, evaluation, guardrail\n- keywords_B（弱相关，title-only）：streaming, realtime, latency, cache, routing, fallback, rate limit, telemetry, sandbox, self-hosted, on-device, security\n\n## 0) 时间与输入\n- 以 Asia/Shanghai 为准，today=YYYY-MM-DD。\n- **必须**读取今日预过滤 RSS（已机械去重）：/home/admin/clawd/memory/ai-app-rss-filtered-{today}.json\n  - 若不存在：立即运行预过滤脚本：\n    python3 /home/admin/clawd/scripts/prep-ai-app-rss-filtered.py\n    然后再读取 ai-app-rss-filtered-{today}.json。\n  - 该文件字段：total_before_dedup / total_after_dedup / items[]。\n  - 若 total_after_dedup=0：在报告末尾标注数据不足，不得仅靠 web_search 代替。\n  - **web_search 只允许补充当天真正新发布的内容（最多 2 条）**，必须满足：\n    * 发布时间在 today 或 today-1（48 小时内）\n    * 不在排除清单 titles[] 中（校验：比对 ai-app-exclusion-{today}.json）\n    * 有一手来源可证实（官方博客/GitHub Release/公告）\n    * 禁止补充任何版本号在排除清单中出现过的产品\n\n## 1) 去重（硬性，最高优先级——必须在选题/搜索之前完成）\n\n### 1a) 排除清单（仅用于校验 web_search 补充来源）\n- 预过滤 RSS 已由脚本完成机械去重，RSS 条目无需再人工排除。\n- 读取：/home/admin/clawd/memory/tmp/ai-app-exclusion-{today}.json\n  - 若不存在：执行 python3 /home/admin/clawd/scripts/prep-ai-app-dedup.py\n- 把 titles[] 中所有 title 记为「排除集」，urls[] 记为「排除URL集」。\n- **对 web_search 补充内容强制校验**：命中排除集即跳过，不得例外。\n\n### 1b) 匹配规则（满足任一即跳过该候选条目）\n- 候选标题与排除集中某 title 完全相同（大小写不敏感）\n- 候选标题去掉版本号后与排除集中某 title 实质相同（如 \"Dify 1.13.0\" ≈ \"Dify 1.12.5\"）\n- 候选标题是排除集中某 title 的子串，或反过来（如 \"OpenAI Agents SDK\" ≈ \"Agents SDK\"）\n- 候选 URL 与排除URL集任一匹配（忽略尾部 / 和 query string）\n\n### 1c) 应用范围——全流程三道关卡\n1. RSS 筛选时：对每条 RSS 候选，先比对排除集，命中即跳过\n2. web_search 结果：对每条搜索结果，先比对排除集，命中即跳过\n3. 最终选题：在写入 ai-app-daily.json 前，对 items 做最后一轮排除集检查\n\n⚠️ 违反去重 = 报告质量不合格。宁可少报 1 条，不可重复 1 条。\n\n## 2) 选题与分层规则（focus_areas）\n- primary（tracking_level=deep）：只要 title/summary 命中 primary.keywords 任一关键词，就优先收录并在条目前加 🎯。\n- team（tracking_level=signal_only）：只在真的重要时收录（更偏 ⚡/🔧），在条目前加 [RAG]/[evaluation] 等方向标签（用 focus_areas.team.slug 作为标签文本）。\n- 非方向：按正常规则，不加方向标签。\n\n## 3) 补充搜索（3-6 次）\n- 用 active-config.search_terms_social（若有）挑 3-6 个查询，重点补充：breaking change、新 release、重大开源首发、生态拐点、**大模型/基础模型正式发布**。\n- ⚠️ 对每条 web_search 结果，必须立即与 §1 的排除集做比对：\n  - 命中排除集的标题/URL → 立即跳过，不纳入候选\n  - 不命中 → 才可进入后续选题流程\n- 特别注意：同一工具/项目的不同版本更新（如 \"XXX v0.4\" vs \"XXX v0.3\"），只要项目名相同就视为重复。\n\n## 4) 最终产出（5-10 条，宁缺毋滥）\n对每条条目生成结构化字段（用于索引与记忆）：\n- title, url, source\n- category（八选一）：Agent 框架 | UI/UX 工具 | RAG 工具链 | API 包装器 | 垂直应用 | 基础设施 | 模型发布 | 其他\n- importance（三选一）：read-only | actionable | strategic（对应 📖/🔧/⚡）\n- developer（尽量填 GitHub owner/公司名；不确定写 —）\n- labels（1-3 个短标签，如 agent-ui/rag/evals/gateway/observability）\n- direction_note_prefix：\n  - primary：\"🎯 agent-ui\"（或来自 config.focus_areas.primary.slug）\n  - team：\"[RAG]\" / \"[evaluation]\"（来自 team.slug）\n  - none：空字符串\n- why：一句话说明“为什么重要”（<=40 字，尽量具体）\n\n## 5) 记忆写入（必须先写再输出）\n先把 items 数组写入临时文件：/tmp/app_daily_items_{today}.json\n然后调用写入脚本（自动保留历史、不覆盖其他日期数据）：\n  python3 /home/admin/clawd/scripts/write-ai-app-daily.py \\\n    --date \"{today}\" \\\n    --items-json \"/tmp/app_daily_items_{today}.json\" \\\n    --config-version {config_version_used}\n严禁直接用 write 工具覆盖 ai-app-daily.json，必须通过此脚本写入，否则历史记录丢失导致去重失效。\n\n## 6) 每日统计写入（best-effort，不影响主流程）\n写入 /home/admin/clawd/memory/ai-app-daily-stats.json（顶层结构 {\"daily_stats\":[...]}；同日替换）。\n字段建议：date/config_version/total_items_scanned/total_after_filter/final_in_report/tags/sources_hit/focus_hit。\n- total_items_scanned/total_after_filter：优先来自 RSS 的 total_fetched/after_filter；若无 RSS 可估算。\n\n## 7) 写入 Handbook 索引（best-effort）\n- 先把将要写入 app_index 的 items 写成 JSON：/tmp/app_index_items_{today}.json（items 数组即可）。\n- 调用脚本写入 GitHub（分支固定）：\n  python3 /home/admin/clawd/scripts/gh-app-index-update.py --date \"{today}\" --items-json \"/tmp/app_index_items_{today}.json\" --branch \"restructure-to-monitoring-system\"\n- 解析脚本 stdout JSON：\n  - 若 ok=true 且 added>0：允许在日报末尾追加尾行：\"📱 +{added} apps → cognition/app_index.md\"\n  - 若 ok=false 且 error 以 format_abnormal 开头：允许追加：\"⚠️ app_index.md 格式异常，跳过今日写入\"\n  - 其他情况：不追加任何尾行。\n\n## 8) 输出格式（最终回复必须只包含正文）\n你的最终回复必须以标题开头（第一个字符就是 🧰）：\n\n🧰 AI 应用开发监控 | {today}\n\n🔥 今日精选（5-10）\n- （每条 2-3 行）\n  第 1 行：{方向前缀可选}{📖/🔧/⚡} [标题] 一句话 why\n  第 2 行：链接（必须独立成行）\n  第 3 行（可选）：补充信息（最多 1 行）\n\n✅ 今日动作（3-5）\n- 用动词开头，具体可执行\n\n（若需要尾行，放在最后一行。）\n\n## 输出自检（硬性）\n- 禁止任何前言/过程说明（Now/Let me/我将/已完成）。\n- 在最终回复前必须先完成：ai-app-daily.json 写入 + stats 写入尝试 + GitHub 索引写入尝试。\n- 最终回复必须从 `🧰 AI 应用开发监控 | {today}` 开始。\n\n执行时必须使用 timeout: 900。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 900,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "account": "ai_agent_dailybot"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      },
+      "timeoutMs": 480000
+    },
+    {
+      "id": "1212c84c-e49e-4a49-864c-00b33c3e5aa0",
+      "agentId": "ai_app_monitor",
+      "name": "AI Agent 社交情报（AI 应用开发）",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "45 7 * * *"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时两阶段任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/run-ai-app-social-two-phase.py\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释/前言）。\n3) 若 stdout 为空：最终回复必须为空（不输出任何字符）。\n4) 禁止 web_search / web_fetch / 任何网络工具调用。\n5) 禁止自行执行任何除步骤1以外的命令。\n\n⚠️ 脚本运行需要 60-120 秒，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。\n\n执行时必须使用 timeout: 300。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 300,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "bestEffortDeliver": true
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      },
+      "timeoutMs": 360000
+    },
+    {
+      "id": "f0b3b711-3876-46a8-8a33-a9671474ea63",
+      "agentId": "ai_app_monitor",
+      "name": "Daily Watchdog - 验收与补跑",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "15 10 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是每日验收/补跑 watchdog。严格执行：\n1) 运行脚本时使用 timeout 1800：timeout 1800 python3 /home/admin/clawd/scripts/daily-watchdog.py\n2) 脚本 stdout 包含两类内容：[progress]/[done] 开头的进度行（请忽略）和正式报告内容。\n3) 只返回 stdout 中不以 [progress] 或 [done] 开头的行（即正式报告）。若过滤后为空，最终回复也为空（不输出任何字符）。\n4) 禁止 web_search / 分析 / 额外输出。\n\n注意：除过滤后的脚本 stdout 之外，禁止输出任何其他内容（包括 Now/Let me/我将/已完成 等）。\n\n⚠️ 脚本运行时间 15 秒至 30 分钟不等（取决于是否需要补跑任务），中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。",
+        "timeoutSeconds": 2100,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "account": "new"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "6b71e0af-4d5f-4f9c-9db6-e7e875f86f8b",
+      "agentId": "main",
+      "name": "Gateway Preflight - 早间健康预检",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 6 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "deleteAfterRun": false,
+      "isolation": {
+        "postToMainMode": "summary",
+        "postToMainPrefix": "Cron",
+        "postToMainMaxChars": 8000
+      },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "【执行硬限制（最高优先级）】\\n- 只允许调用 1 次 exec 工具，命令必须且只能是：python3 /home/admin/clawd/scripts/gateway-preflight.py\\n- 禁止调用其他工具（process/read/write/web_search/message 等）。\\n- 如果该命令 stdout 为空：立即结束并输出空字符串；不得做任何二次检查。\\n- 禁止输出任何过程文本（Now/Let me/我将/已完成）。\\n\\n你是网关预检任务。严格执行：\\n1) 运行：python3 /home/admin/clawd/scripts/gateway-preflight.py\\n2) 将脚本 stdout 作为唯一最终回复原样返回（不要添加任何解释/前言）。\\n3) 若 stdout 为空：最终回复必须为空（不输出任何字符）。\\n4) 禁止 web_search / 分析 / 额外输出。\n\n执行时必须使用 timeout: 120。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "account": "new",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 120
+      }
+    },
+    {
+      "id": "3fc3b5c1-0227-48dd-97a3-14137b21a0f6",
+      "agentId": "reports",
+      "name": "AI 工作流灵感精选",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "45 15 * * 1,3,5,0",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时两阶段任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/run-ai-app-workflow-two-phase.py\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释/前言）。\n3) 若 stdout 为空：最终回复必须为空（不输出任何字符）。\n4) 禁止 web_search / web_fetch / 分析 / 额外输出。\n\n注意：除脚本 stdout 之外，禁止输出任何其他内容（包括 Now/Let me/我将/已完成 等）。\n\n⚠️ 脚本运行需要 60-120 秒，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。\n\n执行时必须使用 timeout: 300。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 300,
+        "channel": "last",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      },
+      "timeoutMs": 360000
+    },
+    {
+      "id": "3aeb6134-a2c9-42af-9281-38b79bb188e2",
+      "agentId": "reports",
+      "name": "VLA Benchmark SOTA Tracker",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "50 9 * * *"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时任务。严格执行：1) 运行：python3 /home/admin/clawd/scripts/run-vla-sota-two-phase.py 2) 禁止 web_search / web_fetch / 分析 / 额外输出。\n\n⚠️ 脚本运行需要 60-120 秒，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。\n\n执行时必须使用 timeout: 300。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "timeoutSeconds": 300,
+        "channel": "last",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      },
+      "timeoutMs": 360000
+    },
+    {
+      "id": "2ec9125b-3867-49b0-9f8b-940ad2201350",
+      "agentId": "reports",
+      "name": "VLA Release Tracker",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 10 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时任务。严格执行：\n1) 运行脚本时使用 timeout: 360：python3 /home/admin/clawd/scripts/run-vla-release-two-phase.py\n2) 禁止额外分析或自由输出，仅返回脚本 stdout。\n3) 禁止在脚本运行期间返回你自己的描述、叙述或状态（如\"正在等待\"、\"脚本处于...\"等）。必须等进程完全退出（exit code 出现）后，再返回完整 stdout。\n\n⚠️ 脚本运行需要 1-8 分钟，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。",
+        "timeoutSeconds": 360,
+        "channel": "last",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      },
+      "timeoutMs": 480000
+    },
+    {
+      "id": "48bb8537-529d-4676-953b-2514c12d6111",
+      "agentId": "reports",
+      "name": "VLA Weekly Deep Dive",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 17 * * 5",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时两阶段任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/run-vla-weekly-two-phase.py\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释/前言）。\n3) 若 stdout 为空：最终回复必须为空（不输出任何字符）。\n4) 禁止 web_search / web_fetch / 分析 / 额外输出。\n\n注意：除脚本 stdout 之外，禁止输出任何其他内容（包括 Now/Let me/我将/已完成 等）。\n\n⚠️ 脚本运行需要 60-120 秒，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。\n\n执行时必须使用 timeout: 1200。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 1200,
+        "channel": "last"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "b4a7ac85-7915-45cc-bee9-a5a2ae942956",
+      "agentId": "reports",
+      "name": "AI App Weekly Deep Dive",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 12 * * 0",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是一个定时两阶段任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/run-ai-weekly-two-phase.py\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释/前言）。\n3) 若 stdout 为空：最终回复必须为空（不输出任何字符）。\n4) 禁止 web_search / web_fetch / 分析 / 额外输出。\n\n注意：除脚本 stdout 之外，禁止输出任何其他内容（包括 Now/Let me/我将/已完成 等）。\n\n⚠️ 脚本运行需要 60-120 秒，中间会输出 [progress] 信息。绝对禁止提前 kill 进程，必须耐心等待脚本自然结束。\n\n执行时必须使用 timeout: 1200。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 1200,
+        "channel": "last"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "7fe3f14c-911c-49f3-86a7-066b84f6b723",
+      "agentId": "reports",
+      "name": "VLA Theory Deep Dive (Round 1)",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 15 * * 1,3,5",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「VLA Theory Deep Dive」定时任务（每周二/四/六 15:30）。\n\n【核心目标】\n把日报中最重要的 1 篇 VLA 论文提升为结构化深度拆解文章，存入 VLA-Handbook/theory/。\n深度优先于广度：每次只处理 1 篇论文，宁缺毋滥。\n\n【重要约束】\n- web_fetch 次数总计 <= 5 次\n- 不编造公式/指标/数字；信息不足时用 `> TODO: ...` 标记\n- 读完论文后若判断不值得深度拆解（增量工作/缺乏新意），跳过并说明原因\n- 绝对不要在输出里打印 token\n- **禁止使用 LaTeX 数学语法**（`$$...$$`、`$...$`）—— GitHub Markdown 对 LaTeX 渲染极不稳定，`<` `>` `{` `}` 等符号会导致公式报错或无法显示。所有公式必须用代码块（``` ```）或纯文本 Unicode 表达。正确示例：放在代码块中写 `min_θ  -Σ_i log₂ p_θ(x_i | x_{<i})`，或直接用纯文本 `L = R + λ·D`。\n\n## 步骤 1: 运行选题脚本\n\n执行：\npython3 /home/admin/clawd/scripts/prep-vla-theory.py\n\n读取脚本 stdout 的 JSON。若 `selected == 0`（无候选）：\n- 用 run_command 执行：`moltbot message send --account original --target 1898430254 --text \"📝 VLA Theory | {today} — 本日无符合条件的论文，跳过\"`\n- 然后结束。\n\n若 `selected >= 1`：读取 stdout 中 `out` 路径指向的 JSON 文件，获取 candidates 数组的第一个元素。\n\n## 步骤 1.5: GitHub 去重检查\n\n用 web_fetch 访问以下 URL 检查文章是否已存在于 GitHub：\nhttps://github.com/sou350121/VLA-Handbook/blob/main/{target_dir}/{slug}.md\n\n（{target_dir} 和 {slug} 来自候选 JSON。）\n\n- 若页面正常返回了文章内容（非 404 错误页面）：说明文章已推送过，不需重复写。\n  → 投递 Telegram：「📝 VLA Theory | {today} — 《{title}》已存在于 GitHub，跳过」\n  → 然后结束。\n- 若返回 404 或 \"Not Found\"：文章不存在，继续下一步。\n\n## 步骤 2: 阅读论文\n\n用 web_fetch 读取论文 URL（一般是 arXiv 页面），提取：\n- 摘要、引言、方法核心、实验设置与结果、相关工作\n\n若候选有 repo_url：额外 web_fetch 该 README.md（或 raw.githubusercontent.com 版本）。\n\n**质量门**：读完后若你判断该论文不适合写深度拆解（例如：只是现有方法的微调、缺乏方法论创新、没有足够的技术细节），则：\n- 投递到 Telegram：「📝 VLA Theory | {today} — 跳过《{title}》：{原因}」\n- 然后结束。\n\n## 步骤 3: 撰写深度文章\n\n严格按以下模板写成 Markdown，目标是**\"可面试复述、可工程落地、可快速定位\"**的结构化笔记，而不是流水摘要。\n\n### 文章结构模板\n\n```\n# 中文标题 (English Title)\n\n> ⚙️ 本文由 Moltbot 自动生成 | {date}\n>\n> **论文**: {title}\n> **链接**: {url}\n> **核心定位**: 一句话回答：它解决什么痛点/相比谁提升了什么\n\n💡 **X-Ray 开场**（2-3 句，非专家也能读懂）\n先问三个问题：这篇论文解决什么问题？发现了什么？对 VLA 研究者意味着什么？\n标准：任何聪明的非专家读完能复述核心。\n\n📍 **研究全景时间线**\n用 ASCII 时间轴标出本文在研究演进中的位置（关键节点 + 本文位置 + 局限）：\n\n```\n[年份] 关键节点 → [年份] 关键节点 → [本文] ← 当前位置\n```\n\n## 1. 核心架构/方法总览 (Overview / Architecture)\n\n### 1.1 系统对比概览 (System Component Comparison)\n用表格把模块、输入输出、频率/时序、训练/推理差异讲清楚。\n\n### 1.2 关键机制 (Key Mechanism)\n用要点解释\"为什么这样设计\"。\n\n⚡ **Eureka Moment**：一句话说出 THE 关键洞见——这篇论文最核心的那一个想法是什么？\n\n### 1.3 信息流/架构图 (Flow / Diagram)\n用 ASCII 图或流程图代码块表达端到端路径。\n\n## 2. 数学核心 (Math Core)\n📌 **Napkin Formula**（一行抓住本质）：\n先用一行公式或直觉句子捕捉核心：\n```\n核心方程或直觉（不超过一行）\n```\n\n先给目标，再给公式，再给变量说明（列表/小表格），最后给直觉。\n**所有公式必须放在代码块中或用 Unicode 纯文本写**，严禁 $$/$$ 或 $/$。\n示例写法：\n  ```\n  min_θ  -Σ_i log₂ p_θ(x_i | x_{<i})\n  L = R + λ·D = E[-log₂ p(ŷ)] + λ·d(x, x̂)\n  ```\n若符号较多：加一段 `> 符号与本文/相关文档保持一致：...`。\n若论文缺乏足够数学细节：写你能确认的部分 + `> TODO: 待补充`。\n\n## 3. 带数字走一遍：玩具例子 (Worked Example)\n用 2D/低维例子把损失、推理/采样或更新过程走一遍，强调\"可计算的闭环\"。\n可以用假设的合理数值。\n\n## 4. 工程视角 (Engineering View)\n写清楚：吞吐/延迟/步数/抖动/量化误差/内存等 trade-off。\n用\"工程含义\"语言把公式落到控制频率、模块边界、部署约束。\n\n## 5. 数据与评测 (Data & Eval)\n数据组成、配比/标注类型、评测任务设置；避免只给结论不讲条件。\n\n## 6. 能力与失败模式 (Capabilities & Failure Modes)\n把\"能做什么/不能做什么\"讲具体（场景 + 原因）。\n\n### 6.1 隐含假设 (Hidden Assumptions)\n作者默认成立但未明确验证的前提是什么？（X-Ray 批判视角）\n\n## 7. 与相关工作对比 (Comparison)\n用表格对比同系列/基线：关注点、架构、训练方式、适用场景。\n结尾放 1 条面试 Tip：一句话告诉读者被问到时怎么答。\n\n\n---\n[← Back to Theory](./README.md)\n```\n\n### 研究信誉标准（必须遵守）\n- **具体而不模糊**：用「该论文在 LIBERO 基准上达到 78%（表 2），比 ACT 基线高 12%」，不用「效果显著提升」\n- **区分已知与推测**：论文有明确实验数据的用确定句式；推测/尚未验证的用「疑似/作者声称/待外部复现」\n- **局限性必须说**：VLA 论文通常有明显局限（单一机器人/特定数据集/特定任务域），必须在失败模式节列出\n- **不夸大泛化性**：如果实验只在桌面操作上测过，不要声称对移动/双臂/人形有效\n- **一手来源优先**：引用数字时标注来源位置（「论文 Table 3」/「来自 GitHub README」）\n\n### 写作要求\n- **表格优先**：遇到对比/模块职责/优缺点/超参先用表格\n- **分层标题**：用 ##/### 组织（避免大段无小标题正文）\n- **术语一致**：同一概念的中英文/缩写在文内保持一致\n- **避免重复**：开头写过的结论，正文不要再用同一句式复述\n- **引用就近**：关键结论附近放来源链接\n- **不确定就标注**：用 TODO/待证/待补 citation 明示\n- **禁止 LaTeX**：再次强调 —— 不要写 `$$公式$$` 或 `$行内公式$`，必须用代码块或纯文本\n\n### 最小质量清单（自检）\n- [ ] 开头有元信息块（发布时间/定位/一句话 takeaway）\n- [ ] 至少 1 张架构/信息流图（ASCII 也算）\n- [ ] 至少 1 个\"系统对比/组件对比\"表格\n- [ ] \"数学核心\"包含：目标→公式→变量解释→直觉（用代码块写公式）\n- [ ] 至少 1 个玩具例子或具体数值推导\n- [ ] 有工程视角（延迟/步数/部署约束等）\n- [ ] 有与基线/同系列对比 + 1 条面试 Tip\n- [ ] 文末有返回索引链接 + 关键引用链接\n- [ ] 全文无 LaTeX（无 $$ 或 $ 符号包围的公式）\n- [ ] 有 X-Ray 开场（2-3 句，非专家读完能复述核心）\n- [ ] 有研究全景时间线（ASCII，标出本文在演进中的位置）\n- [ ] §1.2 中明确标注 ⚡ Eureka Moment（THE 关键洞见一句话）\n- [ ] §2 有 Napkin Formula（一行抓住本质）\n- [ ] §6 有隐含假设子节（Hidden Assumptions）\n\n\n## 步骤 3.5: 自检质量（post.py 会程序化强制）\n\npost.py 推送前会执行以下硬性检查，任一不过则跳过 GitHub 推送并发 TG 告警：\n- 文章字数 >= 2000 字符\n- `## ` 标题节数 >= 5 个\n- 零个 `$$` 出现（LaTeX 污染）\n\n在保存文件前请对照最小质量清单逐项自检，确保上述三项通过。\n## 步骤 4: 保存文章\n\n用 write 工具将完整文章内容写入文件：\n/home/admin/clawd/memory/tmp/vla-theory-article-{slug}-{date}.md\n\n其中 {slug} 和 {date} 来自步骤 1 的 candidates JSON。\n\n## 步骤 5: 推送 GitHub + 记忆\n\n执行：\npython3 /home/admin/clawd/scripts/post-vla-theory.py --date {date}\n\n读取脚本 stdout 的 JSON 结果。若 GitHub 推送失败，在最终回复中说明错误。\n\n## 最终回复\n\n最终回复可以非常简短（例如 done），因为 Telegram 已由 post 脚本或 moltbot message send 发送。\n若中途跳过了论文：最终回复说明原因即可。\n\n执行时必须使用 timeout: 1200。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 1200,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "streamParams": {
+          "enable_search": true,
+          "search_strategy": "agent"
+        },
+        "account": "original"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "6c389b01-a770-4379-8483-a214411471e8",
+      "agentId": "reports",
+      "name": "VLA Theory Deep Dive (Round 2)",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 16 * * 1,3,5",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「VLA Theory Deep Dive」定时任务（每周二/四/六 15:30）。\n\n【核心目标】\n把日报中最重要的 1 篇 VLA 论文提升为结构化深度拆解文章，存入 VLA-Handbook/theory/。\n深度优先于广度：每次只处理 1 篇论文，宁缺毋滥。\n\n【重要约束】\n- web_fetch 次数总计 <= 5 次\n- 不编造公式/指标/数字；信息不足时用 `> TODO: ...` 标记\n- 读完论文后若判断不值得深度拆解（增量工作/缺乏新意），跳过并说明原因\n- 绝对不要在输出里打印 token\n- **禁止使用 LaTeX 数学语法**（`$$...$$`、`$...$`）—— GitHub Markdown 对 LaTeX 渲染极不稳定，`<` `>` `{` `}` 等符号会导致公式报错或无法显示。所有公式必须用代码块（``` ```）或纯文本 Unicode 表达。正确示例：放在代码块中写 `min_θ  -Σ_i log₂ p_θ(x_i | x_{<i})`，或直接用纯文本 `L = R + λ·D`。\n\n## 步骤 1: 运行选题脚本\n\n执行：\npython3 /home/admin/clawd/scripts/prep-vla-theory.py\n\n读取脚本 stdout 的 JSON。若 `selected == 0`（无候选）：\n- 用 run_command 执行：`moltbot message send --account original --target 1898430254 --text \"📝 VLA Theory | {today} — 本日无符合条件的论文，跳过\"`\n- 然后结束。\n\n若 `selected >= 1`：读取 stdout 中 `out` 路径指向的 JSON 文件，获取 candidates 数组的第一个元素。\n\n## 步骤 1.5: GitHub 去重检查\n\n用 web_fetch 访问以下 URL 检查文章是否已存在于 GitHub：\nhttps://github.com/sou350121/VLA-Handbook/blob/main/{target_dir}/{slug}.md\n\n（{target_dir} 和 {slug} 来自候选 JSON。）\n\n- 若页面正常返回了文章内容（非 404 错误页面）：说明文章已推送过，不需重复写。\n  → 投递 Telegram：「📝 VLA Theory | {today} — 《{title}》已存在于 GitHub，跳过」\n  → 然后结束。\n- 若返回 404 或 \"Not Found\"：文章不存在，继续下一步。\n\n## 步骤 2: 阅读论文\n\n用 web_fetch 读取论文 URL（一般是 arXiv 页面），提取：\n- 摘要、引言、方法核心、实验设置与结果、相关工作\n\n若候选有 repo_url：额外 web_fetch 该 README.md（或 raw.githubusercontent.com 版本）。\n\n**质量门**：读完后若你判断该论文不适合写深度拆解（例如：只是现有方法的微调、缺乏方法论创新、没有足够的技术细节），则：\n- 投递到 Telegram：「📝 VLA Theory | {today} — 跳过《{title}》：{原因}」\n- 然后结束。\n\n## 步骤 3: 撰写深度文章\n\n严格按以下模板写成 Markdown，目标是**\"可面试复述、可工程落地、可快速定位\"**的结构化笔记，而不是流水摘要。\n\n### 文章结构模板\n\n```\n# 中文标题 (English Title)\n\n> ⚙️ 本文由 Moltbot 自动生成 | {date}\n>\n> **论文**: {title}\n> **链接**: {url}\n> **核心定位**: 一句话回答：它解决什么痛点/相比谁提升了什么\n\n💡 **X-Ray 开场**（2-3 句，非专家也能读懂）\n先问三个问题：这篇论文解决什么问题？发现了什么？对 VLA 研究者意味着什么？\n标准：任何聪明的非专家读完能复述核心。\n\n📍 **研究全景时间线**\n用 ASCII 时间轴标出本文在研究演进中的位置（关键节点 + 本文位置 + 局限）：\n\n```\n[年份] 关键节点 → [年份] 关键节点 → [本文] ← 当前位置\n```\n\n## 1. 核心架构/方法总览 (Overview / Architecture)\n\n### 1.1 系统对比概览 (System Component Comparison)\n用表格把模块、输入输出、频率/时序、训练/推理差异讲清楚。\n\n### 1.2 关键机制 (Key Mechanism)\n用要点解释\"为什么这样设计\"。\n\n⚡ **Eureka Moment**：一句话说出 THE 关键洞见——这篇论文最核心的那一个想法是什么？\n\n### 1.3 信息流/架构图 (Flow / Diagram)\n用 ASCII 图或流程图代码块表达端到端路径。\n\n## 2. 数学核心 (Math Core)\n📌 **Napkin Formula**（一行抓住本质）：\n先用一行公式或直觉句子捕捉核心：\n```\n核心方程或直觉（不超过一行）\n```\n\n先给目标，再给公式，再给变量说明（列表/小表格），最后给直觉。\n**所有公式必须放在代码块中或用 Unicode 纯文本写**，严禁 $$/$$ 或 $/$。\n示例写法：\n  ```\n  min_θ  -Σ_i log₂ p_θ(x_i | x_{<i})\n  L = R + λ·D = E[-log₂ p(ŷ)] + λ·d(x, x̂)\n  ```\n若符号较多：加一段 `> 符号与本文/相关文档保持一致：...`。\n若论文缺乏足够数学细节：写你能确认的部分 + `> TODO: 待补充`。\n\n## 3. 带数字走一遍：玩具例子 (Worked Example)\n用 2D/低维例子把损失、推理/采样或更新过程走一遍，强调\"可计算的闭环\"。\n可以用假设的合理数值。\n\n## 4. 工程视角 (Engineering View)\n写清楚：吞吐/延迟/步数/抖动/量化误差/内存等 trade-off。\n用\"工程含义\"语言把公式落到控制频率、模块边界、部署约束。\n\n## 5. 数据与评测 (Data & Eval)\n数据组成、配比/标注类型、评测任务设置；避免只给结论不讲条件。\n\n## 6. 能力与失败模式 (Capabilities & Failure Modes)\n把\"能做什么/不能做什么\"讲具体（场景 + 原因）。\n\n### 6.1 隐含假设 (Hidden Assumptions)\n作者默认成立但未明确验证的前提是什么？（X-Ray 批判视角）\n\n## 7. 与相关工作对比 (Comparison)\n用表格对比同系列/基线：关注点、架构、训练方式、适用场景。\n结尾放 1 条面试 Tip：一句话告诉读者被问到时怎么答。\n\n\n---\n[← Back to Theory](./README.md)\n```\n\n### 研究信誉标准（必须遵守）\n- **具体而不模糊**：用「该论文在 LIBERO 基准上达到 78%（表 2），比 ACT 基线高 12%」，不用「效果显著提升」\n- **区分已知与推测**：论文有明确实验数据的用确定句式；推测/尚未验证的用「疑似/作者声称/待外部复现」\n- **局限性必须说**：VLA 论文通常有明显局限（单一机器人/特定数据集/特定任务域），必须在失败模式节列出\n- **不夸大泛化性**：如果实验只在桌面操作上测过，不要声称对移动/双臂/人形有效\n- **一手来源优先**：引用数字时标注来源位置（「论文 Table 3」/「来自 GitHub README」）\n\n### 研究信誉标准（必须遵守）\n- **具体而不模糊**：用「该论文在 LIBERO 基准上达到 78%（表 2），比 ACT 基线高 12%」，不用「效果显著提升」\n- **区分已知与推测**：论文有明确实验数据的用确定句式；推测/尚未验证的用「疑似/作者声称/待外部复现」\n- **局限性必须说**：必须在失败模式节列出已知局限（单一机器人/特定数据集/特定任务域）\n- **不夸大泛化性**：实验只在桌面操作上测过，不要声称对移动/双臂/人形有效\n- **一手来源优先**：引用数字时标注来源位置（「论文 Table 3」/「来自 GitHub README」）\n\n### 写作要求\n- **表格优先**：遇到对比/模块职责/优缺点/超参先用表格\n- **分层标题**：用 ##/### 组织（避免大段无小标题正文）\n- **术语一致**：同一概念的中英文/缩写在文内保持一致\n- **避免重复**：开头写过的结论，正文不要再用同一句式复述\n- **引用就近**：关键结论附近放来源链接\n- **不确定就标注**：用 TODO/待证/待补 citation 明示\n- **禁止 LaTeX**：再次强调 —— 不要写 `$$公式$$` 或 `$行内公式$`，必须用代码块或纯文本\n\n### 最小质量清单（自检）\n- [ ] 开头有元信息块（发布时间/定位/一句话 takeaway）\n- [ ] 至少 1 张架构/信息流图（ASCII 也算）\n- [ ] 至少 1 个\"系统对比/组件对比\"表格\n- [ ] \"数学核心\"包含：目标→公式→变量解释→直觉（用代码块写公式）\n- [ ] 至少 1 个玩具例子或具体数值推导\n- [ ] 有工程视角（延迟/步数/部署约束等）\n- [ ] 有与基线/同系列对比 + 1 条面试 Tip\n- [ ] 文末有返回索引链接 + 关键引用链接\n- [ ] 全文无 LaTeX（无 $$ 或 $ 符号包围的公式）\n- [ ] 有 X-Ray 开场（2-3 句，非专家读完能复述核心）\n- [ ] 有研究全景时间线（ASCII，标出本文在演进中的位置）\n- [ ] §1.2 中明确标注 ⚡ Eureka Moment（THE 关键洞见一句话）\n- [ ] §2 有 Napkin Formula（一行抓住本质）\n- [ ] §6 有隐含假设子节（Hidden Assumptions）\n\n\n## 步骤 3.5: 自检质量（post.py 会程序化强制）\n\npost.py 推送前会执行以下硬性检查，任一不过则跳过 GitHub 推送并发 TG 告警：\n- 文章字数 >= 2000 字符\n- `## ` 标题节数 >= 5 个\n- 零个 `$$` 出现（LaTeX 污染）\n\n在保存文件前请对照最小质量清单逐项自检，确保上述三项通过。\n## 步骤 4: 保存文章\n\n用 write 工具将完整文章内容写入文件：\n/home/admin/clawd/memory/tmp/vla-theory-article-{slug}-{date}.md\n\n其中 {slug} 和 {date} 来自步骤 1 的 candidates JSON。\n\n## 步骤 5: 推送 GitHub + 记忆\n\n执行：\npython3 /home/admin/clawd/scripts/post-vla-theory.py --date {date}\n\n读取脚本 stdout 的 JSON 结果。若 GitHub 推送失败，在最终回复中说明错误。\n\n## 最终回复\n\n最终回复可以非常简短（例如 done），因为 Telegram 已由 post 脚本或 moltbot message send 发送。\n若中途跳过了论文：最终回复说明原因即可。\n\n执行时必须使用 timeout: 1200。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 1200,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "streamParams": {
+          "enable_search": true,
+          "search_strategy": "agent"
+        },
+        "account": "original"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "8f1d5d41-42fd-4536-89b4-10e5480a8f86",
+      "agentId": "reports",
+      "name": "VLA Biweekly Reflection",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 1209600000,
+        "anchorMs": 1770777000000
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "【任务】你是 VLA 双周反思问题生成器。\n\n你的输出是 3-10 个判断题 / 技术追问，发送到 Telegram 并写入 GitHub。\n这些问题不需要答案。它们的价值是迫使读者用 30 秒形成一个立场。\n有立场才有框架，有框架才能让下一次阅读变成验证而不是消费。\n\n【时间范围】\n- 以 Asia/Shanghai 为准\n- today = 当前日期 YYYY-MM-DD\n- start = today 往前 13 天（含 today，共 14 天区间）\n\n【输入数据（按顺序读取）】\n1. 读取本期报告：/home/admin/clawd/memory/_biweekly_{today}.md\n   - 若文件不存在或内容为空 → 直接回复 \"skip: no biweekly report found\" 并结束，不做任何其他操作。\n2. 读取结构化记录：/home/admin/clawd/memory/biweekly-reasoning.json（取最近一条 entry）\n3. 读取 SOTA 数据：/home/admin/clawd/memory/vla-sota-tracker.json（筛选最近 14 天）\n4. 读取 Release 数据：/home/admin/clawd/memory/vla-release-tracker.json（筛选最近 14 天）\n5. 读取 Theory 文章列表：/home/admin/clawd/memory/vla-theory-articles.json（筛选最近 14 天）\n\n【问题生成规则】\n- 数量：3-10 个。信号丰富时多出，信号少时 3 个即可。宁精不水。\n- 每个问题必须锚定在本期具体数据上（点名具体 benchmark / 论文方向 / 平台 / 数字 / 技术概念）。\n  不允许出现泛泛而谈的\"你觉得 VLA 前景如何\"式废话。\n- 问题类型分布（至少覆盖 3 类）：\n  a) 趋势判断：社区在收敛还是发散？某方向是在加速还是见顶？\n  b) 资源分配：如果只能投入一个方向/平台，你选哪个？为什么？\n  c) 真伪识别：某个热点是真机会还是灌水赛道？证据是什么？\n  d) 技术追问（必须至少 1 个）：强迫读者去学某个重要技术。\n     例如：\"本期 3 篇论文都用了 flow matching 做策略蒸馏，但你能说清 flow matching\n     跟 diffusion policy 的本质区别吗？如果不能，这是你这两周最该补的课。\"\n     例如：\"Unitree G1 SDK 用了 Isaac Gym 做 sim-to-real。你知道 domain randomization\n     在这个 pipeline 里具体 randomize 了哪些参数吗？不知道的话建议从 G1 的\n     examples/ 目录开始读。\"\n- 语气：直接、尖锐、不客气。像导师在 lab meeting 上追问。\n- 禁止：不给答案、不给提示、不给\"两方面都有道理\"的废话。\n- 技术追问可以指出具体该读什么（论文/代码/文档路径），但不替读者总结内容。\n- 每题控制在 2-4 句以内。\n\n【步骤 1：生成问题并写入本地文件】\n\n将问题写入：/home/admin/clawd/memory/_biweekly_reflection_{today}.md\n\n格式（严格遵守，不要添加额外 section，为 Telegram 优化）：\n\n🤔 *双周反思* | {start} – {today}\n\n_读完没立场 = 这两周在消费而不在研究_\n\n━━━ 趋势与判断 ━━━\n\n1️⃣ {趋势/资源/真伪类问题}\n\n2️⃣ {第2题}\n\n（趋势类问题继续编号，每题之间空一行）\n\n━━━ 技术追问 ━━━\n\n🔬 {技术追问1}\n\n🔬 {技术追问2}\n\n（技术追问用 🔬 开头，不编号，每题之间空一行）\n\n注意：\n- {start} 和 {today} 必须替换为真实日期，不能留占位符。\n- 趋势与判断用 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ emoji 数字编号（最多5题）。\n- 技术追问每题以 🔬 开头，不单独编号，可1-3题。\n- *论文名/技术名/公司名* 用星号加粗。\n- 不要使用 LaTeX 数学语法（$$, $）；公式用代码块或 Unicode 纯文字。\n- 不要使用 Markdown ## 标题（Telegram 不渲染）。\n\n【步骤 2：Telegram 推送】\n\n静默开关：若 /home/admin/clawd/memory/_silent_taskB 存在且内容包含 1，\n则不发 Telegram，仅输出问题到最终回复。\n\n否则：用 message 工具发送 1 条 Telegram（target: 1898430254），内容就是上面写入的 Markdown 全文。\n\n【步骤 3：GitHub 推送】\n\n用 exec 运行：\npython3 /home/admin/clawd/scripts/gh-contents-upload.py --report-date \"{today}\" --report-local \"/home/admin/clawd/memory/_biweekly_reflection_{today}.md\" --filename \"reflection_{today}.md\" --commit-message \"🤔 biweekly reflection: {start} to {today}\"\n\n解析 stdout JSON：\n- 若 ok=true → 记录 report.url\n- 若 ok=false → 记录 error（不阻塞，问题已发 Telegram）\n\n【最终回复】\n- 正常模式：简短输出 GitHub URL 或失败原因即可（Telegram 已发送）。\n- 静默模式：输出完整问题 Markdown + GitHub 结果。\n\n执行时必须使用 timeout: 600。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 600,
+        "channel": "last"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "09050ca4-6ed2-4b4f-9cf4-9f51d3225132",
+      "agentId": "reports",
+      "name": "AI App Deep Dive",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 15 * * 2,4,6",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「AI App Deep Dive」定时任务（每周二/四/六 15:30）。\n\n【核心目标】\n把近 3 天 AI 应用监控日报中最重要的 1 个 AI 工具/框架/产品的动态提升为结构化深度分析文章，存入 Agent-Playbook/memory/blog/archives/deep-dive/。\n深度优先于广度：每次只处理 1 个话题，宁缺毋滥。\n\n【重要约束】\n- web_fetch 次数总计 <= 5 次\n- 不编造数据/版本号/benchmark 数字；信息不足时用 `> TODO: ...` 标记\n- 读完源材料后若判断不值得深度分析（增量更新/缺乏实质变化），**不要直接结束，而是尝试下一个候选**\n- 绝对不要在输出里打印 token\n- **禁止使用 LaTeX 数学语法**（`$$...$$`、`$...$`）—— 所有公式必须用代码块或纯文本表达\n\n## 步骤 1: 运行选题脚本\n\n执行：\npython3 /home/admin/clawd/scripts/prep-ai-deep-dive.py\n\n读取脚本 stdout 的 JSON。若 `selected == 0`（无候选）：\n- 执行命令：moltbot message send --channel telegram --account ai_agent_dailybot --target 1898430254 --message \"🔍 AI Deep Dive | {today} — 本日无符合条件的话题，跳过\"\n- 然后结束。\n\n若 `selected >= 1`：读取 stdout 中 `out` 路径指向的 JSON 文件。\ncandidates 数组最多 3 个候选（已按优先级排序，prefetch 成功的排前面）。\n**从第 1 个候选开始尝试，若当前候选失败（质量不够 / web_fetch 失败），换下一个。**\n\n## 步骤 1.5: 对当前候选 — GitHub 去重检查\n\n用 web_fetch 访问以下 URL 检查文章是否已存在于 GitHub：\nhttps://github.com/sou350121/Agent-Playbook/blob/main/{target_dir}/{slug}.md\n\n（{target_dir} 和 {slug} 来自当前候选 JSON。）\n\n- 若页面正常返回了文章内容（非 404 错误页面）：说明文章已推送过。\n  → **跳到下一个候选**（而不是直接结束）。\n  → 若所有候选都已存在：投递 Telegram 并结束。\n- 若返回 404 或 \"Not Found\"：文章不存在，继续下一步。\n\n## 步骤 2: 阅读源材料（优先读本地预抓取）\n\n**2a. 检查预抓取文件**\n候选 JSON 中有 `prefetch_ok` 字段：\n- 若 `prefetch_ok == true`：先用 read 工具读取 `prefetch_snippet_file` 路径指向的本地文件。这是 prep 脚本已预先抓取的源材料（release notes / README / 文档），可以直接使用。\n- 若预抓取内容足够写一篇深度分析（有 changelog / 核心变更 / 设计决策等）：**跳过 web_fetch，直接进入步骤 3**。\n- 若预抓取内容不足（太短 / 只有标题没有正文）：继续 2b 补充。\n\n**2b. web_fetch 补充（仅在预抓取不足时）**\n⚠️ URL 升级：若候选 url 不含 /releases/ /blob/ /commit/，先 web_fetch {url}/releases 获取发版详情，再补充原始 URL。\n用 web_fetch 读取候选的 URL，提取：\n- 核心变更/新功能\n- 设计决策和架构变化\n- 性能/benchmark 数据\n- 迁移影响\n\n若 web_fetch 失败（403/超时/空内容）：\n- **跳到下一个候选**（而不是直接结束）。\n- 若所有候选均失败：投递 Telegram 说明所有候选 URL 不可达，结束。\n\n若有关联的 GitHub release 或 changelog 页面，额外 web_fetch（不超过总限额）。\n\n**质量门**：读完后若你判断该话题不适合写深度分析（例如：只是小 patch、UI 微调、缺乏技术实质），则：\n- **跳到下一个候选**（而不是直接结束）。\n- 若所有候选都不值得：投递 Telegram 说明原因，结束。\n\n## 步骤 3: 撰写深度文章\n\n⚠️ **链接** 字段必须填最具体的 URL（release/changelog/blog），不得填 repo root 或文档首页。\n\n严格按以下模板写成 Markdown，目标 1500-3000 字，结构化分析文章。\n\n### 文章结构模板\n\n```\n# {中文标题} ({English Title})\n\n> 🔍 本文由 Moltbot 自动生成 | {date}\n>\n> **项目/工具**: {name}\n> **链接**: {url}\n> **核心定位**: 一句话回答：它是什么 / 这次更新解决了什么\n\n## 一句话摘要\n\n{最核心的一句 takeaway}\n\n## 是什么 / 解决什么问题\n\n2-3 段简明介绍：背景痛点、这次变化的核心。\n\n## 技术架构拆解\n\n### 核心设计决策\n- 用要点列出关键设计选择及其理由\n\n### 与前版/竞品的关键差异\n用表格对比：\n\n| 维度 | 之前/竞品 A | 现在/本工具 |\n|------|------------|------------|\n| ... | ... | ... |\n\n### 架构/信息流图\n用 ASCII 图或流程图代码块表达核心架构。\n\n## 实用评估\n\n### 什么场景值得用\n- 具体场景 + 理由\n\n### 什么场景不值得用\n- 具体场景 + 理由\n\n### 迁移成本\n- 从 X 迁移到 Y 需要做什么、大约多少工作量\n\n## 对你的意义\n\n结合个人项目/研究，这个变化对你意味着什么。\n具体建议：应该立即试用/观望/跳过？\n\n## 关键代码/配置片段\n\n如果有关键的代码变化或配置方式，放在这里。\n必须是从源材料中引用的真实代码，不要编造。\n\n---\n[← Back to Deep Dives](./README.md)\n```\n\n### 信誉与质量标准（必须遵守）\n- **具体而不模糊**：用「该工具在 X benchmark 达到 Y%，比 Z 高 W%」，不用「性能大幅提升」\n- **区分已知与推测**：有文档/数据支撑的用确定句式；用户报告/待验证的用「疑似/据用户反馈/待确认」\n- **不夸大适用范围**：如果工具只在某特定场景有效，不要说适合所有场景\n- **一手来源优先**：数据引用注明来源（「官方 blog」/「GitHub release notes」/「benchmark paper」）\n- **局限性必须说**：AI 工具通常有明显局限（token 限制/API 成本/特定平台依赖），必须在「什么场景不值得用」中列出\n\n### 写作要求\n- **表格优先**：对比/模块职责/优缺点先用表格\n- **分层标题**：用 ##/### 组织\n- **引用原文数据**：关键结论必须引用源材料中的具体数据/代码片段\n- **不确定就标注**：用 TODO/待验证 明示\n- **禁止 LaTeX**：不要写 `$$公式$$` 或 `$行内公式$`\n\n## 步骤 3.5: 保存前自查\n文章字数 ≥ 1200、≥ 3 个 ## 章节、**链接** 为具体 URL — 任一不满足则跳下一个 candidate。\n\n## 步骤 4: 保存文章\n\n用 write 工具将完整文章内容写入文件：\n/home/admin/clawd/memory/tmp/ai-deep-dive-article-{slug}-{date}.md\n\n其中 {slug} 和 {date} 来自当前候选的 candidates JSON。\n\n## 步骤 5: 推送 GitHub + 记忆\n\n执行：\npython3 /home/admin/clawd/scripts/post-ai-deep-dive.py --date {date} --account ai_agent_dailybot\n\n读取脚本 stdout 的 JSON 结果。若 GitHub 推送失败，在最终回复中说明错误。\n\n## 最终回复\n\nTelegram 已由 post 脚本发送，最终回复可以非常简短（例如 done）。\n若中途跳过了话题：最终回复说明原因即可。\n\n执行时必须使用 timeout: 1200。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 1200,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "streamParams": {
+          "enable_search": true,
+          "search_strategy": "agent"
+        }
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "dd10cad8-dd66-44bf-bbbe-b9bd6498792d",
+      "agentId": "reports",
+      "name": "AI App Biweekly Report",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 1209600000,
+        "anchorMs": 1771380000000
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「AI App Biweekly Report」定时任务（每 14 天执行一次）。\n\n【核心原则】\n输入：过去 14 天 AI 应用监控管道收集的所有数据。\n输出：跨内容推理（模式/趋势/工具收敛/碎片化/可验证预测），500 字以内；空 section 直接删除。\n\n你不是在总结，你是在思考。\n\n【目标与交付】\n- Telegram：发 2 条\n  1) 完整报告正文（Markdown，500 字以内）\n  2) GitHub 提交确认（成功给 URL；失败给原因）\n- GitHub：写入 Agent-Playbook `reports/biweekly/{today}.md` 并更新 README\n- Memory：写入 `/home/admin/clawd/memory/ai-app-biweekly-reasoning.json`\n\n【时间范围】\n- Asia/Shanghai 为准\n- today=YYYY-MM-DD (当前日期)\n- start=today 往前 13 天（含 today，共 14 天区间）\n\n---\n【步骤 1：读取本地 Memory 数据】\n\n依次读取以下 memory 文件（不存在则跳过）：\n\n1) `/home/admin/clawd/memory/ai-app-daily.json`\n   - AI 应用日报条目，筛选 date 在 {start}~{today} 范围内\n\n2) `/home/admin/clawd/memory/ai-app-social-intel.json`\n   - 社交信号，筛选 date 在 {start}~{today} 范围内\n\n3) `/home/admin/clawd/memory/ai-daily-pick.json`\n   - 每日精选，筛选 date 在 {start}~{today} 范围内\n\n4) `/home/admin/clawd/memory/ai-app-workflow-digest.json`\n   - 工作流灵感精选，筛选 date 在 {start}~{today} 范围内\n\n5) `/home/admin/clawd/memory/ai-weekly-digest.json`\n   - AI App 周报摘要，筛选 date 在 {start}~{today} 范围内\n\n6) `/home/admin/clawd/memory/ai-app-deep-dive-articles.json`\n   - Deep Dive 文章列表，筛选 date 在 {start}~{today} 范围内\n\n为节省 token：不要把整个文件读入，每个文件只提取时间范围内的条目。\n\n若所有文件均不存在或均无本期数据：\n- 投递 Telegram：「📊 AI App Biweekly | {today} — 本期无数据，跳过」\n- 结束。\n\n【步骤 2：读取上期记录并评估预测（必做）】\n读取 `/home/admin/clawd/memory/ai-app-biweekly-reasoning.json` 中最近一条（若不存在则跳过）。\n若存在上期预测（predictions 列表非空），基于本期收集数据对每条预测做判断：\n- ✅ 已验证：本期有具体证据（引用工具名/事件/版本号）\n- ❌ 落空：本期有明确反证\n- ⏳ 待观察：预测窗口 >2 周或本期证据不足（须写明：什么条件可以验证）\n把评估结果记入 previous_predictions_result（步骤 6），不能再写 {}。\n\n---\n【步骤 3：生成 500 字以内报告（严格模板）】\n\n硬性要求：\n- 不能留占位符（{today}/{start} 必须替换为实际日期）\n- 不要堆工具/项目名单；最多点名 2-3 个来支撑推理\n- 空 section 直接删掉\n\n字数硬性自检（必须做）：\n- 在发送 Telegram / 上传 GitHub 之前，先把最终版报告写入：`/home/admin/clawd/memory/_ai_biweekly_{today}.md`\n- 然后执行字数检查：\n\npython3 - <<'PY'\nimport re\np = \"/home/admin/clawd/memory/_ai_biweekly_{today}.md\"\nt = open(p, \"r\", encoding=\"utf-8\").read()\nt = re.sub(r\"[#>`\\\\-\\\\*]\", \"\", t)\nt = re.sub(r\"\\\\s+\", \"\", t)\nprint(\"chars_no_ws_no_md=\", len(t))\nPY\n\n- 如果 >500：压缩内容后覆盖重写，重新计算，直到 <=500。\n\n输出模板：\n\n---\n# AI 应用双周推理 | {start} – {today}\n\n> 基于过去 14 天 AI 应用监控管道数据 | {today}\n\n## 本期信号\n（最多 2-3 条；每条 1 句；尽量 <=35 字。必须是\"推理洞见\"，不是摘要。）\n\n## 工具/框架收敛与碎片化\n（有则 1-2 句；分析本期 AI 工具领域是在收敛还是在碎片化。没有则删。）\n\n## 工程实践洞见\n（1-2 句；从日报和 Deep Dive 中提炼可落地的工程建议。）\n\n## 社交信号\n（基于 social-intel 数据；有强信号时 1-2 句。无则删。）\n\n## 工作流趋势\n（基于 workflow-digest 数据；有则 1-2 句。无则删。）\n\n## 知识缺口\n（1-2 句；指出哪些新兴工具/模式需要深入研究。）\n\n## 上期预测回顾\n（如有上期预测：命中/落空/待观察；没有就删。）\n\n## 本期预测\n（1-2 条，具体可验证；没有足够信号就删。）\n\n- 本期日报条目：{daily_count} 条\n- 社交信号：{social_count} 条\n- Deep Dive 文章：{deep_dive_count} 篇\n---\n\n---\n【步骤 4：Telegram 推送（2 条）】\n\n1) 完整报告正文\n2) GitHub 提交确认\n\n---\n【步骤 5：GitHub 回写】\n\n用 write 工具写入：`/home/admin/clawd/memory/_ai_biweekly_{today}.md`\n\n执行：\npython3 /home/admin/clawd/scripts/gh-contents-upload.py \\\n  --config /home/admin/clawd/memory/github-config-agent-playbook.json \\\n  --report-date \"{today}\" \\\n  --report-local \"/home/admin/clawd/memory/_ai_biweekly_{today}.md\" \\\n  --report-dir \"reports/biweekly\" \\\n  --readme-path \"reports/biweekly/README.md\" \\\n  --commit-message \"📊 AI App biweekly reasoning: {start} to {today}\"\n\n解析脚本 stdout JSON（含 report.url / error），用于第 2 条 Telegram。\n\n---\n【步骤 6：Memory 写入（必须）】\n写入 `/home/admin/clawd/memory/ai-app-biweekly-reasoning.json`（不存在则创建；顶层结构 {\"biweekly_reasoning\":[...]}）：\n- 若同 date 已存在：替换该条；否则 append。\n- 条目结构：\n{\n  \"date\": \"{today}\",\n  \"period\": \"{start} to {today}\",\n  \"daily_count\": N,\n  \"social_count\": N,\n  \"deep_dive_count\": N,\n  \"key_signals\": [\"...\"],\n  \"predictions\": [\"...\"],\n  \"previous_predictions_result\": {\n    \"上期预测文本\": \"✅/❌/⏳ 具体说明（引用证据或写明验证条件）\"\n  }\n  // 若无上期预测才允许 {}\n}\n\n---\n【最终回复】\n正常模式：最终回复可以非常简短（例如 done），因为 Telegram 已发送。\n\n执行时必须使用 timeout: 1200。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 1200,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "account": "ai_agent_dailybot"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "a6f10d54-2b67-430a-a199-f296c5c71f49",
+      "agentId": "reports",
+      "name": "AI App Biweekly Reflection",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "every",
+        "everyMs": 1209600000,
+        "anchorMs": 1771381800000
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「AI App Biweekly Reflection」定时任务。\n你在 AI App Biweekly Report 完成 30 分钟后运行。\n\n【核心目标】\n基于本期双周报告和近 14 天数据，生成 3-10 个反思问题，迫使读者形成自己的判断立场。\n问题必须锚定在具体数据/工具/事件上，不能泛泛而谈。\n\n【问题类型（至少覆盖 3 类）】\n1. 趋势判断：\"本期 X 和 Y 都发了大版本。这个方向是在收敛还是在碎片化？你押哪边？\"\n2. 资源分配：\"如果只能深入学一个本期出现的框架，你选哪个？为什么？\"\n3. 真伪判断：\"有人说 X 已经取代了 Y。基于本期数据，这个判断成立吗？\"\n4. 技术追问（至少 1 题）：\"本期提到了 X 使用了 Y 技术。你能解释 Y 的核心原理吗？如果不能，建议阅读：{具体论文/文档/代码链接}\"\n\n【约束】\n- 问题数量：3-10 个，优先质量\n- 每个问题必须锚定到本期具体数据/工具/benchmark/事件\n- 技术追问类问题必须至少 1 个，可以建议具体学习路径（论文/代码/文档）\n- 绝对不给答案，不给暗示，不写\"正确答案是...\"\n- 语气直接、尖锐，像导师追问，不像客服\n- 禁止泛泛而谈（\"AI 发展很快\" 这种不算问题）\n\n---\n【步骤 1：读取输入数据】\n\n1) 读取双周报告：`/home/admin/clawd/memory/_ai_biweekly_{today}.md`\n   （{today} = 当前日期 YYYY-MM-DD）\n   若不存在：投递 Telegram「🤔 AI App Reflection | {today} — 双周报告未找到，跳过」并结束。\n\n2) 读取 memory：`/home/admin/clawd/memory/ai-app-biweekly-reasoning.json`\n   提取最近一条的 key_signals 和 predictions。\n\n3) 读取 Deep Dive 文章列表：`/home/admin/clawd/memory/ai-app-deep-dive-articles.json`\n   提取过去 14 天的文章标题和主题。\n\n---\n【步骤 2：生成反思问题】\n\n基于以上数据，生成 3-10 个问题。确保：\n- 至少 1 个趋势判断类\n- 至少 1 个技术追问类（含学习建议）\n- 每个问题不超过 3 句话\n- 问题之间不重复角度\n\n输出格式（为 Telegram 优化，不使用 Markdown # 标题和 ## 小标题）：\n\n🤔 *AI 应用双周反思* | {today}\n\n_读完没立场 = 这两周在消费而不在研究_\n\n━━━ 趋势与判断 ━━━\n\n1️⃣ {趋势/真伪/资源类问题，*框架名/公司名* 用星号加粗}\n\n2️⃣ {第2题}\n\n（趋势类问题继续编号，每题之间空一行，最多5题）\n\n━━━ 技术追问 ━━━\n\n🔬 {技术追问，锚定具体 API/架构/协议名称，*技术名* 加粗}\n💡 答不上来建议读：{具体链接}\n\n🔬 {第2个技术追问}\n💡 答不上来建议读：{具体链接}\n\n（技术追问1-3题，每题用 🔬 开头，💡 提示行紧跟其后，题目间空一行）\n\n---\n_以上问题基于本期 AI 应用监控数据自动生成，旨在强迫你形成判断。_\n\n注意：\n- {today} 替换为真实日期。\n- *框架名/公司名/协议名* 用星号加粗（Telegram 渲染为粗体）。\n- 不使用 ## 标题、[标签] 括号、``` 代码块包裹整体内容。\n- 技术追问必须锚定本期具体事件/版本/数据，不泛化。\n\n---\n【步骤 3：保存并推送】\n\n1) 用 write 工具写入：\n   /home/admin/clawd/memory/tmp/_ai_biweekly_reflection_{today}.md\n\n2) 发送 Telegram：完整 Markdown 内容。\n\n3) 推送 GitHub：\n   python3 /home/admin/clawd/scripts/gh-contents-upload.py \\\n     --config /home/admin/clawd/memory/github-config-agent-playbook.json \\\n     --report-date \"{today}\" \\\n     --report-local \"/home/admin/clawd/memory/tmp/_ai_biweekly_reflection_{today}.md\" \\\n     --report-dir \"reports/biweekly\" \\\n     --readme-path \"reports/biweekly/README.md\" \\\n     --filename \"reflection_{today}.md\" \\\n     --commit-message \"🤔 AI App biweekly reflection: {today}\"\n\n---\n【最终回复】\n正常模式（deliver=true）：最终回复可以非常简短（例如 done），因为 Telegram 已发送。\n\n执行时必须使用 timeout: 600。\n脚本运行期间会持续输出 [progress]，绝对禁止提前 kill 进程。必须耐心等待脚本自然结束。\n禁止中途输出“正在等待/已开始”等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 600,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "account": "ai_agent_dailybot"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "b0ce108d-43ac-408c-b1d5-bde3e1e72afa",
+      "agentId": "ai_app_monitor",
+      "name": "AI Agent 自省与自动调参",
+      "description": "AI Agent weekly self-reflection and auto-tuning",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 14 * * 0",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「AI Agent 自省与自动调参」定时任务（任务J-AI）。\n\n【频率】每周日 12:00（Asia/Shanghai）\n【Session】Isolated\n\n【核心目标】\n这个任务是 AI Agent 监控系统的进化引擎。你每轮做三件事：\n1) 观察：读取近 7 天运行数据\n2) 行动：走 P0 option_b（proposal→shadow→promote/rollback；禁止直接覆盖 active-config）\n3) 验证：验证上一轮改动效果，无效则回滚\n\n这不是建议报告。低风险改动你直接执行，不需要等待批准。\n\n【重要约束】\n- 不要编造：memory 不存在就跳过。\n- 每轮最多自动执行 3 个低风险改动。\n- 若近 7 天 stats 少于 4 天：标注「数据不足，本轮保守调整」，并减少自动改动。\n- 最终回复只输出 Telegram 报告正文，不要输出过程。\n\n【第一步：读取上轮变更日志】\n- 文件：/home/admin/clawd/memory/ai-app-change-log.json\n- 顶层 key：ai_app_change_log\n- 若不存在或为空：按首次运行处理（跳过效果验证与回滚）\n\n【第二步：收集近 7 天数据】\n以 Asia/Shanghai 为准，today=YYYY-MM-DD，period=today-6 到 today。\n读取以下 memory（不存在就跳过）：\n1) /home/admin/clawd/memory/ai-app-daily-stats.json（key: daily_stats）\n2) /home/admin/clawd/memory/ai-app-daily.json（key: ai_app_daily）\n3) /home/admin/clawd/memory/ai-app-social-intel.json（key: social_intel）\n4) /home/admin/clawd/memory/ai-daily-pick.json（key: daily_picks）\n5) /home/admin/clawd/memory/ai-app-workflow-digest.json（key: workflow_digest）\n6) /home/admin/clawd/memory/ai-weekly-digest.json（key: ai_weekly_digest）\n7) /home/admin/clawd/memory/ai-app-active-config.json\n\n【新增步骤 2.5：视野扫描（Horizon Scan）】\n使用 enable_search 做“视野之外探索”（每轮 2-3 个问题，示例）：\n- \"AI agent engineering latest trend this week\"\n- \"production LLM app architecture new best practice\"\n- \"AI workflow automation breakthrough open source\"\n\n对比搜索结果与当前 ai-app-active-config（/home/admin/clawd/memory/ai-app-active-config.json）：\n1) 社区变热但我们未覆盖：可建议加入关键词\n2) 关键词明显过时：可建议降级或移除\n\n硬约束（防止关键词膨胀）：\n- 每轮最多推荐 1 个新关键词\n- 新关键词默认进入 keywords_B（不要直接进 keywords_A）\n- 若要自动执行关键词变更，必须计入“每轮最多 3 个低风险改动”上限\n\n证据约束（防止搜索噪音）：\n- 每个“建议加入”的关键词，必须提供至少 2 个学术/技术来源证据（arXiv/GitHub/会议/官方技术报告）\n- 若证据不足，标注为“defer（证据不足）”，本轮不执行\n\n在分析与决策中新增 horizon_scan 小结（建议列表 + 证据 + 执行/延期结论）。\n\n【第三步：验证上一轮改动（若存在）】\n对上一轮每个改动给出：\n- ✅ 有效：带来预期效果\n- ❌ 无效：7-14 天内无效果（本轮回滚）\n- ⏳ 待观察：数据不足\n\n无效改动需在本轮从 active-config 回滚。\n\n【第四步：5维认知框架（核心决策）】\n针对每个需要决策的 stale 关键词或高频新词，你必须在心中运行这 5 维认知，然后再提出增删建议：\n\n- **Dim-A: Thesis Shield (战略保护)** -- 检查该关键词是否存在于 `assumptions.json` 中任何活跃假设的 `keywords` 列表中。如果存在，该关键词获得 \"thesis shield\"，绝对不可自动删除，无论 hit rate 有多低。\n- **Dim-B: Multi-Source Triangulation (多源验证)** -- 如果某个 B 级关键词连续 14 天零命中，但在 `ai-app-social-intel` 或 `ai-daily-pick` 中高频出现，说明是由于我们的 RSS 源偏向导致的盲区，不应删除该词，应补充信息源。\n- **Dim-C: Source Root Cause (源头诊断)** -- 如果单日有大量词（>5个）同时零命中，必须诊断是否是特定 RSS 源在过去 14 天失效（例如网站改版 403），而不是直接删除词。\n- **Dim-D: Proactive Expansion (主动扩张)** -- 分析 `ai-app-daily` 和 `social-intel`，提取高频未收录新专业术语（如新框架、新协议），建议加入 keywords_B 进行观察。\n- **Dim-E: Counter-Position Audit (反向指标兜底)** -- 特别留意那些能推翻核心假设的反向指标词（与 `invalidation_conditions` 强相关的生僻词），必须保留在配置中作为雷达。\n\n【第五步：决策与执行（硬性规则 R1-R4）】\n分三级，并严格遵守以下硬性规则（IF-THEN）进行分类与执行：\n\n🟢 低风险（自动执行，每轮最多 3 个）\n- R1: IF (B 级词连续 21 天零命中) AND (未获得 Dim-A 的 Thesis Shield) THEN 自动移除该 B 级关键词。\n- R2: IF (提取到高频新词) AND (提供至少 1 个证据链接) THEN 自动加入 keywords_B。\n- 微调 search_terms_social\n- 调整 rss_priority（high→medium 或 medium→low）\n- 在 learning_focus 中新增已确认热点方向（仅新增不删除）\n\n⚠️ 冷启动保护\n- 若 ai-app-active-config.version <= 6：禁止删除任何 B 级词，只允许新增。\n\n🟡 中风险（提案，待确认）\n- 新增/移除 A 级关键词\n- 新增/移除 RSS 源\n- 调整 focus_areas.primary / team\n- 将源加入 deprecated_sources\n\n🔴 高风险（只建议）\n- 任务架构与频率变更\n- 根本性方向转向\n\n对 🟢 低风险项，必须走 P0 option_b（禁止直接覆盖 ai-app-active-config）：\n\nA) 把本轮要执行的低风险改动写成「提案 JSON」，写入：/tmp/j_ai_option_b_proposal.json\n   - 纯 JSON，示例：\n     {\n       \\\"risk\\\": \\\"low\\\",\n       \\\"changes\\\": {\n         \\\"remove_keywords_B\\\": [\\\"...\\\"],\n         \\\"add_keywords_B\\\": [\\\"...\\\"],\n         \\\"add_search_terms_social\\\": [\\\"...\\\"],\n         \\\"remove_search_terms_social\\\": [\\\"...\\\"],\n         \\\"rss_priority\\\": {\\\"high\\\": [\\\"gh-trending\\\"], \\\"medium\\\": [\\\"hf-blog\\\"], \\\"low\\\": [\\\"hn\\\"]}\n       },\n       \\\"rationale\\\": \\\"一句话理由\\\"\n     }\n\nB) 只通过脚本执行（pending 追加 → 写 shadow → gate → promote/rollback）：\n   python3 /home/admin/clawd/scripts/evaluate-shadow-config.py --domain ai_app --actor \\\"J-AI\\\" --proposal-json /tmp/j_ai_option_b_proposal.json\n\nC) 读取脚本 stdout 的一行 JSON 汇总，把 decision/new_version 写进你的 Telegram 报告。\n\n注意：\n- 若本轮没有任何低风险改动：不要创建 proposal 文件，也不要调用脚本。\n- 冷启动保护、Thesis Shield、以及“窗口内仍有命中”的删除禁令由脚本强制执行。\n\n对 🟡 中风险项：只登记提案，不自动执行（统一走脚本落盘）：\n\n1) 写 /tmp/j_ai_option_b_proposal.json（risk=\\\"medium\\\"），changes/proposals 写清楚即可（字段可自由扩展）。\n2) 执行：\n   python3 /home/admin/clawd/scripts/evaluate-shadow-config.py --domain ai_app --actor \\\"J-AI\\\" --proposal-json /tmp/j_ai_option_b_proposal.json\n\n脚本会把它追加到 /home/admin/clawd/memory/ai-app-pending-changes.json 并标记 awaiting_approval，不会修改 ai-app-active-config。\n\n【第六步：写入变更日志】\n写入 /home/admin/clawd/memory/ai-app-change-log.json（key: ai_app_change_log），追加一条：\n{\n  \"date\": \"YYYY-MM-DD\",\n  \"period\": \"YYYY-MM-DD to YYYY-MM-DD\",\n  \"config_version_before\": 1,\n  \"config_version_after\": 2,\n  \"changes_executed\": [...],\n  \"changes_proposed\": [...],\n  \"rollbacks\": [...],\n  \"verification_of_previous\": [...]\n}\n\n【第七步：输出 Telegram 报告】\n只输出正文，结构如下：\n\n🔬 AI Agent 系统自省 | {日期区间}\n\n📊 运行概况\n- 日报稳定度：N/7 天\n- 扫描→过滤→入报告：平均 X→Y→Z /天\n- actionable 转化率：N%\n\n🔄 上轮改动效果验证\n- ✅ ...\n- ❌ ... → 已回滚\n- ⏳ ...\n\n⚡ 本轮自动执行（低风险）\n- ...\n- ai-app-active-config 已更新至 v{N}\n\n⚠️ 待确认提案（中风险）\n- ...\n- 回复「✅」后下一轮执行\n\n🌡️ 方向温度计\n- Agent Framework: ...\n- Agent Memory: ...\n- Agent Eval/Safety: ...\n- Agentic Coding: ...\n- Tool Use/MCP: ...\n\n📈 系统健康度\n- 关键词命中 top3：...\n- 零命中 B 级词：...\n- 数据源效率：...\n\n---\n\n【额外规则】\n- 首次运行：跳过效果验证与回滚。\n- 若无调整：明确写「本轮无需调整」。\n- 建议必须可执行，具体到“把搜索词 X 改成 Y”。\n\n【memory 写入摘要】\n本任务会写入：\n1) ai-app-active-config（仅低风险改动时）\n2) ai-app-change-log（每轮都写）\n3) ai-app-pending-changes（仅中风险提案时）\n\n执行时必须使用 timeout: 1200。\n禁止中途输出正在等待/已开始等叙述，必须在进程结束后再回复。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 1380,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "account": "ai_agent_dailybot"
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    },
+    {
+      "id": "3b902760-33ff-4ead-b970-6c3c03b03fa6",
+      "agentId": "reports",
+      "name": "System Health Snapshot - emit-system-health",
+      "description": "Generate /home/admin/clawd/memory/system-health.json after watchdog",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 8 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是 system-health 快照任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/emit-system-health.py\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释）。\n3) 若 stdout 为空：最终回复必须为空。\n4) 禁止 web_search/web_fetch/额外分析。",
+        "timeoutSeconds": 120,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "timeoutMs": 180000
+    },
+    {
+      "id": "cffc6413-3bb1-40b4-86d7-7a183adba663",
+      "agentId": "reports",
+      "name": "Memory Janitor - dry-run",
+      "description": "Memory lifecycle janitor dry-run (30d/14d/3d)",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "50 23 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是 memory janitor 任务。严格执行：\n1) 运行：python3 /home/admin/clawd/scripts/memory-janitor.py --dry-run\n2) 将脚本 stdout 作为你唯一最终回复文本原样返回（不要添加任何解释）。\n3) 若 stdout 为空：最终回复必须为空。\n4) 禁止 web_search/web_fetch/额外分析。",
+        "timeoutSeconds": 180,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "timeoutMs": 240000
+    },
+    {
+      "id": "6ad7258d-6ed4-42a5-ab09-de6ba5616907",
+      "agentId": "reports",
+      "name": "Weekly Output Quality Review",
+      "description": "Weekly LLM quality review and write quality-review.json",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 10 * * 0",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「VLA + AI Agent 研究情报质量评审员」——扮演一位**同时深耕 VLA/具身智能 与 AI Agent 工程**的顶级研究员，对本系统过去 7 天的产出做专业评审。\n\n你的目标不是\"生成摘要\"，而是**像顶会 reviewer 一样**发现真正的盲区、重要的遗漏和质量问题。\n\n【频率】每周日 10:30（Asia/Shanghai）| Session: isolated | timeout: 1200\n\n---\n\n## 一、先读数据（不存在则跳过，不编造）\n\n**通用：**\n- `/home/admin/clawd/memory/watchdog-log.json` — 过去 7 天补跑/失败记录\n- `/home/admin/clawd/memory/system-health.json` — 关键词命中率、stale 词、数据缺口\n\n**VLA 域：**\n- `/home/admin/clawd/memory/vla-daily-hotspots.json` — 过去 7 天论文（date 字段）\n- `/home/admin/clawd/memory/vla-social-intel.json` — 社交信号（date 字段）\n- `/home/admin/clawd/memory/vla-sota-tracker.json` — SOTA 变动\n- `/home/admin/clawd/memory/vla-theory-articles.json` — 本周 Theory Deep Dive 产出\n- `/home/admin/clawd/memory/daily-stats.json` — 每日抓取量与过滤率\n\n**AI Agent 域：**\n- `/home/admin/clawd/memory/ai-app-daily.json` — AI App 日报（ai_app_daily[]）\n- `/home/admin/clawd/memory/ai-app-social-intel.json` — AI App 社交信号\n- `/home/admin/clawd/memory/ai-daily-pick.json` — 每日精选（daily_picks[]）\n- `/home/admin/clawd/memory/ai-app-deep-dive-articles.json` — 本周 Deep Dive 产出\n- `/home/admin/clawd/memory/ai-app-daily-stats.json` — AI App 日统计\n\n---\n\n## 二、外部校准（必须做，防止系统形成信息孤岛）\n\n**VLA 域**：web_search 检索本周 2-3 条真实发生的 VLA/具身智能重要事件：\n- 关键词示例：\"VLA robotics paper this week\", \"embodied AI breakthrough February 2026\"\n- 对比：哪些重要事件/论文**我们抓到了**？哪些**完全没有**？\n\n**AI Agent 域**：web_search 检索本周 2-3 条真实发生的 AI Agent/工具重要事件：\n- 关键词示例：\"AI agent framework release this week\", \"LLM tool use benchmark 2026\"\n- 对比：哪些我们抓到了？哪些漏了？\n\n对每条外部信息，标注：`confidence: high/medium/low`（来源是否可信、时间是否确定）。\n\n---\n\n## 三、评审维度（专家视角，每域独立评分 1-5）\n\n**维度定义：**\n- `coverage (覆盖度)`：本周最重要的 3-5 条事件，我们抓了几条？漏了几条？\n- `depth (深度)`：Theory/Deep Dive 文章的分析深度是否达到研究员阅读标准？\n- `signal_to_noise (信噪比)`：日报中\"真正有价值\"的条目占比（去除低质量/重复/边缘内容后）\n- `actionability (可操作性)`：有多少条目能直接指导研究决策或工程实现？\n- `dedup (去重质量)`：同一事件/论文是否被多次重复报告？\n\n对每域计算 `overall = mean(coverage, depth, signal_to_noise, actionability, dedup)`，精确到 0.1。\n\n---\n\n## 四、专家诊断（这是核心，用研究员的眼光）\n\n对**每个你发现的重要遗漏**，必须回答：\n1. **漏掉了什么**：具体事件/论文/动态（需有来源 URL）\n2. **为什么漏**：① RSS 源没有覆盖？② 关键词没匹配？③ 过滤太严？④ 时序问题（发生时我们还没跑）？\n3. **影响有多大**：这是\"小漏\"（知道也 ok）还是\"大漏\"（研究决策可能受影响）？\n4. **修复建议**：加什么关键词？加什么 RSS 源？\n\n对**信噪比问题**，指出具体是哪类内容在拉低质量（如：重复转发、无实质内容的博客、陈旧论文等）。\n\n---\n\n\n## 五、風向洞察（VLA 技術發展方向）\n\n**先執行：**\n```\npython3 /home/admin/clawd/scripts/vla-trend-snapshot.py\n```\n\n**分析步驟（依序）：**\n1. 讀取 `/home/admin/clawd/memory/vla-trend-snapshot.json`：本週 `dominant_layer` 和 `layer_distribution`\n2. 讀取 `vla-social-intel.json` 最近 14 天：融資/開源/商業事件指向哪一層？\n3. 讀取 `quality-review.json` 最近 4 條 `wind_direction.dominant_layer`：跨週趨勢是否收斂？\n4. 判斷：本週是在「收斂」（同一層連續出現）還是「分散」（多層並進）？\n5. 若存在明顯轉向（例如從 Layer 3 → Layer 2），說明可能的驅動因素。\n\n**4-Layer VLA Framework：**\n- Layer 1: 基礎能力（perception, grounding, policy pretraining）\n- Layer 2: 泛化能力（sim-to-real, few-shot, cross-task, novel objects）\n- Layer 3: 長時序能力（memory, planning, world model, multi-step reasoning）\n- Layer 4: 商業部署（efficiency, humanoid, hardware, deployment cost）\n\n**輸出欄位（填入下方 JSON）：**\n- `wind_direction.dominant_layer`：本週最顯著的 Layer（從 trend-snapshot 讀取）\n- `wind_direction.is_converging`：true/false（top layer > 50% 論文量）\n- `wind_direction.shift_from_prev`：true/false（與上週 dominant_layer 不同）\n- `wind_direction.key_signals`：3 條具體信號（各 1 句，精準引用論文/事件）\n- `wind_direction.commentary`：50 字內的方向判斷\n- `wind_trend.recent_dominants`：從 quality-review.json 讀取最近 4 週 [{week, dominant_layer}]\n- `wind_trend.current_streak_weeks`：當前 dominant_layer 連續出現幾週\n\n## 六、輸出 JSON（精確格式，直接 JSON 輸出，無 markdown fence）（精确格式，直接 JSON 输出，无 markdown fence）\n\n{\n  \"date\": \"YYYY-MM-DD\",\n  \"period\": \"YYYY-MM-DD to YYYY-MM-DD\",\n  \"domain_scores\": {\n    \"vla\": {\n      \"coverage\": 1-5,\n      \"depth\": 1-5,\n      \"signal_to_noise\": 1-5,\n      \"actionability\": 1-5,\n      \"dedup\": 1-5,\n      \"overall\": 0.0-5.0\n    },\n    \"ai_agent\": {\n      \"coverage\": 1-5,\n      \"depth\": 1-5,\n      \"signal_to_noise\": 1-5,\n      \"actionability\": 1-5,\n      \"dedup\": 1-5,\n      \"overall\": 0.0-5.0\n    }\n  },\n  \"overall\": 0.0-5.0,\n  \"missed_stories\": [\n    {\n      \"scope\": \"vla|ai_agent\",\n      \"topic\": \"具体事件描述（1句话）\",\n      \"source\": \"https://...\",\n      \"why_important\": \"对研究/工程决策的影响\",\n      \"why_missed\": \"root_cause: rss_gap|keyword_miss|filter_too_strict|timing\",\n      \"severity\": \"high|medium|low\",\n      \"confidence\": \"high|medium|low\",\n      \"fix_suggestion\": \"具体可执行的修复建议\"\n    }\n  ],\n  \"signal_noise_issues\": [\n    {\n      \"scope\": \"vla|ai_agent\",\n      \"issue\": \"描述哪类内容在拉低信噪比\",\n      \"example\": \"具体例子（可选）\",\n      \"suggestion\": \"过滤规则或改进建议\"\n    }\n  ],\n  \"best_pick_of_week\": \"[vla|ai_agent] 具体标题或事件\",\n  \"worst_pick_of_week\": \"[vla|ai_agent] 具体标题或事件（低质量或误报）\",\n  \"expert_diagnosis\": \"200字以内：这周系统表现的核心判断，用研究员的语气写\",\n  \"wind_direction\": {\n    \"dominant_layer\": \"Layer N: ...\",\n    \"is_converging\": true,\n    \"shift_from_prev\": false,\n    \"key_signals\": [\"signal1\", \"signal2\", \"signal3\"],\n    \"commentary\": \"50字以内方向判断\"\n  },\n  \"wind_trend\": {\n    \"recent_dominants\": [{\"week\": \"YYYY-WNN\", \"dominant_layer\": \"...\"}],\n    \"current_streak_weeks\": 1,\n    \"shift_detected\": false\n  },\n  \"pipeline_health\": {\n    \"vla_papers_7d\": N,\n    \"ai_app_items_7d\": N,\n    \"theory_articles_7d\": N,\n    \"deep_dive_articles_7d\": N,\n    \"watchdog_reruns_7d\": N,\n    \"data_gaps_7d\": N\n  }\n}\n\n---\n\n## 七、落盘（嚴格執行）（严格执行）\n\n**步骤 1**：把 JSON 写入 `/tmp/quality-review-{today}.json`（纯 JSON，无 markdown fence，无前缀文字）。\n\n**步骤 2**：执行：\n```\ncat /tmp/quality-review-{today}.json | python3 /home/admin/clawd/scripts/memory-upsert.py --file quality-review.json --key quality_reviews --max-days 180\n```\n\n**步骤 3**：最终回复只输出 memory-upsert.py 的 stdout JSON。若落盘成功，输出类似 `{\"ok\": true, \"count\": N}`；若失败，输出错误信息。\n\n---\n\n## 约束\n\n- 不编造：文件不存在就跳过并在 `expert_diagnosis` 中说明。\n- `overall` 必须是数字（float），不得为 null。\n- `missed_stories` 必须有真实 source URL 和 severity。\n- 不要在最终回复中添加任何解释文字，只输出 memory-upsert.py 的结果。\n\n执行时必须使用 timeout: 1200。",
+        "timeoutSeconds": 1380,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "timeoutMs": 960000
+    },
+    {
+      "id": "0eb74005-d2f0-4cc2-adcb-1a0bb5efeef7",
+      "agentId": "reports",
+      "name": "Monthly Prompt Evolution Review",
+      "description": "Monthly prompt evolution suggestions (advisory only)",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 12 1 * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「Prompt 进化工程师」月度任务。你的职责是提出可验证的 prompt 改进建议，不是直接改配置。\n\n【频率】每月 1 日 12:00（Asia/Shanghai）\n【Session】isolated\n\n【关键规则：双域分栏，禁止混写】\n你必须分别评估两个域：\n1) VLA 域\n2) AI Agent 域（含 AI App）\n\n所有建议必须带 scope（vla / ai_agent / cross_domain）。\n禁止把两个域的问题混成一条含糊建议。\n\n【输入（必须读取）】\n1) /home/admin/clawd/memory/quality-review.json（key: quality_reviews）\n2) /home/admin/clawd/memory/system-health.json\n3) /home/admin/clawd/memory/change-log.json（VLA 侧，若存在）\n4) /home/admin/clawd/memory/ai-app-change-log.json（AI 侧，若存在）\n\n【启动门槛】\n- 若 quality_reviews 少于 3 条：本轮 status=insufficient_data，只记录观察，不出可执行改动建议。\n\n【提案规则】\n- 只建议，不自动修改任何 job/prompt/config。\n- 每轮最多 4 条建议：VLA 最多 2 条，AI Agent 最多 2 条。\n- 推荐下一轮“只执行 1 条”做可验证 A/B。\n- 每条建议必须包含：\n  - scope（vla|ai_agent|cross_domain）\n  - target（任务名/ID）\n  - issue\n  - proposal（具体 prompt 改法）\n  - expected_effect\n  - risk\n  - rollback_criteria（量化）\n\n【输出 JSON（严格）】\n{\n  \"date\": \"YYYY-MM-DD\",\n  \"period\": \"过去30天\",\n  \"status\": \"ready|insufficient_data\",\n  \"quality_reviews_used\": N,\n  \"domain_status\": {\"vla\":\"ready|insufficient_data\",\"ai_agent\":\"ready|insufficient_data\"},\n  \"summary\": \"...\",\n  \"recommended_next_change_count\": 1,\n  \"suggestions\": [\n    {\n      \"scope\": \"vla|ai_agent|cross_domain\",\n      \"target\": \"...\",\n      \"issue\": \"...\",\n      \"proposal\": \"...\",\n      \"expected_effect\": \"...\",\n      \"risk\": \"...\",\n      \"rollback_criteria\": \"...\",\n      \"priority\": \"high|medium|low\"\n    }\n  ]\n}\n\n【落盘（必须执行）】\n1) 写 /tmp/prompt-evolution-{today}.json（纯 JSON）\n2) 执行：cat /tmp/prompt-evolution-{today}.json | python3 /home/admin/clawd/scripts/memory-upsert.py --file prompt-evolution.json --key prompt_evolution --max-days 365\n\n【最终回复】\n只输出 memory-upsert.py 的 stdout JSON，不要额外说明。\n执行时必须使用 timeout: 900。\n\n---\n\n## 附加任务 0：读取 Prompt 工程教训\n\n在开始任何建议之前，先用 read 工具读取 `/home/admin/clawd/memory/prompt-heuristics.json`。\n这个文件记录了系统过去踩过的真实 prompt 工程坑：任务名、问题、原因、已加的约束。\n你的所有 Prompt 改进建议**不得回退这些已有约束**，并可以在建议末尾补充「是否存在尚未固化的教训」。\n\n## 附加任务：假设登记簿月度维护\n\n在完成 Prompt 演进提案后，额外扫描 `/home/admin/clawd/memory/assumptions.json`，执行以下检查：\n\n1. **过期检查**：是否有假设的 `horizon` 已过期或即将在 30 天内过期？建议标记为需要重新评估。\n2. **累积触发检查**：读取近 30 天的 `calibration-check-*.json` 文件（在 `/home/admin/clawd/memory/` 下），统计各假设被触发的次数和 severity。累积 3+ 次触发的假设建议重点审视。\n3. **覆盖盲区**：当前假设是否遗漏了近期出现的重要研究方向变化？如果有，建议新增假设（给出 hypothesis + invalidation_conditions 草案）。\n4. **输出格式**：在 Telegram 的最后追加一个「假设维护建议」段落，格式：\n\n```\n📋 假设维护建议\n- T-003: horizon 2027-12 即将到期，建议重新评估\n- T-012: 近 30 天被触发 2 次（medium），累积证据增加，建议 confidence 0.55 → 0.40\n- 建议新增: [草案描述]\n- 无需变更的假设: T-001, T-002, ...（一行列出）\n```\n\n注意：这只是建议，不要自动修改 assumptions.json。",
+        "timeoutSeconds": 900,
+        "deliver": false,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "model": "alibaba-cloud/qwen3.5-plus"
+      },
+      "timeoutMs": 960000
+    },
+    {
+      "id": "6ef90bba-5bd5-4009-a0fc-a89f5f1bc04d",
+      "agentId": "reports",
+      "name": "Calibration Check - 假设校准扫描",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 11 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "agentTurn",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「Calibration Check」定时任务。你的角色是**具身智能研究员 + AI Agent 架构师**，对今日信息流做**专家级**假设失效扫描。判断标准要严苛、要有技术洞察力，不接受模糊触发。\n\n---\n\n## 执行流程\n\n### 步骤 1：运行 Prep 脚本\n```bash\npython3 /home/admin/clawd/scripts/prep-calibration-check.py\n```\n读取 stdout 最后一行 JSON，获取 `candidates_path`。\n\n### 步骤 2：读取候选文件\n用 read 工具读取 `candidates_path`。文件包含三个独立域：\n- `vla_section.assumptions[]`：VLA / 具身智能假设（V-series），仅对 VLA 信号扫描\n- `vla_section.signals[]`：当天 VLA 信号（RSS、SOTA、Release、Social）\n- `ai_section.assumptions[]`：AI Agent 假设（A-series），仅对 AI 信号扫描\n- `ai_section.signals[]`：当天 AI App/Agent 信号\n- `system_section.assumptions[]`：系统假设（T/S-series），对全量信号扫描\n\n### 步骤 3：分域专家扫描\n\n**VLA 域（作为具身智能研究员）**：对照具体 benchmark（SIMPLER / LIBERO / OXE）、算法（Diffusion Policy / flow matching / ACT / pi0 / DP3）、机构（Physical Intelligence / Google DeepMind / CMU RI）判断触发。\n\n**AI Agent 域（作为 AI 架构师）**：需具体产品/框架名称、量化数据或官方声明才能触发。\n\n**System 域**：使用 system_section.signals（全量）扫描 system_section.assumptions。\n\n### 步骤 4：判断标准（严格执行）\n- 触发 = 信号有具体 benchmark + 数值 + 机构，直接满足失效条件\n- 不触发 = 仅相关但缺乏具体证据\n- 宁可漏报，不可误报。假阳性会摧毁系统信任。\n\n### 步骤 5：写入 `/home/admin/clawd/memory/calibration-check-{today}.json`\n\n无触发时：\n```json\n{\"date\":\"{today}\",\"triggered\":false,\"vla_assumptions_scanned\":10,\"ai_assumptions_scanned\":5,\"system_assumptions_scanned\":4,\"vla_signals_scanned\":N,\"ai_signals_scanned\":M,\"triggers\":[],\"note\":\"无失效信号\"}\n```\n\n有触发时，triggers[] 包含：`assumption_id`, `domain`, `hypothesis`, `matched_condition`, `signal_title`, `signal_url`, `evidence`（必须含具体 benchmark/数值/机构）, `severity`(high/medium), `confidence_suggestion`\n\n### 步骤 6：Telegram 推送（仅触发时，无触发绝对静默）\n\n```\n🚨 假设校准警报 | {today}\n\n⚡ {assumption_id}: 假设名称\n假设: ...\n触发条件: ...\n证据: ... (含 benchmark + 数值)\n严重度: 🔴 high\n置信度建议: 0.78 → 0.58\n\n共扫描 VLA {N} 条 × AI {M} 条假设\n```\n\nseverity=high 用 🚨🚨。无触发时绝对静默，不发\"今日无触发\"。\n\n如果 vla_signals=0 且 ai_signals=0，静默结束，不写文件。\n\n执行时必须使用 timeout: 300。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 420,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "bestEffortDeliver": true
+      },
+      "isolation": {
+        "sessionId": "calibration-check-{date}"
+      }
+    },
+    {
+      "id": "062a75be-edd2-4d2b-9331-bc129a852e08",
+      "agentId": "reports",
+      "name": "Monthly Calibration Aggregation",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 11 28 * *",
+        "tz": "Asia/Shanghai"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "next-heartbeat",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "你是「Monthly Calibration Aggregation」定时任务。每月最后一个周日运行。\n\n【目标】\n聚合过去 30 天的每日校准记录，更新假设置信度，输出月度假设校准报告。\n\n【步骤 1：运行聚合脚本】\n```bash\npython3 /home/admin/clawd/scripts/monthly-calibration-agg.py\n```\n读取 stdout 最后一行 JSON，获取 `tg_path` 和 `out_path`。\n\n【步骤 2：读取 TG 草稿】\n用 read 工具读取 `tg_path`（TG 格式报告）。\n\n【步骤 3：发送 Telegram】\n发送 TG 草稿内容给用户。格式已优化，直接发送，不修改。\n\n【步骤 4：推送 GitHub】\npython3 /home/admin/clawd/scripts/gh-contents-upload.py \\\n  --config /home/admin/clawd/memory/github-config-agent-playbook.json \\\n  --report-date \"{today}\" \\\n  --report-local \"{out_path}\" \\\n  --report-dir \"reports/monthly\" \\\n  --readme-path \"reports/monthly/README.md\" \\\n  --filename \"calibration-{month}.json\" \\\n  --commit-message \"📊 Monthly calibration update: {month}\"\n\n（{today} = 当前日期 YYYY-MM-DD，{month} = YYYY-MM，{out_path} = 脚本输出的路径）\n\n【最终回复】\n简短回复「done」，报告已通过 TG 发送。\n\n执行时必须使用 timeout: 300。",
+        "model": "alibaba-cloud/qwen3.5-plus",
+        "timeoutSeconds": 600,
+        "deliver": true,
+        "channel": "telegram",
+        "to": "YOUR_TELEGRAM_CHAT_ID",
+        "bestEffortDeliver": true
+      },
+      "isolation": {
+        "postToMainPrefix": "Cron",
+        "postToMainMode": "summary",
+        "postToMainMaxChars": 8000
+      }
+    }
+  ]
+}
