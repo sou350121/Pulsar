@@ -1,0 +1,7 @@
+{
+  "tag": "github-config",
+  "repo": "sou350121/VLA-Handbook",
+  "api_base": "https://api.github.com",
+  "token_env": "GITHUB_TOKEN"
+}
+
