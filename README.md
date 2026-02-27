@@ -1,72 +1,46 @@
-# Pulsar · 照見
-
-**A self-evolving domain intelligence organism.**  
-Not a scraper. Not a news aggregator. A system that watches, rates, reasons — and gets sharper every month.
+# Pulsar · 照见: Automated Domain Intelligence Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Lang](https://img.shields.io/badge/README-中文-red)](README_CN.md)
 
----
+Pulsar is a server-side domain intelligence pipeline that continuously monitors AI/VLA research ecosystems, distills raw signals into structured knowledge assets through multi-stage LLM processing, and improves its own judgment accuracy through monthly calibration.
 
-## The Core Idea
-
-Most monitoring tools collect. Pulsar *evolves*.
-
-Every two weeks, it reviews its own predictions — grading each ✅ verified, ❌ wrong, ⏳ pending.  
-Every month, it recalibrates 19 tracked hypotheses based on what actually happened.  
-Underperforming assumptions get flagged, watch-listed, and injected with extra signal next cycle.  
-
-**The system knows what it doesn't know — and corrects itself.**
+Open-sourced in 2026 by the 照见 (Pulsar) system.
 
 ---
 
-## Biomimetic Architecture
+## Core Problems It Solves
 
-Pulsar is modeled on a cognitive organism, not a data pipeline:
+Engineers building or maintaining domain intelligence systems face six recurring problems:
 
-| Layer | Biological Analog | Pulsar Component |
-|-------|------------------|-----------------|
-| **Perception** | Sensory organs | arXiv RSS · GitHub releases · community feeds |
-| **Filtering** | Thalamic gate | Rating engine (⚡/🔧/📖/❌) — cuts noise before LLM cost |
-| **Reasoning** | Cortical processing | Three-stage LLM: `prep → agent → post` |
-| **Memory** | Hippocampal encoding | Structured Markdown → GitHub (VLA-Handbook · Agent-Playbook) |
-| **Metacognition** | Prefrontal reflection | Biweekly prediction reviews · monthly calibration |
-| **Immune system** | Autoimmune response | Watchdog: 15 health checks, 7 self-healing recovery paths |
+1. **Signal overload** — arXiv publishes 30+ VLA papers daily; without a rating mechanism it's pure noise, and reading everything is impossible
+2. **Opaque reasoning** — AI summaries tell you "this is important" without explaining why; you can't trust or reproduce the judgment
+3. **Knowledge doesn't accumulate** — papers read today, community debates from last week — all lost in inboxes and message streams
+4. **Unreliable pipelines** — cron jobs fail silently with no alert; by the time you notice, a week of data is missing
+5. **Unverifiable judgments** — "AI trend predictions" have no historical accuracy record; there's no way to evaluate the source's credibility
+6. **Static assumptions** — domain beliefs never update as new evidence arrives, drifting further from reality over time
 
 ---
 
-## The Evolution Loop
+## Six Core Mechanisms
 
-```
-Signal intake ─► Rating ─► LLM reasoning ─► Knowledge output
-                                                    │
-                                          Biweekly predictions
-                                          (✅/❌/⏳ grading)
-                                                    │
-                                          Monthly calibration
-                                          19 hypotheses updated
-                                                    │
-                                          Watch-list: struggling
-                                          assumptions boosted
-                                                    │
-                                          ──────────┘ (feeds back into signal intake)
-```
+**1. Rate first — cut noise before LLM cost**  
+A four-tier rating engine (⚡/🔧/📖/❌) evaluates every paper before it enters LLM reasoning. 30 raw inputs → 3–5 selected for deep analysis, saving 80%+ inference cost. Rating criteria: topic relevance × institution weight × engineering applicability.
 
-The system doesn't just run — it learns which of its own beliefs need more evidence, then hunts for it.
+**2. Three-stage observable reasoning chain**  
+`prep (structured collection) → agent (LLM reasoning) → post (semantic validation + structured output)`. Each stage has defined I/O formats and intermediate artifacts written to disk. When something breaks, you see exactly which stage failed.
 
----
+**3. Structured knowledge written to Git**  
+All outputs are Markdown, pushed to public repositories ([VLA-Handbook](https://github.com/sou350121/VLA-Handbook) / [Agent-Playbook](https://github.com/sou350121/Agent-Playbook)) via the GitHub Contents API. Full commit history, full-text grep-able, no SaaS dependency.
 
-## Standout Numbers
+**4. Watchdog self-healing system**  
+`daily-watchdog.py` monitors 15 health signals. On failure, it auto-triggers re-runs in DAG order (rss → daily → social), covering 7 failure categories without human intervention. Run logs are persisted to `memory/watchdog-log.json` — kills, recoveries, and backfills all recorded.
 
-| Metric | Value |
-|--------|-------|
-| Scheduled jobs | **33** fully automated cron jobs |
-| Pipeline scripts | **55** across two research domains |
-| Tracked hypotheses | **19** with monthly confidence auto-updates |
-| Watchdog checks | **15** health signals, **7** auto-recovery paths |
-| End-to-end latency | **< 2 hours**: arXiv RSS → rated papers → TG notification |
-| Hardware requirement | **2 GB RAM** — runs on a minimal VPS |
-| Output repositories | **2** GitHub repos, daily commits, full history |
+**5. Biweekly predictions with ✅/❌ accountability**  
+Every biweekly reasoning report includes verifiable predictions. The next report must grade them: ✅ confirmed / ❌ wrong / ⏳ pending. Accuracy history is on record. Source credibility is measured, not assumed.
+
+**6. Monthly hypothesis calibration**  
+The system maintains 19 domain hypotheses, each with a confidence score (0–1). Monthly, it computes 30-day trigger rates and conservatively updates confidence (max ±0.08/month). Hypotheses with declining confidence enter a watch-list — the system automatically injects more signal to investigate them in the next cycle.
 
 ---
 
@@ -74,20 +48,19 @@ The system doesn't just run — it learns which of its own beliefs need more evi
 
 Each tool has a real sweet spot. Here's an honest breakdown:
 
-**Pick Feedly AI if** you want zero setup, a polished mobile experience, team collaboration, and access to 1M+ curated sources — it's a mature product that just works.  
-**Pick ResearchRabbit if** you're doing academic literature reviews — its visual citation graph and 270M+ paper index are genuinely hard to beat for systematic discovery.  
-**Pick MineContext if** you want to capture *your own* reading and work history — it's local-first, private, and doesn't require you to define a domain upfront.  
-**Pick Pulsar if** you need a server-side pipeline that autonomously generates knowledge assets, self-heals when it breaks, and improves its own accuracy over time.
+**Pick Feedly AI** if you want zero setup, a polished mobile experience, team collaboration, and 1M+ curated sources — it's a mature product that just works.  
+**Pick ResearchRabbit** if you're doing academic literature reviews — visual citation graphs and 270M+ papers are genuinely hard to beat for systematic discovery.  
+**Pick MineContext** if you want to capture *your own* reading and work context — local-first, private, no domain definition needed upfront.  
+**Pick Pulsar** if you need a server-side pipeline that runs autonomously, generates structured knowledge assets, self-heals on failure, and self-calibrates monthly.
 
 | Dimension | Feedly AI | ResearchRabbit | MineContext | **Pulsar** |
 |-----------|-----------|---------------|-------------|------------|
 | **Best at** | Team intel feeds, mobile | Academic citation mapping | Personal context capture | Autonomous domain pipeline |
 | **Hosting** | ☁️ SaaS only | ☁️ SaaS only | ✅ Local / OSS | ✅ Self-hosted / OSS |
-| **Cost** | $1,600–3,200 / month | Closed pricing | Free | Free |
-| **Setup effort** | ✅ Zero — works immediately | ✅ Zero | ✅ Desktop install | ⚠️ ~1 hour config |
-| **Source coverage** | ✅ 1M+ curated sources | ✅ 270M academic papers | Your own files/screens | arXiv · GitHub · RSS · community |
+| **Cost** | \$1,600–3,200 / month | Closed pricing | Free | Free |
+| **Setup effort** | ✅ Zero | ✅ Zero | ✅ Desktop install | ⚠️ ~1 hour |
 | **Signal rating** | ❌ | ❌ | ❌ | ✅ ⚡/🔧/📖/❌ before LLM |
-| **LLM reasoning** | ⚠️ AI summaries | ❌ | ⚠️ Single-pass VLM | ✅ 3-stage pipeline |
+| **Reasoning transparency** | ❌ Black-box summaries | ❌ | ❌ | ✅ 3-stage observable chain |
 | **Self-healing** | ❌ | ❌ | ❌ | ✅ 7 auto-recovery paths |
 | **Belief calibration** | ❌ | ❌ | ❌ | ✅ 19 hypotheses, monthly |
 | **Prediction tracking** | ❌ | ❌ | ❌ | ✅ ✅/❌ every 2 weeks |
@@ -96,28 +69,31 @@ Each tool has a real sweet spot. Here's an honest breakdown:
 
 ---
 
-## Pipeline Overview
+## Biomimetic Architecture
 
-```
-arXiv RSS ──────────────────►┐
-GitHub releases ─────────────►│  Rating (⚡/🔧/📖/❌)
-Community discussions ────────►│       │
-Social signals ──────────────►┘       │
-                                       ▼
-                              Three-stage LLM pipeline
-                              (prep → agent → post)
-                                       │
-                    ┌──────────────────┼───────────────────┐
-                    ▼                  ▼                   ▼
-             Daily hotspots    Theory deep dives    Calibration check
-                    │                  │                   │
-                    └──────────────────┴───────────────────┘
-                                       │
-                              ┌────────┴────────┐
-                              ▼                 ▼
-                         VLA-Handbook    Agent-Playbook
-                         Telegram channels (2 domains)
-```
+Pulsar's internal layers follow a cognitive organism model, not a traditional data pipeline:
+
+| Layer | Biological Analog | Pulsar Component |
+|-------|------------------|-----------------|
+| **Perception** | Sensory organs | arXiv RSS · GitHub releases · community feeds |
+| **Filtering** | Thalamic gate | Rating engine (⚡/🔧/📖/❌) — noise cut before LLM |
+| **Reasoning** | Cortical processing | Three-stage LLM: prep → agent → post |
+| **Memory** | Hippocampal encoding | Structured Markdown → GitHub |
+| **Metacognition** | Prefrontal reflection | Biweekly prediction reviews · monthly calibration |
+| **Immune system** | Autoimmune response | Watchdog: 15 health checks, 7 self-healing paths |
+
+---
+
+## Key Numbers
+
+| Metric | Value |
+|--------|-------|
+| Scheduled jobs | **33** fully automated cron jobs |
+| Pipeline scripts | **55** across two research domains |
+| Tracked hypotheses | **19** with monthly confidence auto-updates |
+| Watchdog checks | **15** health signals, **7** auto-recovery paths |
+| End-to-end latency | **< 2 hours**: RSS → rated papers → TG notification |
+| Hardware requirement | **2 GB RAM** — minimal VPS |
 
 ---
 
@@ -125,13 +101,13 @@ Social signals ──────────────►┘       │
 
 **Requirements**: Node 22+ · Python 3.9+ · [Moltbot](https://molt.bot) · DashScope API Key · GitHub Token · Telegram Bot Token
 
-```bash
+\`\`\`bash
 git clone https://github.com/sou350121/Pulsar-KenVersion
 cp config/.env.example .env          # fill in your keys
 moltbot gateway run --bind loopback --port 18789 --force
 moltbot cron import config/jobs.template.json
 python3 scripts/vla-rss-collect.py   # test one pipeline
-```
+\`\`\`
 
 Full setup: [AGENTS.md](AGENTS.md)
 
