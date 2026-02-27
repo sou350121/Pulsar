@@ -70,17 +70,22 @@ The system doesn't just run — it learns which of its own beliefs need more evi
 
 ---
 
-## How It Beats Generic Monitoring
+## How Pulsar Compares
 
-| Dimension | Typical monitor / aggregator | Pulsar |
-|-----------|------------------------------|--------|
-| Failure recovery | Manual restart | Watchdog auto-recovers 7 failure modes |
-| Knowledge persistence | Feed / email inbox | Structured Markdown, Git history, grep-able |
-| Belief updating | Static assumptions | 19 hypotheses, confidence auto-adjusts monthly |
-| Prediction accountability | None | ✅/❌ retroactive grading every 2 weeks |
-| Signal prioritization | Recency-only | ⚡/🔧/📖/❌ relevance rating before LLM cost |
-| Resource footprint | Cloud-scale infra | Runs on 2 GB RAM |
-| Domain depth | Broad / shallow | Two deep domains: VLA robotics + AI app ecosystem |
+| Dimension | Feedly AI | ResearchRabbit | MineContext | **Pulsar** |
+|-----------|-----------|---------------|-------------|------------|
+| **Purpose** | Market/threat intel feeds | Paper citation discovery | Personal desktop context | Domain intelligence pipeline |
+| **Hosting** | ☁️ SaaS only | ☁️ SaaS only | ✅ Local / OSS | ✅ Self-hosted / OSS |
+| **Cost** | $1,600–3,200 / month | Closed pricing | Free | Free |
+| **Signal rating** | ❌ | ❌ | ❌ | ✅ ⚡/🔧/📖/❌ before LLM |
+| **LLM reasoning** | ⚠️ Summaries only | ❌ | ⚠️ Single-pass | ✅ 3-stage pipeline |
+| **Self-healing** | ❌ | ❌ | ❌ | ✅ 7 auto-recovery paths |
+| **Belief calibration** | ❌ | ❌ | ❌ | ✅ 19 hypotheses, monthly |
+| **Prediction tracking** | ❌ | ❌ | ❌ | ✅ ✅/❌ every 2 weeks |
+| **Knowledge output** | Feed / inbox | Graph view | Local summaries | Structured Markdown → Git |
+| **RAM footprint** | N/A (cloud) | N/A (cloud) | Desktop app | **2 GB VPS** |
+
+> Feedly AI costs more per month than most engineers earn in a week — and still can't tell you if its own assessments were right.
 
 ---
 
