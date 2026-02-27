@@ -42,8 +42,8 @@ Pulsar is a server-side domain intelligence pipeline. **You define the domain; P
 - **Three-stage observable reasoning chain → transparent and reproducible**: `prep → agent → post`, each stage with defined I/O formats and intermediate artifacts written to disk; when something breaks, you see exactly which stage failed
 - **Structured knowledge written to Git → knowledge accumulates permanently**: All outputs are Markdown pushed to GitHub via the Contents API; full commit history, full-text grep, no SaaS dependency
 - **Watchdog self-healing → pipelines recover automatically**: 15 health checks, 7 failure categories handled automatically in DAG order, full run logs persisted to `memory/watchdog-log.json`
-- **Biweekly predictions + ✅/❌ tracking → accountability on record**: Every reasoning report includes verifiable predictions; the next report must grade them; accuracy history is tracked, not assumed
-- **Monthly hypothesis calibration → beliefs update with evidence**: Domain hypotheses each with confidence scores; monthly trigger-rate analysis conservatively updates confidence; declining hypotheses automatically receive more signal in the next cycle
+- **Biweekly predictions + mandatory ✅/❌ grading → forecast accuracy on record**: Every reasoning report must include verifiable predictions with explicit verification conditions. The *next* report grades each one ✅/❌. Accuracy history accumulates permanently in Git — the system cannot quietly revise past claims
+- **Self-evolving belief system → the pipeline finds and fixes its own blind spots**: The system maintains explicit domain hypotheses × confidence scores (0–1). Every month it identifies which beliefs are confirmed by data and which are drifting. Drifting hypotheses enter a watch-list and automatically receive boosted signal injection the next cycle — the system actively investigates what it might be wrong about, with no human prompting. Together with biweekly ✅/❌ grading, this forms a closed self-correction loop
 
 ---
 
@@ -395,9 +395,13 @@ This makes the system's judgment accuracy traceable and measurable, not just cla
 
 ---
 
-### 6. Monthly Hypothesis Calibration
+### 6. Self-Evolving Belief System
 
-The system maintains `memory/assumptions.json` — domain hypotheses, each with a confidence score (0–1):
+This is Pulsar's most distinctive capability — and what separates it from static pipelines.
+
+Most intelligence systems collect, summarize, and forget. Pulsar maintains an **explicit model of its own beliefs**, tracks their accuracy over time, and actively revises them based on evidence.
+
+The system tracks domain hypotheses in `memory/assumptions.json`, each with a confidence score (0–1):
 
 ```json
 {
@@ -408,12 +412,47 @@ The system maintains `memory/assumptions.json` — domain hypotheses, each with 
 }
 ```
 
-On the 28th of each month, `monthly-calibration-agg.py` automatically:
-1. Computes 30-day trigger rates for each hypothesis
-2. Conservatively updates confidence scores (max ±0.08/month)
-3. Writes hypotheses with declining confidence to `watch-list.json`
+**The closed self-correction loop:**
 
-The watch-list feeds back into `prep-calibration-check.py`, which injects extra signals for watched hypotheses — **the system proactively investigates its own blind spots** without human intervention.
+```
+  Daily signals
+       │
+       ▼
+  Calibration check ─── each signal matched against hypotheses
+       │
+       │  (monthly, on the 28th)
+       ▼
+  Trigger rate computed per hypothesis
+       │
+       ├── confirmed by data ──▶ confidence ▲  (max +0.08)
+       │
+       └── drifting / low evidence ──▶ confidence ▼
+                                            │
+                                            ▼
+                                      Watch-list entry
+                                            │
+                                            ▼
+                                 Next cycle: signal boost
+                                 (extra relevant signals
+                                  injected from RSS/social)
+                                            │
+                                            ▼
+                                 More evidence → re-evaluate
+                                            │
+                                            └──▶ loop continues
+
+  Biweekly predictions ──▶ ✅/❌ grade ──▶ accuracy history in Git
+```
+
+**What makes this self-evolution, not just automation:**
+
+- The system decides *what to look harder for* — not just passively collect more
+- Declining confidence is a trigger for active investigation, not just a metric
+- Biweekly ✅/❌ reviews provide an independent check on the system's reasoning quality
+- Confidence history is committed to Git — belief changes are traceable, never silent
+- No human curates the watch-list: it emerges from the data itself
+
+This loop runs continuously. After enough cycles, the system's confidence scores reflect accumulated real-world evidence — not the priors you started with.
 
 ---
 
