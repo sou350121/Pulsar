@@ -12,6 +12,8 @@ Design goals:
   - Output schema compatible with downstream tasks (keywords_matched/source_status/items)
 
 Changelog:
+  2026-02-27: Add tophub.today scraping (/c/developer + /c/tech) via POST API.
+              Uses /node-items-by-date endpoint; no external libs (curl POST).
   2026-02-23: Add pub_date parsing (pubDate/published/updated) to all items.
               This enables downstream date-filtering to reject stale articles.
               HuggingFace blog RSS returns 180+ articles including items from 2024;
@@ -71,6 +73,21 @@ REDDIT_FEEDS = [
     ("reddit-LocalLLaMA", "https://www.reddit.com/r/LocalLLaMA/.rss"),
     ("reddit-ClaudeAI", "https://www.reddit.com/r/ClaudeAI/.rss"),
 ]
+
+# Tophub nodes: POST /node-items-by-date?p=1&date=YYYY-MM-DD&nodeid=N
+# Covers /c/developer (掘金, 开源中国, 人人都是产品经理) and
+#         /c/tech     (IT之家, 虎嗅网, 36氪, Readhub)
+# Node IDs verified 2026-02-27 via the AJAX API (sitename cross-checked).
+TOPHUB_NODES = {
+    100: "tophub-juejin",    # 掘金  (/c/developer)
+    96:  "tophub-juejin-b",  # 掘金 热榜  (/c/developer)
+    310: "tophub-oschina",   # 开源中国  (/c/developer)
+    213: "tophub-woshipm",   # 人人都是产品经理  (/c/developer)
+    119: "tophub-ithome",    # IT之家  (/c/tech)
+    32:  "tophub-huxiu",     # 虎嗅网  (/c/tech)
+    345: "tophub-36kr",      # 36氪  (/c/tech)
+    209: "tophub-readhub",   # Readhub  (/c/tech)
+}
 
 GH_RELEASE_REPOS = [
     "langchain-ai/langchain",
@@ -180,6 +197,30 @@ def _curl_fetch(url, timeout_sec=25):
     if not text.strip():
         return "", None
     return text, None
+
+
+def _tophub_post(nodeid, date, page=1):
+    """POST to tophub /node-items-by-date. Returns (items_list, error_str|None)."""
+    body = "p=%d&date=%s&nodeid=%d" % (page, date, int(nodeid))
+    cmd = [
+        "/usr/bin/curl", "-fsSL", "--max-time", "20",
+        "-X", "POST",
+        "-H", "Content-Type: application/x-www-form-urlencoded",
+        "-H", "X-Requested-With: XMLHttpRequest",
+        "-H", "Referer: https://tophub.today/",
+        "-A", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "--data", body,
+        "https://tophub.today/node-items-by-date",
+    ]
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    if p.returncode != 0:
+        return [], "curl_exit_%d" % p.returncode
+    try:
+        resp = json.loads(p.stdout)
+        items = (resp.get("data") or {}).get("items") or []
+        return items, None
+    except Exception as e:
+        return [], "json_err:%s" % str(e)[:60]
 
 
 _NS_ATOM = "http://www.w3.org/2005/Atom"
@@ -431,16 +472,61 @@ def main():
                 }
             )
 
-    # Dedup by URL; cap
+    # 4) Tophub (/c/developer + /c/tech) via POST API
+    for nodeid, src_name in TOPHUB_NODES.items():
+        items_raw, err = _tophub_post(nodeid, today)
+        if err is not None:
+            source_status[src_name] = "failed:%s" % err
+            continue
+        source_status[src_name] = "ok:%d" % len(items_raw)
+        raw_total += len(items_raw)
+        for it in items_raw:
+            title = (it.get("title") or "").strip()
+            link = (it.get("url") or "").strip()
+            summ = _strip_tags(it.get("description") or "")
+            if not link or not title:
+                continue
+            lvl, matched = _match_keywords(title, summ, kw_a, kw_b)
+            if not lvl:
+                continue
+            nu = _norm(link)
+            nt = _norm(title)
+            already = (nu in covered_urls) or (nt and (nt in covered_titles))
+            kept.append({
+                "title": title,
+                "url": link,
+                "source": src_name,
+                "match_level": lvl,
+                "keywords_matched": matched,
+                "already_covered": bool(already),
+                "pub_date": today,
+                "summary_snippet": summ[:240] if summ else "",
+            })
+
+    # Dedup by URL; two-pass cap so tophub items are never squeezed out by RSS volume.
+    # Pass 1: non-tophub sources (RSS, GitHub) — up to 250 items.
+    # Pass 2: tophub sources — up to 50 more (total cap 300).
     seen_url = set()
     out_items = []
     for it in kept:
+        if "tophub" in (it.get("source") or ""):
+            continue
         u = _norm(it.get("url"))
         if not u or (u in seen_url):
             continue
         seen_url.add(u)
         out_items.append(it)
-        if len(out_items) >= 200:
+        if len(out_items) >= 250:
+            break
+    for it in kept:
+        if "tophub" not in (it.get("source") or ""):
+            continue
+        u = _norm(it.get("url"))
+        if not u or (u in seen_url):
+            continue
+        seen_url.add(u)
+        out_items.append(it)
+        if len(out_items) >= 300:
             break
 
     payload = {
