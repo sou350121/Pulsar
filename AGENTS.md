@@ -3,7 +3,7 @@
 ## System Identity
 - Chinese: 照見（Zhàojiàn）
 - English: Pulsar
-- Purpose: Automated AI/VLA signal intelligence pipeline
+- Purpose: Automated domain intelligence pipeline (configurable for any research domain)
 
 ## Key Paths (after setup)
 - Scripts: `~/clawd/scripts/`
@@ -16,7 +16,8 @@ See `scripts/SCRIPTS.md` for full DAG.
 
 ## Environment
 - API keys in `~/.clawdbot/.env` or system environment
-- DashScope key in `~/.moltbot/agents/reports/agent/auth-profiles.json`
+- LLM key: `DASHSCOPE_API_KEY` (works with any OpenAI-compatible provider; update base URL in `scripts/_vla_expert.py` to switch)
+- DashScope key also in `~/.moltbot/agents/reports/agent/auth-profiles.json`
 - Tophub API key in `~/.clawdbot/.env` as `TOPHUB_API_KEY`
 
 ## Setup Notes (verified)
@@ -46,9 +47,11 @@ cp config/jobs.template.json ~/.openclaw/cron/jobs.json
 **GitHub config files**: not in repo — create from template:
 ```bash
 mkdir -p memory
+cp config/github-config.template.json memory/github-config-primary.json
+# Edit: set "repo" to your knowledge-base repo (e.g. "your-username/your-domain-handbook")
+# For the reference dual-domain deployment, create two configs:
 cp config/github-config.template.json memory/github-config-vla-handbook.json
 cp config/github-config.template.json memory/github-config-agent-playbook.json
-# Edit each to set "repo" to your fork name
 ```
 
 **vla-rss-collect.py**: exits silently on success (no stdout). Verify via:
