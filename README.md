@@ -338,6 +338,7 @@ Congratulations — Pulsar is live! 🎉
 ---
 
 </details>
+
 ## Core Concepts
 
 ### 1. Signal Rating Engine
