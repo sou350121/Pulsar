@@ -73,16 +73,22 @@ Before you begin, make sure your environment meets these requirements:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/sou350121/Pulsar-KenVersion
-cd Pulsar-KenVersion
+git clone https://github.com/sou350121/Pulsar-KenVersion ~/clawd
+cd ~/clawd
 ```
+
+> ⚠️ **Important**: Scripts are pre-configured for the `~/clawd/` directory. Cloning elsewhere requires updating hardcoded paths with:
+> ```bash
+> MYUSER=$(whoami)
+> find scripts/ -name "*.py" | xargs sed -i "s|/home/admin|/home/$MYUSER|g"
+> ```
 
 ---
 
 ### 2. Configure Your Keys
 
 ```bash
-cp config/.env.example .env
+cp .env.example .env
 ```
 
 Open `.env` and fill in your keys:
@@ -150,14 +156,15 @@ Pulsar pushes daily outputs to your knowledge-base repos via the GitHub Contents
 3. Set permission: `Contents: Read and Write`
 4. Add the token to `GITHUB_TOKEN` in `.env`
 
-If you forked the knowledge-base repos, update the config files to point to your forks:
+Create the GitHub config files in `memory/` (these are not in the repo — create them from the template):
 
 ```bash
-nano memory/github-config-vla-handbook.json
-nano memory/github-config-agent-playbook.json
+mkdir -p memory
+cp config/github-config.template.json memory/github-config-vla-handbook.json
+cp config/github-config.template.json memory/github-config-agent-playbook.json
 ```
 
-Config file format:
+Then edit each to point to your forks:
 
 ```json
 {
@@ -206,15 +213,21 @@ Gateway running on ws://127.0.0.1:18789
 
 ---
 
-### 4. Import Cron Jobs
+### 4. Load Cron Jobs
+
+The 33 scheduled jobs are stored in `config/jobs.template.json`. Load them by copying to the Moltbot cron directory **before** starting the gateway (or stop it first if already running):
 
 ```bash
-moltbot cron import config/jobs.template.json
+pkill -f moltbot-gateway || true
+mkdir -p ~/.openclaw/cron
+cp config/jobs.template.json ~/.openclaw/cron/jobs.json
 ```
 
-Verify the import:
+Then restart the gateway and verify:
 
 ```bash
+nohup moltbot gateway run --bind loopback --port 18789 --force \
+  > /tmp/moltbot-gateway.log 2>&1 &
 moltbot cron list
 ```
 
@@ -234,26 +247,24 @@ python3 scripts/vla-rss-collect.py
 
 #### Expected output
 
-```json
-{
-  "ok": true,
-  "date": "2026-XX-XX",
-  "papers_found": 28,
-  "papers_new": 21,
-  "hotspots_updated": true
-}
+```
+(no output — silent on success by design)
 ```
 
-#### Inspect the results
+Verify the collection worked:
 
 ```bash
+# Check today's RSS file was created
+ls ~/clawd/memory/vla-rss-*.json
+
+# Inspect the top 3 recent papers
 python3 -c "
 import json
 with open('memory/vla-daily-hotspots.json') as f:
     d = json.load(f)
-today = sorted(d.get('hotspots', []), key=lambda x: x.get('date',''), reverse=True)[:3]
-for p in today:
-    print(p.get('title',''), '-', p.get('rating',''))
+papers = sorted(d.get('reported_papers', []), key=lambda x: x.get('date',''), reverse=True)[:3]
+for p in papers:
+    print(p.get('rating','?'), p.get('title',''))
 "
 ```
 
@@ -420,23 +431,25 @@ Pulsar-KenVersion/
 │   └── SCRIPTS.md              # Full pipeline DAG documentation
 │
 ├── config/
-│   ├── .env.example            # Key template (copy to .env and fill in)
-│   └── jobs.template.json      # 33 cron job configuration templates
+│   ├── active-config.template.json  # Research directions + keyword tracking config
+│   ├── assumptions.template.json    # 19 domain hypotheses template
+│   ├── github-config.template.json  # GitHub push target template
+│   └── jobs.template.json           # 33 cron job configurations
 │
-├── memory/                     # Local knowledge store (.gitignored)
+├── memory/                     # Local knowledge store (.gitignored, auto-created)
 │   ├── vla-daily-hotspots.json # VLA daily hotspot papers
 │   ├── vla-social-intel.json   # VLA social intelligence (90-day rolling)
 │   ├── ai-app-social-intel.json# AI app social intelligence (90-day rolling)
 │   ├── assumptions.json        # 19 domain hypotheses + confidence scores
 │   ├── watchdog-log.json       # Watchdog run history
 │   ├── tmp/                    # Pipeline intermediates (auto-cleaned after 60 days)
-│   └── github-config-*.json    # GitHub push target configs
+│   └── github-config-*.json    # GitHub push targets (create from config template)
 │
 ├── docs/
 │   └── banner.svg              # Project banner
 │
 ├── AGENTS.md                   # Full deployment guide (AI agent-readable)
-├── .env.example                # Key template
+├── .env.example                # Key template (copy to .env and fill in)
 └── LICENSE                     # MIT
 ```
 
@@ -531,3 +544,4 @@ Have a question, idea, or want to fork this into your own domain's Pulsar?
 ---
 
 *MIT License — fork it, adapt it, make it your own domain's Pulsar.*
+
