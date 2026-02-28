@@ -297,18 +297,27 @@ def _check_vla_sota(today):
 
 
 def _check_vla_release(today):
-    """Check that Release tracker has a new item dated today."""
+    """Check that Release tracker ran today (via github-last-seen checked_at).
+    The tracker only adds items when new tags are found; on quiet days no items
+    are added even though the job ran fine.  Check checked_at instead."""
     p = os.path.join(MEM_DIR, "vla-release-tracker.json")
     d = _read_json(p)
     if not d:
         return False, "FAIL", "missing vla-release-tracker.json"
+    # Primary check: at least one repo has checked_at == today (job ran today)
+    last_seen = d.get("github-last-seen") or {}
+    checked_today = [repo for repo, meta in last_seen.items()
+                     if isinstance(meta, dict) and meta.get("checked_at") == today]
+    if checked_today:
+        return True, "OK", ""
+    # Secondary: any release item dated today (new tag found today)
     items = d.get("vla-release-tracker") or []
     if not items:
         return False, "WARN", "vla-release-tracker.json has 0 items"
     dates = sorted([i.get("date", "") for i in items if i.get("date")], reverse=True)
     latest = dates[0] if dates else ""
     if latest != today:
-        return False, "WARN", "vla-release newest item=%s (not today)" % (latest or "none")
+        return False, "WARN", "vla-release job did not run today (last checked=%s)" % (latest or "none")
     return True, "OK", ""
 
 
@@ -397,6 +406,26 @@ def _check_disk_space():
         return True, "OK", ""
     except Exception:
         return True, "OK", ""
+
+
+def _check_quality_drift(today: str):
+    """WARN if quality-drift-check.py didn't record today's metrics yet (check #16)."""
+    drift_state_path = os.path.join(MEM_DIR, "drift-state.json")
+    if not os.path.exists(drift_state_path):
+        return False, "WARN", "drift-state.json missing — quality-drift-check.py never ran"
+    try:
+        state = _read_json(drift_state_path)
+        last = state.get("last_check", "")
+        if last != today:
+            return False, "WARN", "drift check last ran %r, expected %r" % (last, today)
+        # If drift detected, surface it as a WARN (alert already sent by the script itself)
+        metrics = state.get("metrics", {})
+        drifting = [k for k, m in metrics.items() if m.get("streak", 0) >= 3]
+        if drifting:
+            return False, "WARN", "quality drift active: %s" % ", ".join(drifting)
+    except Exception as e:
+        return False, "WARN", "drift-state.json unreadable: %s" % e
+    return True, "OK", ""
 
 
 def _memory_rw_check():
@@ -587,6 +616,7 @@ def main():
         ("theory_articles",lambda: _check_theory_articles()),
         ("ai_deep_dive",   lambda: _check_ai_deep_dive()),
         ("disk_space",     lambda: _check_disk_space()),
+        ("quality_drift", lambda: _check_quality_drift(today)),
     ]
 
     results = {}
