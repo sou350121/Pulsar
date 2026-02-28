@@ -1,0 +1,26 @@
+{
+  "tag": "{{DOMAIN_KEY}}-active-config",
+  "version": 1,
+  "last_updated": "{{TODAY}}",
+  "updated_by": "setup.sh",
+  "research_directions": {
+    "primary": {
+      "name": "{{PRIMARY_DIRECTION}}",
+      "slug": "{{PRIMARY_SLUG}}",
+      "keywords": ["{{PRIMARY_KEYWORD_1}}", "{{PRIMARY_KEYWORD_2}}"],
+      "tracking_level": "deep",
+      "notes": "Primary focus area — papers matching these keywords are prioritised."
+    },
+    "team": []
+  },
+  "keywords_A": [
+    "{{KEYWORD_A_1}}",
+    "{{KEYWORD_A_2}}",
+    "{{KEYWORD_A_3}}"
+  ],
+  "keywords_B": [
+    "{{KEYWORD_B_1}}"
+  ],
+  "notes": "Edit keywords_A/B to tune signal quality. keywords_A = high-priority, keywords_B = secondary.",
+  "_changelog": []
+}
