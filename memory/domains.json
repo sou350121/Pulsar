@@ -1,0 +1,42 @@
+{
+  "_comment": "Pulsar domain registry — single source of truth for all configured domains.",
+  "version": 1,
+  "domains": {
+    "vla": {
+      "name": "VLA",
+      "description": "Vision-Language-Action models for robotics and manipulation",
+      "enabled": true,
+      "active_config": "active-config.json",
+      "shadow_config": "shadow-active-config.json",
+      "pending_changes": "pending-changes.json",
+      "github_config": "github-config-vla-handbook.json",
+      "tg_account": "original",
+      "tg_target": "1898430254",
+      "memory_files": {
+        "hotspots":    "vla-daily-hotspots.json",
+        "sota":        "vla-sota-tracker.json",
+        "releases":    "vla-release-tracker.json",
+        "social":      "vla-social-intel.json",
+        "biweekly":    "biweekly-reasoning.json",
+        "daily_stats": "daily-stats.json"
+      }
+    },
+    "ai_app": {
+      "name": "AI App",
+      "description": "AI application and agent ecosystem — tools, frameworks, products",
+      "enabled": true,
+      "active_config": "ai-app-active-config.json",
+      "shadow_config": "ai-app-shadow-active-config.json",
+      "pending_changes": "ai-app-pending-changes.json",
+      "github_config": "github-config-agent-playbook.json",
+      "tg_account": "ai_agent_dailybot",
+      "tg_target": "1898430254",
+      "memory_files": {
+        "daily_pick":  "ai-daily-pick.json",
+        "social":      "_ai_social_{date}.md",
+        "biweekly":    "ai-app-biweekly-reasoning.json",
+        "deep_dive":   "_ai_deep_dive_{date}.json"
+      }
+    }
+  }
+}
