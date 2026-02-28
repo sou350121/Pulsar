@@ -1,0 +1,25 @@
+{
+  "_comment": "Pulsar domain registry — single source of truth for all configured domains.",
+  "version": 1,
+  "domains": {
+    "{{DOMAIN_KEY}}": {
+      "name": "{{DOMAIN_NAME}}",
+      "description": "{{DOMAIN_DESCRIPTION}}",
+      "enabled": true,
+      "active_config": "{{DOMAIN_KEY}}-active-config.json",
+      "shadow_config": "{{DOMAIN_KEY}}-shadow-active-config.json",
+      "pending_changes": "{{DOMAIN_KEY}}-pending-changes.json",
+      "github_config": "github-config-{{DOMAIN_KEY}}.json",
+      "tg_account": "{{TG_ACCOUNT}}",
+      "tg_target": "{{TG_TARGET}}",
+      "memory_files": {
+        "hotspots": "{{DOMAIN_KEY}}-daily-hotspots.json",
+        "sota": "{{DOMAIN_KEY}}-sota-tracker.json",
+        "releases": "{{DOMAIN_KEY}}-release-tracker.json",
+        "social": "{{DOMAIN_KEY}}-social-intel.json",
+        "biweekly": "{{DOMAIN_KEY}}-biweekly-reasoning.json",
+        "daily_stats": "daily-stats.json"
+      }
+    }
+  }
+}
