@@ -1,0 +1,17 @@
+{
+  "generated": "{{TODAY}}",
+  "description": "Research assumptions and hypotheses tracked by Pulsar calibration system.",
+  "assumptions": [
+    {
+      "id": "assumption-001",
+      "status": "active",
+      "domain": "{{DOMAIN_KEY}}",
+      "hypothesis": "Example: The field will see >3 major model releases in Q1 2026.",
+      "invalidation_conditions": ["no new model releases in Q1 2026"],
+      "keywords": ["release", "model", "launch"],
+      "created": "{{TODAY}}",
+      "source": "setup.sh"
+    }
+  ],
+  "last_calibration_update": null
+}
