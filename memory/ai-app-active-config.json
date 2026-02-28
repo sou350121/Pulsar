@@ -1,0 +1,200 @@
+{
+  "tag": "ai-app-active-config",
+  "version": 5,
+  "last_updated": "2026-02-27",
+  "updated_by": "claude-reorder: first 4 = diverse (opinion/debate/viral/industry)",
+  "focus_areas": {
+    "primary": {
+      "name": "Agent + UI",
+      "slug": "agent-ui",
+      "keywords": [
+        "agent ui",
+        "chat ui",
+        "workflow ui",
+        "visual builder",
+        "agent builder",
+        "copilot ui",
+        "webui",
+        "desktop app",
+        "interface"
+      ],
+      "tracking_level": "deep",
+      "notes": "主攻方向：只要命中就优先收录，并在日报/索引中加 🎯。"
+    },
+    "team": [
+      {
+        "name": "RAG 工具链",
+        "slug": "RAG",
+        "keywords": [
+          "rag",
+          "retrieval augmented",
+          "retrieval",
+          "vector database",
+          "embedding",
+          "rerank",
+          "hyybrid search"
+        ],
+        "tracking_level": "signal_only"
+      },
+      {
+        "name": "评估与安全",
+        "slug": "evaluation",
+        "keywords": [
+          "eval",
+          "evaluation",
+          "benchmark",
+          "guardrail",
+          "safety",
+          "red teaming",
+          "prompt evaluation"
+        ],
+        "tracking_level": "signal_only"
+      }
+    ]
+  },
+  "keywords_A": [
+    "agent",
+    "agentic",
+    "multi-agent",
+    "workflow",
+    "orchestration",
+    "tool calling",
+    "function calling",
+    "mcp",
+    "rag",
+    "retrieval",
+    "vector",
+    "embedding",
+    "chat ui",
+    "agent ui",
+    "sdk",
+    "gateway",
+    "llmops",
+    "observability",
+    "tracing",
+    "evaluation",
+    "guardrail",
+    "prompt management",
+    "deployment",
+    "llm",
+    "large language model",
+    "foundation model",
+    "multimodal model",
+    "model release",
+    "new model",
+    "language model",
+    "reasoning model"
+  ],
+  "keywords_B": [
+    "streaming",
+    "realtime",
+    "latency",
+    "cache",
+    "routing",
+    "fallback",
+    "rate limit",
+    "telemetry",
+    "sandbox",
+    "self-hosted",
+    "on-device",
+    "pii",
+    "security",
+    "compliance",
+    "agentic engineering",
+    "a2ui",
+    "ag-ui",
+    "deep agents",
+    "context engineering",
+    "langgraph",
+    "agentic rl",
+    "multimodal retrieval",
+    "qwen",
+    "claude",
+    "gpt",
+    "gemini",
+    "llama",
+    "mistral",
+    "deepseek",
+    "phi",
+    "command r",
+    "grok",
+    "openai",
+    "anthropic",
+    "google ai",
+    "meta ai",
+    "benchmark",
+    "leaderboard",
+    "mmlu",
+    "humaneval",
+    "context window",
+    "token limit",
+    "vision model",
+    "speech model",
+    "code model"
+  ],
+  "rss_priority": {
+    "high": [
+      "gh-trending",
+      "producthunt",
+      "gh-release:"
+    ],
+    "medium": [
+      "hf-blog"
+    ],
+    "low": [
+      "hn",
+      "reddit-"
+    ]
+  },
+  "deprecated_sources": [],
+  "search_terms_social": [
+    "Andrej Karpathy OR Sam Altman OR Dario Amodei OR Yann LeCun AI opinion 2026",
+    "AI agent limitation failure disappointment reddit hacker news 2026",
+    "viral AI demo video tweet reddit trending 2026",
+    "AI startup funding acquisition major news 2026",
+    "AI researcher opinion prediction controversy blog post 2026",
+    "Geoffrey Hinton OR Yoshua Bengio OR Gary Marcus AI opinion warning 2026",
+    "AI CEO founder opinion interview prediction 2026",
+    "LLM coding agent criticism OR overhyped OR debate developer community 2026",
+    "AI hype AGI controversy skeptic opinion 2026",
+    "AI benchmark cheating OR gaming OR misleading 2026",
+    "developer frustration AI tool broken OR unreliable OR disappointing 2026",
+    "AI tool community reaction backlash OR praise OR viral 2026",
+    "AI jailbreak OR misuse OR unexpected behavior viral 2026",
+    "AI safety alignment policy regulation debate 2026",
+    "open source vs closed model debate community 2026",
+    "AI job displacement automation workforce debate 2026",
+    "AI regulation EU OR US OR China policy debate 2026",
+    "RAG vs fine-tuning debate community 2026",
+    "context window scaling debate OR controversy 2026",
+    "AI reasoning hallucination debate criticism 2026"
+  ],
+  "learning_focus": [
+    "Agent Framework",
+    "Agent Memory",
+    "Agent Eval/Safety",
+    "Agentic Coding",
+    "Tool Use / MCP",
+    "Multimodal RAG",
+    "LLM / Foundation Model Releases"
+  ],
+  "roles": {
+    "reader": {
+      "model": null,
+      "note": "No LLM — AI App RSS collect + filter"
+    },
+    "analyst": {
+      "model": "qwen3.5-plus",
+      "note": "AI App daily report, social intel, deep-dive"
+    },
+    "memory": {
+      "model": null,
+      "note": "No LLM — writes to daily-stats/pick files"
+    },
+    "delivery": {
+      "model": null,
+      "note": "No LLM — Telegram send"
+    },
+    "_ram_warning": "Different models per role requires ≥4GB RAM. Keep all on analyst model on 2GB servers."
+  }
+}
