@@ -1,0 +1,212 @@
+{
+  "tag": "vla-active-config",
+  "version": 3,
+  "last_updated": "2026-02-28",
+  "updated_by": "keyword-cleanup-2026-02-28",
+  "research_directions": {
+    "primary": {
+      "name": "觸覺 / Tactile Sensing",
+      "slug": "tactile",
+      "keywords": [
+        "tactile",
+        "touch",
+        "haptic",
+        "force sensing",
+        "force sensor",
+        "visuotactile",
+        "tactile sensor",
+        "contact-rich",
+        "force control",
+        "tactile sensing",
+        "tactile feedback",
+        "dexterous",
+        "grasp",
+        "fingertip",
+        "tactile policy",
+        "visuo-tactile",
+        "force-vision",
+        "tactile-force",
+        "taf-vla",
+        "tacrefinenet",
+        "tactilenet"
+      ],
+      "tracking_level": "deep",
+      "notes": "主攻方向：只要命中就优先收录，并在日报/索引中加 🎯。"
+    },
+    "team": [
+      {
+        "name": "RL 訓練 VLA",
+        "slug": "rl-vla",
+        "keywords": [
+          "reinforcement learning",
+          "rl training",
+          "reward",
+          "dpo",
+          "grpo",
+          "ppo",
+          "rlhf",
+          "rlaif",
+          "online rl",
+          "offline rl",
+          "preference learning",
+          "gr-rl",
+          "rlinf",
+          "rl fine-tuning",
+          "verifiable reward",
+          "process reward",
+          "outcome reward"
+        ],
+        "tracking_level": "signal_only"
+      },
+      {
+        "name": "VLA 後訓練",
+        "slug": "vla-post-train",
+        "keywords": [
+          "post-training",
+          "fine-tuning",
+          "finetuning",
+          "lora",
+          "qlora",
+          "adapter",
+          "instruction tuning",
+          "sft",
+          "supervised fine-tuning",
+          "distillation",
+          "knowledge distillation",
+          "model compression",
+          "quantization",
+          "pruning",
+          "continual learning",
+          "curriculum"
+        ],
+        "tracking_level": "signal_only"
+      },
+      {
+        "name": "世界模型 + VLA",
+        "slug": "world-model",
+        "keywords": [
+          "world model",
+          "video prediction",
+          "dynamics model",
+          "simulation",
+          "dreamer",
+          "latent dynamics",
+          "video generation",
+          "video world model",
+          "wam",
+          "model-based",
+          "model based rl",
+          "imagination",
+          "mental simulation",
+          "scene understanding"
+        ],
+        "tracking_level": "signal_only"
+      }
+    ]
+  },
+  "keywords_A": [
+    "VLA",
+    "vision-language-action",
+    "vision language action",
+    "OpenVLA",
+    "diffusion policy",
+    "robot manipulation",
+    "robotic manipulation",
+    "robot learning",
+    "embodied AI",
+    "sim-to-real",
+    "imitation learning",
+    "action chunking",
+    "visuomotor",
+    "world model",
+    "pi0",
+    "physical intelligence",
+    "lerobot",
+    "flow matching",
+    "Gemini Robotics"
+  ],
+  "keywords_B": [
+    "tactile",
+    "robot policy",
+    "embodied intelligence",
+    "dexterous"
+  ],
+  "notes": "Reconstructed from context on 2026-02-23 after active-config.json was lost in Cursor session.",
+  "_changelog": "v3: removed 18 zero-hit B keywords (ALOHA, GR00T, visotactile sensing, dexterous manipulation, bimanual...); kept 4 active: ['tactile', 'robot policy', 'embodied intelligence', 'dexterous']. Analysis: all dropped terms already covered by A-level abstract scan. | v2: connected RSS loop, pruned 10 stale keywords (RT-2/Octo/Open X-Embodiment/WidowX/Franka/robot grasping/locomotion/language-conditioned/embodied agent/foundation model robotics), added pi0/lerobot/Gemini Robotics/flow matching/humanoid/teleoperation/GR00T/Isaac Lab/manipulation policy",
+  "roles": {
+    "reader": {
+      "model": null,
+      "note": "No LLM — RSS collect + filter"
+    },
+    "analyst": {
+      "model": "qwen3.5-plus",
+      "note": "VLA hotspot synthesis, rating, social"
+    },
+    "memory": {
+      "model": null,
+      "note": "No LLM — writes to hotspots/stats files"
+    },
+    "delivery": {
+      "model": null,
+      "note": "No LLM — Telegram send"
+    },
+    "_ram_warning": "Different models per role requires ≥4GB RAM. Keep all on analyst model on 2GB servers."
+  },
+  "cross_domain_rules": [
+    {
+      "id": "R001",
+      "enabled": true,
+      "description": "VLA ⚡/🔧 paper with diffusion/flow keywords → flag for AI App framework review",
+      "source_domain": "vla",
+      "if_rating": [
+        "⚡",
+        "🔧"
+      ],
+      "if_keywords_any": [
+        "diffusion policy",
+        "flow matching",
+        "diffusion",
+        "pi0",
+        "action head"
+      ],
+      "target_domain": "ai_app",
+      "label": "vla-technique-cross"
+    },
+    {
+      "id": "R002",
+      "enabled": true,
+      "description": "VLA ⚡ world-model / reasoning paper → AI App reasoning model context",
+      "source_domain": "vla",
+      "if_rating": [
+        "⚡"
+      ],
+      "if_keywords_any": [
+        "world model",
+        "reasoning",
+        "planning",
+        "foundation model"
+      ],
+      "target_domain": "ai_app",
+      "label": "vla-worldmodel-cross"
+    },
+    {
+      "id": "R003",
+      "enabled": true,
+      "description": "AI App match-level-A signal with embodied/robot keywords → VLA context injection",
+      "source_domain": "ai_app",
+      "if_match_level": [
+        "A"
+      ],
+      "if_keywords_any": [
+        "embodied",
+        "robot",
+        "manipulation",
+        "physical",
+        "sensor",
+        "gripper"
+      ],
+      "target_domain": "vla",
+      "label": "aiapp-embodied-cross"
+    }
+  ]
+}
