@@ -24,6 +24,11 @@ from datetime import date, datetime, timedelta
 from mcp.server.fastmcp import FastMCP
 
 MEMORY_DIR = os.environ.get("PULSAR_MEMORY_DIR", "/home/admin/clawd/memory")
+SCRIPTS_DIR = os.environ.get("PULSAR_SCRIPTS_DIR", os.path.dirname(os.path.abspath(__file__)))
+
+import sys as _sys
+if SCRIPTS_DIR not in _sys.path:
+    _sys.path.insert(0, SCRIPTS_DIR)
 
 mcp = FastMCP("pulsar")
 
@@ -309,6 +314,38 @@ def get_pipeline_health() -> str:
         "last_watchdog": latest[0] if latest else None,
         "recent_stats": recent,
     }, ensure_ascii=False, indent=2)
+
+
+# ── Domain tools ─────────────────────────────────────────────────────────────
+
+@mcp.tool()
+def list_domains() -> str:
+    """
+    List all configured Pulsar domains with their names and descriptions.
+
+    Returns JSON array of domain keys, names, and descriptions.
+    """
+    from _domain_loader import list_domains as _list, load_domain as _load
+    result = []
+    for key in _list():
+        d = _load(key)
+        result.append({"key": key, "name": d.name, "description": d.description})
+    return json.dumps({"count": len(result), "domains": result}, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+def get_domain_config(domain: str) -> str:
+    """
+    Return the active config (keywords, research directions) for a Pulsar domain.
+
+    Args:
+        domain: Domain key — 'vla' or 'ai_app'.
+
+    Returns JSON with the full active config for that domain.
+    """
+    from _domain_loader import load_domain as _load
+    d = _load(domain)
+    return json.dumps(d.active_config(), ensure_ascii=False, indent=2)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
