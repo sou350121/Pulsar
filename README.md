@@ -52,6 +52,27 @@ Pulsar is a server-side domain intelligence pipeline. **You define the domain; P
 
 ## Quick Start
 
+### ⚡ One-command Setup (Recommended)
+
+Clone the repo and run the guided installer — it handles Python, `mcp`, config files, and prints your Claude Desktop JSON block:
+
+```bash
+git clone https://github.com/sou350121/Pulsar ~/clawd
+bash ~/clawd/scripts/setup.sh
+```
+
+The script will prompt you for: LLM API key, GitHub token, Telegram bot token + chat ID, and your research domain details. All config files are written automatically.
+
+**Non-interactive / CI:**
+```bash
+bash ~/clawd/scripts/setup.sh --non-interactive --memory-dir /path/to/memory
+```
+
+> **Note:** `setup.sh` requires Python 3.10+ and installs the `mcp` package automatically. For manual setup, continue with the steps below.
+
+---
+
+
 ### 🤖 AI-Assisted Setup (Cursor · Claude · ChatGPT)
 
 Use this prompt with any AI coding assistant to get guided, interactive setup:
@@ -637,6 +658,16 @@ The table below reflects debate from three perspectives (product strategy, engin
 | **P3** | **GraphRAG Knowledge Graph** | Convert Git commit history and Entity Tracker index into a relationship graph: paper ↔ author ↔ benchmark ↔ lab ↔ method; supports structured traversal queries | Deferred: Entity Tracker (P2) satisfies most retrieval needs first. GraphRAG's index construction is O(n²) in LLM calls and only becomes cost-effective at 6+ months of accumulated data or with significantly cheaper models than are available today | 📋 Planned |
 | **P3** | **Prediction Score Public API** | Expose each domain's biweekly prediction hit-rate and hypothesis confidence scores as a queryable endpoint — the "credibility score" for a domain intelligence source | Makes Pulsar's accuracy claims independently verifiable. Differentiates from every black-box AI summary tool that asserts importance without a track record; this turns the prediction loop into a public signal of system quality | 📋 Planned |
 | **P4** | **Config & Domain Template Marketplace** | Community hub for sharing domain configs, assumption templates, keyword sets, and validated cron blueprints across Pulsar instances | Replaces "Federated Calibration" (hypothesis confidence scores are context-dependent and cannot be meaningfully shared across instances with different sources, keywords, and rating criteria). What *can* be shared — and immediately useful — is the *structure*: domain config templates, RSS feed lists, hypothesis starter sets | 📋 Planned |
+
+## Changelog
+
+### 2026-02-28 — P0 Infrastructure Release
+
+| Feature | Description |
+|---------|-------------|
+| **MCP Server** | 11-tool MCP server exposing the full knowledge base to Claude Desktop, Cursor, or any MCP client — query VLA signals, SOTA, releases, social intel, predictions, and pipeline health in plain conversation |
+| **Multi-domain config** | `memory/domains.json` registry + `scripts/_domain_loader.py` shared loader — add a 3rd research domain by editing one file instead of modifying scripts |
+| **One-click deploy** | `scripts/setup.sh` — guided 6-step installer (Python check, `mcp` install, interactive config prompts, config file generation, path substitution, verification + Claude Desktop JSON output) |
 
 
 ## Further Reading
