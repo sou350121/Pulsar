@@ -116,9 +116,11 @@ def _build_exclusion_set(today):
         if u:
             urls.add(u)
 
-    # 2) VLA social intel history
+    # 2) VLA social intel history (last 30 days only — avoid dedup exhaustion)
     social = _read_json(VLA_SOCIAL_PATH, {})
-    for entry in (social.get("social_intel") or []):
+    import datetime as _dt2
+    _cutoff30 = (_dt2.datetime.utcnow() + _dt2.timedelta(hours=8) - _dt2.timedelta(days=30)).strftime("%Y-%m-%d")
+    for entry in [e for e in (social.get("social_intel") or []) if isinstance(e, dict) and (e.get("date") or "") >= _cutoff30]:
         if not isinstance(entry, dict):
             continue
         for sig in (entry.get("signals") or []):
@@ -186,10 +188,10 @@ def _call_qwen_search(day, topic, excl_sample, key, timeout=90):
             + "; ".join(list(excl_sample)[:10])
         )
     query_text = (
-        "Today is " + day + ". Find notable events from the PAST 5 DAYS ONLY (strict: "
-        + day + " minus 5 days) about: " + topic + ". "
+        "Today is " + day + ". Find notable events from the PAST 3 DAYS ONLY (strict: "
+        + day + " minus 3 days) about: " + topic + ". "
         "For each item provide: entity/person, what happened, EXACT date (YYYY-MM-DD), and source URL. "
-        "IMPORTANT: Only include events that happened on or after 5 days before today. "
+        "IMPORTANT: Only include events that happened on or after 3 days before today. "
         "Exclude arXiv preprints. Exclude evergreen/intro content with no specific event date." + excl_hint
     )
     payload = {
