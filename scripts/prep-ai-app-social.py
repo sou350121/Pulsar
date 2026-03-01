@@ -125,10 +125,13 @@ def _build_exclusion_set(today):
     for u in (excl.get("urls") or []):
         urls.add(_norm(u))
 
-    # 2) Social intel history (all entries)
+    # 2) Social intel history (last 30 days only, to avoid dedup exhaustion over time)
     social = _read_json(SOCIAL_INTEL_PATH, {})
     entries = social.get("social_intel", [])
     if isinstance(entries, list):
+        import datetime as _dt2
+        cutoff = (_dt2.datetime.utcnow() + _dt2.timedelta(hours=8) - _dt2.timedelta(days=30)).strftime("%Y-%m-%d")
+        entries = [e for e in entries if isinstance(e, dict) and (e.get("date") or "") >= cutoff]
         for entry in entries:
             if not isinstance(entry, dict):
                 continue
@@ -199,11 +202,16 @@ def _call_qwen_search(day, topic, excl_sample, key, timeout=90):
             "\nAlready reported (skip these): "
             + "; ".join(list(excl_sample)[:10])
         )
+    # Hard 72-hour window — matches the downstream §0 timeliness rule
+    from datetime import datetime, timezone, timedelta
+    cutoff_str = (datetime.now(timezone.utc) + timedelta(hours=8) - timedelta(days=3)).strftime("%Y-%m-%d")
     query_text = (
-        "Today is " + day + ". Find the most notable recent events (past 2-3 weeks) "
+        "Today is " + day + ". Find notable events from the PAST 3 DAYS ONLY "
+        "(strict cutoff: on or after " + cutoff_str + ") "
         "about: " + topic + ". "
-        "For each item provide: entity/person, what happened, approximate date, and source URL. "
-        "Exclude arXiv preprints." + excl_hint
+        "For each item provide: entity/person, what happened, EXACT date (YYYY-MM-DD), and source URL. "
+        "IMPORTANT: Only include events that occurred on or after " + cutoff_str + ". "
+        "Exclude arXiv preprints. Exclude evergreen content with no specific event date." + excl_hint
     )
     payload = {
         "model": "qwen3.5-plus",
