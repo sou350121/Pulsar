@@ -348,6 +348,43 @@ def get_domain_config(domain: str) -> str:
     return json.dumps(d.active_config(), ensure_ascii=False, indent=2)
 
 
+
+# ── Search tool ──────────────────────────────────────────────────────────────
+
+@mcp.tool()
+def search_memory(query: str, days: int = 60, top: int = 5, source_type: str = "") -> str:
+    """
+    Semantic search over Pulsar's 60-day memory window.
+
+    Uses DashScope text-embedding-v3 to embed the query and returns the most
+    relevant memory chunks ranked by cosine similarity.
+
+    Args:
+        query: Natural language query string.
+        days: Only search within this many past days (default 60).
+        top: Number of top results to return (default 5).
+        source_type: Optional filter — one of: ai_daily_pick, ai_social,
+                     vla_social, vla_biweekly, biweekly_reflection,
+                     calibration, upstream. Empty string = no filter.
+
+    Returns JSON with count and results array (score, date, source, source_type, section, text).
+    """
+    import importlib.util as _ilu
+    _spec = _ilu.spec_from_file_location(
+        "semantic_search",
+        os.path.join(SCRIPTS_DIR, "semantic-search.py"),
+    )
+    _mod = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_mod)
+    results = _mod.search(
+        query=query,
+        days=days,
+        top=top,
+        source_type=source_type or None,
+    )
+    return json.dumps({"count": len(results), "results": results}, ensure_ascii=False, indent=2)
+
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
