@@ -65,6 +65,18 @@ def main():
 
     kept = [e for e in existing if isinstance(e, dict) and e.get("date", "") >= cutoff and e.get("date", "") != today]
 
+    # Deduplicate new_items by URL (same URL from different sources = keep first)
+    seen_urls = set()
+    deduped_items = []
+    for it in new_items:
+        url = (it.get("url") or "").strip().rstrip("/")
+        if url and url in seen_urls:
+            continue
+        if url:
+            seen_urls.add(url)
+        deduped_items.append(it)
+    new_items = deduped_items
+
     new_entry = {
         "date": today,
         "config_version": args.config_version,
