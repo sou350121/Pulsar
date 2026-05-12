@@ -59,6 +59,21 @@ PULSAR_MEMORY_DIR=/your/path python3.11 scripts/mcp_server.py
 | `get_predictions` | `domain="all"` | Latest biweekly predictions + previous-round results |
 | `get_pipeline_health` | — | Last watchdog run status + 7-day signal volume stats |
 
+### Domain Registry
+
+| Tool | Args | Description |
+|------|------|-------------|
+| `list_domains` | — | All configured Pulsar domains (`memory/domains.json`) with keys, names, and descriptions |
+| `get_domain_config` | `domain` | Active config (keywords, hypotheses, RSS sources, research directions) for one domain |
+
+### Search
+
+| Tool | Args | Description |
+|------|------|-------------|
+| `search_memory` | `query`, `days=60`, `top=5`, `source_type=""` | Semantic search over the 60-day memory window via DashScope `text-embedding-v3` + cosine similarity. `source_type` filters to e.g. `social`, `daily-pick`, `theory`. |
+
+> **Tool count: 12.** All tools are read-only; the server never writes to memory files.
+
 ---
 
 ## Rating Scale
@@ -91,6 +106,15 @@ Is the pipeline healthy? Any failed checks today?
 
 What were last month's predictions and did they come true?
 → get_predictions(domain="all")
+
+What domains is this Pulsar instance tracking?
+→ list_domains()
+
+What keywords does the AI app domain use for rating?
+→ get_domain_config(domain="ai_app")
+
+What evidence contradicted assumption V-003 last month?
+→ search_memory(query="V-003 contradicted", days=30, top=5)
 ```
 
 ---
@@ -100,5 +124,7 @@ What were last month's predictions and did they come true?
 - **Runtime:** Python 3.11 + `mcp 1.26.0` (FastMCP)
 - **Transport:** stdio (local process, zero network exposure)
 - **Memory directory:** `/home/admin/clawd/memory/` (overridable via `PULSAR_MEMORY_DIR`)
+- **Scripts directory:** auto-detected from `mcp_server.py` path (overridable via `PULSAR_SCRIPTS_DIR`); needs to contain `_domain_loader.py` and `semantic-search.py`
 - **Read-only:** the server never writes to memory files
 - **AI social intel** is stored as dated `.md` files (`_ai_social_YYYY-MM-DD.md`); `get_social_intel(domain="ai")` globs and returns the relevant range
+- **`search_memory` dependencies:** semantic index files (`memory/semantic-index/{chunks.jsonl,vectors.bin}`) must be built by `semantic-index-builder.py` first; if missing, the tool returns a friendly "index not built" message
