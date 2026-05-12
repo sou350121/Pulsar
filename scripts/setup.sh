@@ -205,6 +205,17 @@ safe_write "$MEMORY_DIR/${DOMAIN_KEY}-active-config.json" "$ACTIVE"
   cp "$MEMORY_DIR/${DOMAIN_KEY}-active-config.json" "$MEMORY_DIR/active-config.json" && \
   ok "Linked as active-config.json"
 
+# Mirror to specific filenames the (currently hardcoded) collectors read:
+# ai-app-rss-collect.py reads `ai-app-active-config.json` and rate-vla-daily
+# reads `vla-active-config.json`. Without this mirror the keywords_A/B in the
+# preset never reach the rating engine (silent degradation, not visible
+# failure — verified end-to-end during the ai-news preset deploy test).
+for alt in ai-app-active-config.json vla-active-config.json; do
+  alt_dest="$MEMORY_DIR/$alt"
+  [[ -f "$alt_dest" ]] || cp "$MEMORY_DIR/${DOMAIN_KEY}-active-config.json" "$alt_dest"
+done
+ok "Mirrored to ai-app-active-config.json + vla-active-config.json"
+
 # Preset assumptions / jobs: copy if available (preset path only)
 if [[ -n "$PRESET" ]]; then
   [[ -f "$PRESET_PATH/assumptions.json" ]] && \
@@ -291,13 +302,28 @@ echo "  3. $PYTHON $MCP_SERVER                      # test MCP server"
 echo "  4. Schedule the first cron via Moltbot. Pulsar cron jobs use --message"
 echo "     with the identity-frame pattern (bare commands are silently skipped):"
 echo ""
+# Pick the right collector for the next-step example: if a preset was used,
+# point at the actual script it deploys (ai-app-rss-collect.py for the
+# ai-news preset). Otherwise fall back to ${DOMAIN_KEY}-rss-collect.py which
+# the user is expected to author themselves.
+if [[ -n "$PRESET" && -f "$SCRIPTS_DIR/ai-app-rss-collect.py" ]]; then
+  EXAMPLE_RSS="$SCRIPTS_DIR/ai-app-rss-collect.py"
+else
+  EXAMPLE_RSS="$SCRIPTS_DIR/${DOMAIN_KEY}-rss-collect.py"
+fi
 echo "       moltbot cron add \\\\"
 echo "         --name '${DOMAIN_NAME} RSS' \\\\"
 echo "         --cron '0 9 * * *' \\\\"
 echo "         --tz 'Asia/Shanghai' \\\\"
 echo "         --session isolated \\\\"
 echo "         --timeout-seconds 600 \\\\"
-echo "         --message \$'你是「${DOMAIN_NAME} RSS」定时任务。严格执行：\\\\n1) 运行：timeout 540 python3 $SCRIPTS_DIR/${DOMAIN_KEY}-rss-collect.py\\\\n2) 退出码0=正常，非0=错误\\\\n3) 脚本执行完毕后绝对静默'"
+echo "         --message \$'你是「${DOMAIN_NAME} RSS」定时任务。严格执行：\\\\n1) 运行：timeout 540 python3 $EXAMPLE_RSS\\\\n2) 退出码0=正常，非0=错误\\\\n3) 脚本执行完毕后绝对静默'"
+if [[ -n "$PRESET" ]]; then
+  echo ""
+  echo "       # Tip: the ai-news preset already shipped a staged jobs.json at"
+  echo "       # $HOME/.openclaw/cron/jobs.${PRESET}.staged.json — review then 'cp' it"
+  echo "       # to ~/.openclaw/cron/jobs.json instead of typing cron-add by hand."
+fi
 echo ""
 echo "  5. Docs: https://github.com/sou350121/Pulsar/blob/main/docs/multi-domain.md"
 echo ""
