@@ -60,8 +60,7 @@ def _gh_fetch(path, token):
 
 def _extract_summary(content, max_lines=50):
     """Extract headings + key table rows as compact summary."""
-    lines = content.split("
-")
+    lines = content.split("\n")
     out = []
     for line in lines:
         s = line.strip()
@@ -70,8 +69,7 @@ def _extract_summary(content, max_lines=50):
         elif s.startswith("|") and not s.startswith("|-"):
             if len(out) < max_lines:
                 out.append(s)
-    return "
-".join(out[:max_lines])
+    return "\n".join(out[:max_lines])
 
 def _latest_adoption():
     """Load latest gh-adoption-*.json."""
@@ -113,8 +111,7 @@ def main():
         content = _gh_fetch(path, token)
         if content:
             notes[key] = _extract_summary(content)
-            print("%s: %d chars → %d summary lines" % (key, len(content), notes[key].count("
-") + 1))
+            print("%s: %d chars → %d summary lines" % (key, len(content), notes[key].count("\n") + 1))
 
     result["community_notes"] = notes
 
@@ -122,8 +119,7 @@ def main():
     tmp = OUT_PATH + ".tmp"
     with open(tmp, "w") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
-        f.write("
-")
+        f.write("\n")
     os.rename(tmp, OUT_PATH)
     print("Written: %s" % OUT_PATH)
 
