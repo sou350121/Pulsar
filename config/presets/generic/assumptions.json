@@ -1,0 +1,54 @@
+{
+  "generated": "{{TODAY}}",
+  "domain": "{{DOMAIN_KEY}}",
+  "description": "Scaffold for your domain's working hypotheses. Replace every {{PLACEHOLDER}} and add as many entries as you need.",
+  "assumptions": [
+    {
+      "id": "GEN-001",
+      "status": "active",
+      "domain": "{{DOMAIN_KEY}}",
+      "text": "{{HYPOTHESIS_1}}",
+      "hypothesis": "{{HYPOTHESIS_1}}",
+      "confidence": 0.5,
+      "invalidation_conditions": [
+        "{{INVALIDATION_1A}}",
+        "{{INVALIDATION_1B}}"
+      ],
+      "keywords": ["{{HYPO_1_KEYWORD_1}}", "{{HYPO_1_KEYWORD_2}}"],
+      "created": "{{TODAY}}",
+      "last_updated": "{{TODAY}}",
+      "source": "preset:generic"
+    },
+    {
+      "id": "GEN-002",
+      "status": "active",
+      "domain": "{{DOMAIN_KEY}}",
+      "text": "{{HYPOTHESIS_2}}",
+      "hypothesis": "{{HYPOTHESIS_2}}",
+      "confidence": 0.5,
+      "invalidation_conditions": [
+        "{{INVALIDATION_2A}}"
+      ],
+      "keywords": ["{{HYPO_2_KEYWORD_1}}"],
+      "created": "{{TODAY}}",
+      "last_updated": "{{TODAY}}",
+      "source": "preset:generic"
+    },
+    {
+      "id": "GEN-003",
+      "status": "active",
+      "domain": "{{DOMAIN_KEY}}",
+      "text": "{{HYPOTHESIS_3}}",
+      "hypothesis": "{{HYPOTHESIS_3}}",
+      "confidence": 0.5,
+      "invalidation_conditions": [
+        "{{INVALIDATION_3A}}"
+      ],
+      "keywords": ["{{HYPO_3_KEYWORD_1}}"],
+      "created": "{{TODAY}}",
+      "last_updated": "{{TODAY}}",
+      "source": "preset:generic"
+    }
+  ],
+  "last_calibration_update": null
+}

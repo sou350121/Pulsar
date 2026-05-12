@@ -1,0 +1,88 @@
+{
+  "generated": "2026-05-12",
+  "domain": "ai_news",
+  "description": "Five working hypotheses about the AI/ML field, tracked by Pulsar's calibration loop. Confidence is a 0-1 prior — calibration jobs adjust it based on observed signals.",
+  "assumptions": [
+    {
+      "id": "AI-001",
+      "status": "active",
+      "domain": "ai_news",
+      "text": "Open-source models reach within 6 months of frontier closed models on standard benchmarks.",
+      "hypothesis": "Open-source models reach within 6 months of frontier closed models on standard benchmarks.",
+      "confidence": 0.55,
+      "invalidation_conditions": [
+        "open-weights leader lags closed frontier by >9 months on MMLU/GPQA/SWE-bench for 2 consecutive quarters",
+        "no open release within 6 months of a flagship closed launch"
+      ],
+      "keywords": ["open-source", "open weights", "benchmark", "frontier", "Llama", "DeepSeek", "Qwen", "Mistral"],
+      "created": "2026-05-12",
+      "last_updated": "2026-05-12",
+      "source": "preset:ai-news"
+    },
+    {
+      "id": "AI-002",
+      "status": "active",
+      "domain": "ai_news",
+      "text": "Agentic multi-step replaces single-shot prompting in 60%+ of production apps by EOY 2026.",
+      "hypothesis": "Agentic multi-step replaces single-shot prompting in 60%+ of production apps by EOY 2026.",
+      "confidence": 0.45,
+      "invalidation_conditions": [
+        "industry surveys at EOY 2026 show <40% adoption of multi-step agent flows in production",
+        "major frameworks (LangChain/LlamaIndex/AutoGen-class) deprecate agent abstractions"
+      ],
+      "keywords": ["agent", "agentic", "multi-step", "tool use", "production", "workflow"],
+      "created": "2026-05-12",
+      "last_updated": "2026-05-12",
+      "source": "preset:ai-news"
+    },
+    {
+      "id": "AI-003",
+      "status": "active",
+      "domain": "ai_news",
+      "text": "Inference cost per token for equivalent capability drops at least 5x year-over-year.",
+      "hypothesis": "Inference cost per token for equivalent capability drops at least 5x year-over-year.",
+      "confidence": 0.65,
+      "invalidation_conditions": [
+        "frontier-equivalent token prices flat or up for 2 consecutive quarters",
+        "no new sub-quadratic / MoE / distillation release lands a >2x price cut"
+      ],
+      "keywords": ["inference cost", "pricing", "tokens", "MoE", "distillation", "quantization", "efficient"],
+      "created": "2026-05-12",
+      "last_updated": "2026-05-12",
+      "source": "preset:ai-news"
+    },
+    {
+      "id": "AI-004",
+      "status": "active",
+      "domain": "ai_news",
+      "text": "MCP or an equivalent protocol becomes the de-facto standard for AI tool / context integration.",
+      "hypothesis": "MCP or an equivalent protocol becomes the de-facto standard for AI tool / context integration.",
+      "confidence": 0.55,
+      "invalidation_conditions": [
+        "2+ major model vendors ship competing, incompatible tool protocols and refuse interop",
+        "MCP adoption stalls — fewer than 5 production integrations land in any given month for a full quarter"
+      ],
+      "keywords": ["MCP", "tool integration", "protocol", "context", "interop", "function calling"],
+      "created": "2026-05-12",
+      "last_updated": "2026-05-12",
+      "source": "preset:ai-news"
+    },
+    {
+      "id": "AI-005",
+      "status": "active",
+      "domain": "ai_news",
+      "text": "RAG gets subsumed by long-context plus agent-driven retrieval, becoming less architecturally distinct.",
+      "hypothesis": "RAG gets subsumed by long-context plus agent-driven retrieval, becoming less architecturally distinct.",
+      "confidence": 0.35,
+      "invalidation_conditions": [
+        "RAG remains a primary architectural pattern in production case studies through 2026",
+        "long-context models continue to underperform retrieval pipelines on standard QA benchmarks"
+      ],
+      "keywords": ["RAG", "long-context", "retrieval", "agent retrieval", "vector database"],
+      "created": "2026-05-12",
+      "last_updated": "2026-05-12",
+      "source": "preset:ai-news"
+    }
+  ],
+  "last_calibration_update": null
+}

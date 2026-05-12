@@ -1,0 +1,56 @@
+{
+  "tag": "{{DOMAIN_KEY}}-active-config",
+  "version": 1,
+  "last_updated": "{{TODAY}}",
+  "updated_by": "preset:generic",
+  "domain_key": "{{DOMAIN_KEY}}",
+  "domain_name": "{{DOMAIN_NAME}}",
+  "research_directions": {
+    "primary": {
+      "name": "{{PRIMARY_DIRECTION_NAME}}",
+      "slug": "{{PRIMARY_DIRECTION_SLUG}}",
+      "keywords": [
+        "{{PRIMARY_KEYWORD_1}}",
+        "{{PRIMARY_KEYWORD_2}}",
+        "{{PRIMARY_KEYWORD_3}}"
+      ],
+      "tracking_level": "deep",
+      "notes": "Primary focus area — papers matching these keywords are prioritised."
+    },
+    "team": [
+      {
+        "name": "{{TEAM_DIRECTION_NAME}}",
+        "slug": "{{TEAM_DIRECTION_SLUG}}",
+        "keywords": [
+          "{{TEAM_KEYWORD_1}}",
+          "{{TEAM_KEYWORD_2}}"
+        ],
+        "tracking_level": "signal_only"
+      }
+    ]
+  },
+  "keywords_A": [
+    "{{KEYWORD_A_1}}",
+    "{{KEYWORD_A_2}}",
+    "{{KEYWORD_A_3}}"
+  ],
+  "keywords_B": [
+    "{{KEYWORD_B_1}}",
+    "{{KEYWORD_B_2}}"
+  ],
+  "institutions": [
+    "{{INSTITUTION_1}}",
+    "{{INSTITUTION_2}}"
+  ],
+  "rss_sources": [
+    {
+      "id": "{{RSS_ID_1}}",
+      "name": "{{RSS_NAME_1}}",
+      "url": "{{RSS_URL_1}}",
+      "tier": "primary",
+      "type": "academic"
+    }
+  ],
+  "notes": "Scaffold preset — replace every {{PLACEHOLDER}} before deploying. See docs/deployment/your-own-domain.md for the walkthrough.",
+  "_changelog": []
+}

@@ -27,6 +27,8 @@ import tempfile
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPTS_DIR.parent
+PRESETS_DIR = REPO_ROOT / "config" / "presets"
 
 # Two classes of smoke-runnable script:
 #   ALWAYS_OK: must exit 0 even with an empty memory dir (writes empty output)
@@ -94,6 +96,44 @@ def shell_check(quiet=False):
             fails.append((name, "timeout"))
             print("  shell FAIL %s — timeout" % name)
     return fails
+
+
+def preset_check(quiet=False):
+    """JSON-parse every config/presets/*/*.json and report per-preset OK/FAIL.
+
+    Returns (fails, total_checked, preset_count) so the summary can show
+    preset=N/M coverage.
+    """
+    import json
+    fails = []
+    total_checked = 0
+    presets = []
+    if not PRESETS_DIR.exists():
+        if not quiet:
+            print("  preset SKIP — config/presets/ does not exist")
+        return fails, 0, 0
+    for preset_dir in sorted(p for p in PRESETS_DIR.iterdir() if p.is_dir()):
+        presets.append(preset_dir.name)
+        json_files = sorted(preset_dir.glob("*.json"))
+        if not json_files:
+            fails.append((preset_dir.name, "no JSON files"))
+            print("  preset FAIL %s — no JSON files found" % preset_dir.name)
+            continue
+        preset_fails = []
+        for jf in json_files:
+            total_checked += 1
+            try:
+                json.loads(jf.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as e:
+                preset_fails.append((jf.name, str(e)[:120]))
+                fails.append(("%s/%s" % (preset_dir.name, jf.name), str(e)[:120]))
+        if preset_fails:
+            for name, err in preset_fails:
+                print("  preset FAIL %s/%s — %s" % (preset_dir.name, name, err))
+        elif not quiet:
+            files_str = ", ".join(f.name for f in json_files)
+            print("  preset OK   %s  (%s)" % (preset_dir.name, files_str))
+    return fails, total_checked, len(presets)
 
 
 def helper_check(quiet=False):
@@ -188,20 +228,28 @@ def main():
     shell_fails = shell_check(args.quiet)
 
     if args.parse:
+        preset_fails, preset_count, preset_total = [], 0, 0
         helper_fails = []
         smoke_fails = []
     else:
+        # Slot preset_check between shell_check and helper_check
+        print("\n[check] preset JSON validity (config/presets/)")
+        preset_fails, _preset_files_checked, preset_total = preset_check(args.quiet)
+        preset_count = preset_total - len({name.split("/")[0] for name, _ in preset_fails})
+
         print("\n[check] helper imports")
         helper_fails = helper_check(args.quiet)
         total_smoke = len(SMOKE_ALWAYS_OK) + len(SMOKE_NEEDS_DATA)
         print("\n[check] smoke-run leaves (%d scripts, empty memory dir)" % total_smoke)
         smoke_fails = smoke_check(args.quiet)
 
-    total = len(parse_fails) + len(shell_fails) + len(helper_fails) + len(smoke_fails)
+    total = (len(parse_fails) + len(shell_fails) + len(preset_fails)
+             + len(helper_fails) + len(smoke_fails))
     total_smoke = len(SMOKE_ALWAYS_OK) + len(SMOKE_NEEDS_DATA)
-    print("\n[check] summary: parse=%d/%d shell=%d/%d helpers=%d/%d smoke=%d/%d"
+    print("\n[check] summary: parse=%d/%d shell=%d/%d preset=%d/%d helpers=%d/%d smoke=%d/%d"
           % (len(parse_fails), len(list(SCRIPTS_DIR.glob('*.py'))),
              len(shell_fails), len(SHELL_SCRIPTS),
+             preset_count, preset_total,
              len(helper_fails), len(REQUIRED_HELPERS),
              len(smoke_fails), total_smoke))
     if total == 0:

@@ -1,0 +1,167 @@
+{
+  "tag": "ai_news-active-config",
+  "version": 1,
+  "last_updated": "2026-05-12",
+  "updated_by": "preset:ai-news",
+  "domain_key": "ai_news",
+  "domain_name": "AI News & Research",
+  "research_directions": {
+    "primary": {
+      "name": "Agentic Systems & LLM Frontiers",
+      "slug": "agentic-llm",
+      "keywords": [
+        "agent",
+        "agentic",
+        "tool use",
+        "MCP",
+        "LLM",
+        "reasoning",
+        "RAG",
+        "long-context",
+        "function calling",
+        "multi-agent"
+      ],
+      "tracking_level": "deep",
+      "notes": "Primary focus: how LLM-based agents are built, evaluated, and deployed. Papers / posts matching these get prioritised."
+    },
+    "team": [
+      {
+        "name": "Model Training & Alignment",
+        "slug": "training-alignment",
+        "keywords": [
+          "fine-tun",
+          "RLHF",
+          "DPO",
+          "SFT",
+          "instruction tuning",
+          "preference learning",
+          "constitutional AI",
+          "post-training"
+        ],
+        "tracking_level": "signal_only"
+      },
+      {
+        "name": "Foundation Model Releases",
+        "slug": "model-releases",
+        "keywords": [
+          "GPT",
+          "Claude",
+          "Gemini",
+          "Llama",
+          "Mistral",
+          "DeepSeek",
+          "Qwen",
+          "release",
+          "open weights",
+          "model card"
+        ],
+        "tracking_level": "signal_only"
+      },
+      {
+        "name": "Generative Media",
+        "slug": "generative-media",
+        "keywords": [
+          "diffusion",
+          "image generation",
+          "video generation",
+          "text-to-image",
+          "text-to-video",
+          "flow matching",
+          "rectified flow"
+        ],
+        "tracking_level": "signal_only"
+      }
+    ]
+  },
+  "keywords_A": [
+    "LLM",
+    "transformer",
+    "agent",
+    "RAG",
+    "fine-tun",
+    "RLHF",
+    "DPO",
+    "embedding",
+    "MCP",
+    "tool use",
+    "agentic",
+    "GPT",
+    "Claude",
+    "Gemini",
+    "diffusion"
+  ],
+  "keywords_B": [
+    "AI",
+    "machine learning",
+    "neural network",
+    "deep learning"
+  ],
+  "institutions": [
+    "OpenAI",
+    "Anthropic",
+    "Google DeepMind",
+    "Meta",
+    "Mistral",
+    "Hugging Face",
+    "DeepSeek",
+    "Alibaba"
+  ],
+  "rss_sources": [
+    {
+      "id": "arxiv-cs-ai",
+      "name": "arXiv cs.AI",
+      "url": "https://export.arxiv.org/rss/cs.AI",
+      "tier": "primary",
+      "type": "academic"
+    },
+    {
+      "id": "arxiv-cs-cl",
+      "name": "arXiv cs.CL",
+      "url": "https://export.arxiv.org/rss/cs.CL",
+      "tier": "primary",
+      "type": "academic"
+    },
+    {
+      "id": "huggingface-blog",
+      "name": "Hugging Face Blog",
+      "url": "https://huggingface.co/blog/feed.xml",
+      "tier": "primary",
+      "type": "industry"
+    },
+    {
+      "id": "lilian-weng",
+      "name": "Lil'Log (Lilian Weng)",
+      "url": "https://lilianweng.github.io/index.xml",
+      "tier": "primary",
+      "type": "expert-blog"
+    },
+    {
+      "id": "sebastian-raschka",
+      "name": "Ahead of AI (Sebastian Raschka)",
+      "url": "https://magazine.sebastianraschka.com/feed",
+      "tier": "primary",
+      "type": "expert-blog"
+    },
+    {
+      "id": "the-batch",
+      "name": "The Batch (DeepLearning.AI)",
+      "url": "https://www.deeplearning.ai/the-batch/feed/",
+      "tier": "primary",
+      "type": "newsletter"
+    },
+    {
+      "id": "eleuther-blog",
+      "name": "EleutherAI Blog",
+      "url": "https://blog.eleuther.ai/index.xml",
+      "tier": "secondary",
+      "type": "research-org"
+    }
+  ],
+  "notes": "Public-only preset: every RSS source above is reachable without an API key. Edit keywords_A/B to tune signal quality. keywords_A = high-priority hits, keywords_B = secondary nets. Institutions list is used by the LLM rating prompt for affiliation weighting.",
+  "_changelog": [
+    {
+      "date": "2026-05-12",
+      "change": "v1: initial AI news preset shipped with Pulsar."
+    }
+  ]
+}
