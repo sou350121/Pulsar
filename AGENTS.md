@@ -45,6 +45,24 @@ Notable slots (Asia/Shanghai TZ):
 
 Deep-dive slots are FIFO-queued with water-level quota gates; on Fridays the daytime deep-dive slots skip in favor of weekly deep-dive runs.
 
+### When to enable advanced capabilities
+
+Most P1/P2 capabilities have data dependencies. Enabling them before the
+upstream collectors have run a few days produces empty or misleading output.
+See [docs/use-cases/README.md#when-to-enable-what](docs/use-cases/README.md#when-to-enable-what)
+for the full timeline; the short version:
+
+- **Day 1**: MCP server, setup, Devil's Advocate
+- **Day 3+**: Field-State Trigger, Cross-domain Rule Engine v2
+- **Day 7+**: Quality Drift Detector
+- **Day 14+**: Entity Tracker queries, GitHub Adoption analysis
+- **Day 28+**: Calibration aggregation, Upstream Monitor
+- **Day 60+**: Semantic Memory Search at full quality
+
+`python3 scripts/check-pipeline.py` works from day 0 — it verifies the scripts
+parse, helpers import, and the leaf mechanical scripts handle empty memory
+correctly. Run it after `setup.sh` and after any environment change.
+
 ### Scheduling a new script
 
 After you've copied the relevant scripts and verified they run manually,

@@ -781,6 +781,9 @@ Pulsar 的内部分层参考认知有机体设计，而非传统数据管道：
 | 文档 | 内容 |
 |------|------|
 | [AGENTS.md](AGENTS.md) | 完整部署指南：密钥配置 · 路径说明 · 常见问题 |
+| [docs/architecture.md](docs/architecture.md) | 4 层模型 · 三道去重 · 自我纠错闭环 · 端到端时序 |
+| [docs/use-cases/README.md](docs/use-cases/README.md) | 全部 14 项能力索引——每项做什么、状态、何时启用 |
+| [docs/mcp.md](docs/mcp.md) | 12 工具 MCP API 参考 |
 | [scripts/SCRIPTS.md](scripts/SCRIPTS.md) | 所有 pipeline 脚本的完整 DAG 图 · 每个脚本的输入输出 |
 | [VLA-Handbook](https://github.com/sou350121/VLA-Handbook) | 参考 VLA 知识库（实时输出） |
 | [Agent-Playbook](https://github.com/sou350121/Agent-Playbook) | 参考 AI 工具知识库（实时输出） |

@@ -811,6 +811,9 @@ The table below reflects debate from three perspectives (product strategy, engin
 | Document | Contents |
 |----------|---------|
 | [AGENTS.md](AGENTS.md) | Full deployment guide: key config · path reference · troubleshooting |
+| [docs/architecture.md](docs/architecture.md) | 4-layer model · 3-pass dedup · closed self-correction loop · end-to-end timing |
+| [docs/use-cases/README.md](docs/use-cases/README.md) | Index of all 14 capabilities — what each does, status, when to enable |
+| [docs/mcp.md](docs/mcp.md) | 12-tool MCP API reference |
 | [scripts/SCRIPTS.md](scripts/SCRIPTS.md) | Full DAG of all pipeline scripts · I/O for each script |
 | [VLA-Handbook](https://github.com/sou350121/VLA-Handbook) | Reference VLA knowledge repo (live output) |
 | [Agent-Playbook](https://github.com/sou350121/Agent-Playbook) | Reference AI tools knowledge repo (live output) |
