@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # Pulsar setup.sh — guided first-time deployment
-# Usage: bash setup.sh [--memory-dir PATH] [--non-interactive]
+# Usage:
+#   bash setup.sh                              # full interactive
+#   bash setup.sh --preset ai-news             # use preset (skip domain/RSS prompts)
+#   bash setup.sh --no-telegram                # skip TG prompts (output via GitHub/JSON only)
+#   bash setup.sh --provider openai            # explicit LLM provider (else auto-detect from key)
+#   bash setup.sh --memory-dir /path/to/memory # custom memory location
+#   bash setup.sh --non-interactive            # zero prompts (env vars + flags only)
 # Supports: Amazon Linux / RHEL / Ubuntu / Debian / macOS
 set -euo pipefail
 
@@ -15,17 +21,38 @@ PULSAR_HOME="${PULSAR_HOME:-$HOME/clawd}"
 MEMORY_DIR="${PULSAR_MEMORY_DIR:-$PULSAR_HOME/memory}"
 SCRIPTS_DIR="$PULSAR_HOME/scripts"
 TEMPLATES_DIR="$SCRIPTS_DIR/templates"
+PRESETS_DIR="$PULSAR_HOME/config/presets"
 ENV_FILE="$HOME/.clawdbot/.env"
 TODAY="$(date +%Y-%m-%d)"
 NON_INTERACTIVE=0
+PRESET=""
+NO_TELEGRAM=0
+PROVIDER=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --memory-dir)      MEMORY_DIR="$2"; shift 2 ;;
     --non-interactive) NON_INTERACTIVE=1; shift ;;
-    *) die "Unknown option: $1" ;;
+    --preset)          PRESET="$2"; shift 2 ;;
+    --no-telegram)     NO_TELEGRAM=1; shift ;;
+    --provider)        PROVIDER="$2"; shift 2 ;;
+    --help|-h)         sed -n '2,9p' "$0"; exit 0 ;;
+    *) die "Unknown option: $1 (try --help)" ;;
   esac
 done
+
+# Auto-detect LLM provider from common API key prefixes if not explicit.
+# Note: DashScope and OpenAI both use 'sk-' so we look at length + structure.
+detect_provider() {
+  local key="$1"
+  if   [[ "$key" =~ ^sk-or- ]];        then echo "openrouter"
+  elif [[ "$key" =~ ^sk-ant- ]];       then echo "anthropic"
+  elif [[ "$key" =~ ^gsk_ ]];          then echo "groq"
+  elif [[ "$key" =~ ^sk-proj- ]];      then echo "openai"
+  elif [[ "${#key}" -ge 48 && "$key" =~ ^sk- ]]; then echo "openai"
+  elif [[ "$key" =~ ^sk- ]];           then echo "dashscope"
+  else echo "dashscope"; fi
+}
 
 prompt() {
   local var="$1" question="$2" default="${3:-}"
@@ -39,6 +66,10 @@ prompt() {
 
 prompt_secret() {
   local var="$1" question="$2"
+  # Honour a pre-set env var even in interactive mode — lets users pre-fill via
+  # `LLM_API_KEY=... bash setup.sh` without touching their shell history.
+  local existing="${!var:-}"
+  if [[ -n "$existing" ]]; then ok "$var supplied via env"; return; fi
   if [[ $NON_INTERACTIVE -eq 1 ]]; then eval "${var}=''"; return; fi
   ask "$question (hidden): "; read -rs input; echo
   [[ -z "$input" ]] && die "Required: $question"
@@ -91,21 +122,50 @@ fi
 
 # ── Step 3: collect inputs ───────────────────────────────────────────────────
 info "Step 3/6 — Configuration ..."
+
+# Preset path: skip the domain/keyword prompts (preset already has those values).
+if [[ -n "$PRESET" ]]; then
+  PRESET_PATH="$PRESETS_DIR/$PRESET"
+  [[ -d "$PRESET_PATH" ]] || die "Preset not found: $PRESET_PATH (try: ls $PRESETS_DIR)"
+  ok "Using preset: $PRESET ($PRESET_PATH)"
+  DOMAIN_KEY="${DOMAIN_KEY:-$PRESET}"
+  DOMAIN_NAME="${DOMAIN_NAME:-Pulsar — $PRESET}"
+  DOMAIN_DESC="${DOMAIN_DESC:-Preset deployment: $PRESET}"
+fi
+
 echo ""; echo "  Answer the prompts. Press Enter to accept [defaults]."; echo ""
 
-prompt       LLM_PROVIDER      "LLM provider (dashscope/openai)" "dashscope"
 prompt_secret LLM_API_KEY      "LLM API key"
-prompt_secret GITHUB_TOKEN     "GitHub personal access token (repo scope)"
-prompt       GITHUB_USER       "GitHub username or org" ""
-prompt       GITHUB_REPO       "GitHub archive repo name" "Research-Archive"
-prompt       TG_ACCOUNT        "Telegram account name (moltbot)" "default"
-prompt       TG_TARGET         "Telegram chat ID" ""
-prompt       DOMAIN_KEY        "Domain key slug (e.g. vla, bio, ai_app)" "research"
-prompt       DOMAIN_NAME       "Domain display name" "Research"
-prompt       DOMAIN_DESC       "Domain description" "My research domain"
-prompt       PRIMARY_DIRECTION "Primary research direction" "Core Topic"
-prompt       PRIMARY_SLUG      "Direction slug (no spaces)" "core-topic"
-prompt       PRIMARY_KW        "Primary keywords (comma-separated)" "keyword1, keyword2"
+if [[ -z "$PROVIDER" ]]; then
+  PROVIDER="$(detect_provider "$LLM_API_KEY")"
+  ok "LLM provider auto-detected: $PROVIDER  (override with --provider)"
+fi
+LLM_PROVIDER="$PROVIDER"
+prompt_secret GITHUB_TOKEN     "GitHub personal access token (repo scope, or blank to skip)"
+prompt       GITHUB_USER       "GitHub username or org (blank to skip GitHub push)" ""
+prompt       GITHUB_REPO       "GitHub archive repo name" "Pulsar-Archive"
+
+if [[ $NO_TELEGRAM -eq 1 ]]; then
+  TG_ACCOUNT="none"; TG_TARGET="YOUR_TELEGRAM_CHAT_ID"
+  ok "--no-telegram: skipped Telegram prompts (jobs.json will keep the placeholder)"
+else
+  prompt     TG_ACCOUNT        "Telegram account name (or 'none' to disable)" "default"
+  if [[ "$TG_ACCOUNT" == "none" ]]; then
+    TG_TARGET="YOUR_TELEGRAM_CHAT_ID"
+  else
+    prompt   TG_TARGET         "Telegram chat ID (negative for channels)" ""
+  fi
+fi
+
+# Skip domain/keyword prompts under --preset (already supplied by the preset itself).
+if [[ -z "$PRESET" ]]; then
+  prompt     DOMAIN_KEY        "Domain key slug (e.g. vla, bio, ai_app)" "research"
+  prompt     DOMAIN_NAME       "Domain display name" "Research"
+  prompt     DOMAIN_DESC       "Domain description" "My research domain"
+  prompt     PRIMARY_DIRECTION "Primary research direction" "Core Topic"
+  prompt     PRIMARY_SLUG      "Direction slug (no spaces)" "core-topic"
+  prompt     PRIMARY_KW        "Primary keywords (comma-separated)" "keyword1, keyword2"
+fi
 echo ""
 
 # ── Step 4: write config files ───────────────────────────────────────────────
@@ -123,22 +183,40 @@ else
   [[ -f "$ENV_FILE" ]] && ok ".env already exists, skipping (non-interactive + no keys supplied)" || warn ".env not written: no API keys supplied in non-interactive mode"
 fi
 
-# active-config.json
-IFS=',' read -ra KWS <<< "$PRIMARY_KW"
-KW_ARRAY=$(printf '"%s",' "${KWS[@]}" | sed 's/[[:space:]]//g; s/,$//')
-ACTIVE=$(sed \
-  -e "s/{{DOMAIN_KEY}}/${DOMAIN_KEY}/g" \
-  -e "s/{{TODAY}}/${TODAY}/g" \
-  -e "s/{{PRIMARY_DIRECTION}}/${PRIMARY_DIRECTION}/g" \
-  -e "s/{{PRIMARY_SLUG}}/${PRIMARY_SLUG}/g" \
-  -e "s|\"{{PRIMARY_KEYWORD_1}}\", \"{{PRIMARY_KEYWORD_2}}\"|${KW_ARRAY}|g" \
-  -e "s|\"{{KEYWORD_A_1}}\", \"{{KEYWORD_A_2}}\", \"{{KEYWORD_A_3}}\"|${KW_ARRAY}|g" \
-  -e "s|\"{{KEYWORD_B_1}}\"|\"general\"|g" \
-  "$TEMPLATES_DIR/active-config.template.json")
+# active-config.json — preset path bypasses template substitution
+if [[ -n "$PRESET" && -f "$PRESET_PATH/active-config.json" ]]; then
+  ACTIVE=$(cat "$PRESET_PATH/active-config.json")
+  ok "Using preset active-config.json (keywords/RSS/institutions baked in)"
+else
+  IFS=',' read -ra KWS <<< "$PRIMARY_KW"
+  KW_ARRAY=$(printf '"%s",' "${KWS[@]}" | sed 's/[[:space:]]//g; s/,$//')
+  ACTIVE=$(sed \
+    -e "s/{{DOMAIN_KEY}}/${DOMAIN_KEY}/g" \
+    -e "s/{{TODAY}}/${TODAY}/g" \
+    -e "s/{{PRIMARY_DIRECTION}}/${PRIMARY_DIRECTION}/g" \
+    -e "s/{{PRIMARY_SLUG}}/${PRIMARY_SLUG}/g" \
+    -e "s|\"{{PRIMARY_KEYWORD_1}}\", \"{{PRIMARY_KEYWORD_2}}\"|${KW_ARRAY}|g" \
+    -e "s|\"{{KEYWORD_A_1}}\", \"{{KEYWORD_A_2}}\", \"{{KEYWORD_A_3}}\"|${KW_ARRAY}|g" \
+    -e "s|\"{{KEYWORD_B_1}}\"|\"general\"|g" \
+    "$TEMPLATES_DIR/active-config.template.json")
+fi
 safe_write "$MEMORY_DIR/${DOMAIN_KEY}-active-config.json" "$ACTIVE"
 [[ ! -f "$MEMORY_DIR/active-config.json" ]] && \
   cp "$MEMORY_DIR/${DOMAIN_KEY}-active-config.json" "$MEMORY_DIR/active-config.json" && \
   ok "Linked as active-config.json"
+
+# Preset assumptions / jobs: copy if available (preset path only)
+if [[ -n "$PRESET" ]]; then
+  [[ -f "$PRESET_PATH/assumptions.json" ]] && \
+    safe_write "$MEMORY_DIR/assumptions.json" "$(cat "$PRESET_PATH/assumptions.json")"
+  if [[ -f "$PRESET_PATH/jobs.json" ]]; then
+    STAGED="$HOME/.openclaw/cron/jobs.${PRESET}.staged.json"
+    mkdir -p "$(dirname "$STAGED")"
+    sed "s|/home/admin|${HOME}|g" "$PRESET_PATH/jobs.json" > "$STAGED"
+    ok "Staged preset cron jobs: $STAGED"
+    info "  → stop gateway then 'cp $STAGED ~/.openclaw/cron/jobs.json' to activate"
+  fi
+fi
 
 # domains.json
 DOMAINS=$(sed \
