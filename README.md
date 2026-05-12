@@ -6,7 +6,7 @@
 
 [中文](README_CN.md) / English
 
-<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">Issues</a> · <a href="AGENTS.md">Deployment Docs</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a>
+<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">Issues</a> · <a href="docs/architecture.md">Architecture</a> · <a href="AGENTS.md">Deployment</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a> · <a href="docs/mcp.md">MCP API</a>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://python.org)
@@ -526,7 +526,7 @@ This loop runs continuously. After enough cycles, the system's confidence scores
 
 These features are shipped in the public template but not surfaced in the bullet list above. Pick the ones relevant to your domain — they all run on the same 2 GB VPS profile.
 
-### Cross-domain Rule Engine v2 (7 built-in rules)
+### [Cross-domain Rule Engine v2](docs/use-cases/cross-domain-engine-v2.md) (7 built-in rules)
 
 `scripts/cross-domain-rule-engine.py` runs daily and surfaces signals that bridge two domains. Rules are deterministic (auditable, predictable) and the engine adds a one-sentence LLM "cross-domain significance" per insight batch.
 
@@ -544,7 +544,7 @@ Output: `memory/cross-domain-insight.json`; reports include the latest insights 
 
 ---
 
-### GitHub Issues Adoption Sensor (4 scripts)
+### [GitHub Issues Adoption Sensor](docs/use-cases/gh-issues-adoption-sensor.md) (4 scripts)
 
 A mechanical signal pipeline that watches **OSS adoption** in your domain via issue/PR velocity, not just star counts.
 
@@ -567,7 +567,7 @@ update-gh-field-notes.py  (push to your knowledge-base repo)
 
 ---
 
-### Field-State Trigger (mechanical, zero LLM)
+### [Field-State Trigger](docs/use-cases/field-state-trigger.md) (mechanical, zero LLM)
 
 `scripts/ai-field-state.py` evaluates the daily corpus against **6 trigger types** before any LLM step runs:
 

@@ -6,7 +6,7 @@
 
 [English](README.md) / 中文
 
-<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">问题反馈</a> · <a href="AGENTS.md">部署文档</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a>
+<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">问题反馈</a> · <a href="docs/architecture.md">架构</a> · <a href="AGENTS.md">部署文档</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a> · <a href="docs/mcp.md">MCP API</a>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://python.org)
@@ -526,7 +526,7 @@ candidates JSON          LLM output JSON           memory + GitHub + TG
 
 下面这些能力已经随公开模板一起发布，但概览段没展开。挑你领域用得到的部署即可——它们都跑在 2 GB VPS 配置里。
 
-### 跨域规则引擎 v2（7 条内建规则）
+### [跨域规则引擎 v2](docs/use-cases/cross-domain-engine-v2.md)（7 条内建规则）
 
 `scripts/cross-domain-rule-engine.py` 每天跑一次，把同时跨越两个领域的信号拎出来。规则是**确定性的**（可审计 / 可复现），引擎再给每批 insight 加一句 LLM 生成的「跨域意义」总结。
 
@@ -544,7 +544,7 @@ candidates JSON          LLM output JSON           memory + GitHub + TG
 
 ---
 
-### GitHub Issues 采纳度传感器（4 个脚本）
+### [GitHub Issues 采纳度传感器](docs/use-cases/gh-issues-adoption-sensor.md)（4 个脚本）
 
 机械化的 **OSS 采纳信号**管线——看 issue / PR 速度而非 star 数。
 
@@ -567,7 +567,7 @@ update-gh-field-notes.py  （推回你的知识库）
 
 ---
 
-### 场态触发器（机械化，零 LLM）
+### [场态触发器](docs/use-cases/field-state-trigger.md)（机械化，零 LLM）
 
 `scripts/ai-field-state.py` 在任何 LLM 阶段开始前，用 **6 类触发器**评估当日语料：
 

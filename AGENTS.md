@@ -14,9 +14,17 @@
 ## Pipeline Overview
 See `scripts/SCRIPTS.md` for full DAG and [`docs/architecture.md`](docs/architecture.md) for the 4-layer model + closed self-correction loop.
 
-## Cron Schedule (Reference)
+## Cron Schedule (Reference Deployment)
 
-The shipped template defines **33 cron jobs**. Notable slots (Asia/Shanghai TZ):
+> ⚠️ The slots below are from the **maintainer's live deployment**, not all of
+> them ship in `config/jobs.template.json`. The shipped template defines the
+> **33 core jobs**; the newer advanced scripts (field-state, GH adoption,
+> cross-domain v2) are intentionally **not pre-scheduled** because the right
+> cadence depends on your domain and signal volume. Add them via
+> `moltbot cron add --message "..."` (or by editing `~/.openclaw/cron/jobs.json`
+> while the gateway is stopped) once you've tuned the rest of the pipeline.
+
+Notable slots (Asia/Shanghai TZ):
 
 | Time | Job |
 |------|-----|
@@ -36,6 +44,26 @@ The shipped template defines **33 cron jobs**. Notable slots (Asia/Shanghai TZ):
 | 28th monthly | Calibration aggregation — confidence updates |
 
 Deep-dive slots are FIFO-queued with water-level quota gates; on Fridays the daytime deep-dive slots skip in favor of weekly deep-dive runs.
+
+### Scheduling a new script
+
+After you've copied the relevant scripts and verified they run manually,
+schedule them via Moltbot. Minimal recipe (replace the cron expression and
+script path):
+
+```bash
+moltbot cron add \
+  --name "Field-State Trigger" \
+  --cron "56 9 * * *" \
+  --session isolated \
+  --timeout 90000 \
+  --message $'你是「场态触发器」定时任务。严格执行：\n1) 运行：timeout 60 python3 ~/clawd/scripts/ai-field-state.py\n2) 退出码0=正常，非0=错误\n3) 脚本执行完毕后绝对静默'
+```
+
+Pulsar cron jobs need the identity-frame message pattern (`你是…定时任务`) — bare
+command strings cause the runtime to skip the tool call. Use `~` or
+`$HOME/clawd/...` once you've run the `find scripts/ -name "*.py" |
+xargs sed -i "s|/home/admin|/home/$USER|g"` substitution from the README.
 
 ## Key Scripts Added in Recent Releases
 

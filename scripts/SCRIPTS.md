@@ -1,6 +1,6 @@
 # Scripts Reference
 
-> Last updated: 2026-02-27
+> Last updated: 2026-05-12
 
 ## Naming Conventions
 
@@ -56,12 +56,47 @@ prep-ai-app-dedup.py        (shared dedup helper)
 ```
 prep-calibration-check.py   (daily 11:00 assumption scan)
 monthly-calibration-agg.py  (monthly aggregation + confidence update)
+quality-drift-check.py      (7-day rolling baseline + 30-day sustained-decay)
+ai-field-state.py           (mechanical zero-LLM trigger gate; 6 trigger types →
+                             memory/field-state-YYYY-MM-DD.json)
+cross-domain-rule-engine.py (v2: 7 built-in rules R001-R007 + LLM significance →
+                             memory/cross-domain-insight.json)
+entity-tracker.py           (90-day rolling index of authors/labs/methods/benchmarks)
+upstream-signal-monitor.py  (track 1-2 upstream domains for early signals)
+```
+
+## GitHub Issues Adoption Sensor
+
+A 4-script pipeline that watches an OSS-repo registry and infers
+adoption phases, the Daily Field Index (DFI), and cross-repo convergence.
+
+```
+collect-github-issues.py    (daily; tier-1 repos)
+       ↓
+  memory/gh-issues-YYYY-MM-DD.json
+       ↓
+compute-gh-adoption.py      (Fri; tier-1 + tier-2 → adoption phases + DFI)
+       ↓
+  memory/gh-adoption-YYYY-MM-DD.json
+       ↓
+update-gh-field-notes.py    (push back to PULSAR_FIELD_NOTES_REPO)
+prep-community-context.py   (bundle community notes + adoption snapshot
+                             into tmp file consumed by weekly reports)
+_gh_issues_config.py        (shared: registry of monitored repos,
+                             tier flags, method-family tags)
+```
+
+## Semantic Memory
+
+```
+semantic-index-builder.py   (DashScope text-embedding-v3, batch=10, incremental)
+semantic-search.py          (pure-Python cosine top-k)
 ```
 
 ## Watchdog and System Health
 
 ```
-daily-watchdog.py            (v6: 15 checks, self-healing, lockfile)
+daily-watchdog.py            (16 checks, self-healing, lockfile)
 emit-system-health.py        (emit system-health.json)
 evaluate-shadow-config.py    (A/B shadow config evaluator)
 gateway-preflight.py         (gateway connectivity check)

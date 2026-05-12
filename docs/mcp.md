@@ -9,26 +9,29 @@ Pulsar exposes its knowledge base as an [MCP (Model Context Protocol)](https://m
 pip install mcp   # requires Python 3.11+
 ```
 
-**Run:**
+**Run** (substitute your clone path; the script auto-detects sibling helpers):
 ```bash
-python3.11 /home/admin/clawd/scripts/mcp_server.py
+python3.11 ~/clawd/scripts/mcp_server.py
 ```
 
-**Claude Desktop** (`~/.config/claude/claude_desktop_config.json`):
+**Claude Desktop** (`~/.config/claude/claude_desktop_config.json`) — use an
+absolute path so Claude Desktop can resolve it under your home:
 ```json
 {
   "mcpServers": {
     "pulsar": {
       "command": "python3.11",
-      "args": ["/home/admin/clawd/scripts/mcp_server.py"]
+      "args": ["/Users/you/clawd/scripts/mcp_server.py"]
     }
   }
 }
 ```
 
-Override the memory directory:
+Override paths:
 ```bash
-PULSAR_MEMORY_DIR=/your/path python3.11 scripts/mcp_server.py
+PULSAR_MEMORY_DIR=/your/memory \
+PULSAR_SCRIPTS_DIR=/your/scripts \
+python3.11 mcp_server.py
 ```
 
 ---
@@ -123,7 +126,7 @@ What evidence contradicted assumption V-003 last month?
 
 - **Runtime:** Python 3.11 + `mcp 1.26.0` (FastMCP)
 - **Transport:** stdio (local process, zero network exposure)
-- **Memory directory:** `/home/admin/clawd/memory/` (overridable via `PULSAR_MEMORY_DIR`)
+- **Memory directory:** defaults to `~/clawd/memory/` (the reference deployment path) and is overridable via `PULSAR_MEMORY_DIR`
 - **Scripts directory:** auto-detected from `mcp_server.py` path (overridable via `PULSAR_SCRIPTS_DIR`); needs to contain `_domain_loader.py` and `semantic-search.py`
 - **Read-only:** the server never writes to memory files
 - **AI social intel** is stored as dated `.md` files (`_ai_social_YYYY-MM-DD.md`); `get_social_intel(domain="ai")` globs and returns the relevant range
