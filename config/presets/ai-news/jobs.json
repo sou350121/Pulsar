@@ -1,5 +1,5 @@
 {
-  "_comment": "AI News preset — minimal 4-job pipeline. setup.sh / quickstart.sh substitutes /home/admin -> $HOME before installing into ~/.openclaw/cron/jobs.json.",
+  "_comment": "AI News preset — 2-job MINIMAL pipeline verified end-to-end. Daily Report (LLM-orchestrated in production) and Daily Watchdog (VLA-specific health checks) are NOT included — see config/presets/ai-news/README.md for how to re-add them with proper configuration.",
   "jobs": [
     {
       "id": "0d503792-3801-4f69-8484-a59b58846ddc",
@@ -25,29 +25,6 @@
       "timeoutMs": 360000
     },
     {
-      "id": "ba89e553-03bb-4c7c-b0f9-c8f8627dbae0",
-      "agentId": "reports",
-      "name": "AI News — Daily Report",
-      "enabled": true,
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 8 * * *",
-        "tz": "Asia/Shanghai"
-      },
-      "sessionTarget": "isolated",
-      "wakeMode": "next-heartbeat",
-      "payload": {
-        "kind": "agentTurn",
-        "message": "你是「AI News Daily」定时任务。严格执行：\n1) 运行：timeout 300 python3 /home/admin/clawd/scripts/write-ai-app-daily.py\n2) 退出码0=正常，非0=错误\n3) 脚本执行完毕后绝对静默",
-        "deliver": false,
-        "channel": "telegram",
-        "to": "YOUR_TELEGRAM_CHAT_ID",
-        "model": "alibaba-cloud/qwen3.5-plus",
-        "bestEffortDeliver": true
-      },
-      "timeoutMs": 360000
-    },
-    {
       "id": "bd71948e-e180-495c-8b55-5881ced83779",
       "agentId": "reports",
       "name": "AI News — Calibration Check",
@@ -62,29 +39,6 @@
       "payload": {
         "kind": "agentTurn",
         "message": "你是「AI News Calibration」定时任务。严格执行：\n1) 运行：timeout 240 python3 /home/admin/clawd/scripts/prep-calibration-check.py\n2) 退出码0=正常，非0=错误\n3) 脚本执行完毕后绝对静默",
-        "deliver": false,
-        "channel": "telegram",
-        "to": "YOUR_TELEGRAM_CHAT_ID",
-        "model": "alibaba-cloud/qwen3.5-plus",
-        "bestEffortDeliver": true
-      },
-      "timeoutMs": 360000
-    },
-    {
-      "id": "8c185c55-5cfa-4bf4-996b-b1c5294d2773",
-      "agentId": "reports",
-      "name": "AI News — Daily Watchdog",
-      "enabled": true,
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 23 * * *",
-        "tz": "Asia/Shanghai"
-      },
-      "sessionTarget": "isolated",
-      "wakeMode": "next-heartbeat",
-      "payload": {
-        "kind": "agentTurn",
-        "message": "你是「AI News Watchdog」定时任务。严格执行：\n1) 运行：timeout 240 python3 /home/admin/clawd/scripts/daily-watchdog.py\n2) 退出码0=正常，非0=错误\n3) 脚本执行完毕后绝对静默",
         "deliver": false,
         "channel": "telegram",
         "to": "YOUR_TELEGRAM_CHAT_ID",

@@ -22,16 +22,26 @@ Filters: 15 high-priority keywords (`keywords_A`), 4 broad nets (`keywords_B`), 
 
 Tracks 5 hypotheses (`AI-001` through `AI-005`) covering open-source parity, agentic adoption, inference cost, MCP, and RAG's future. See `assumptions.json`.
 
-## The 4 cron jobs
+## The 2 cron jobs
 
-| Time (Asia/Shanghai) | Job | Script |
-|---|---|---|
-| 07:00 | RSS Collect | `ai-app-rss-collect.py` |
-| 08:00 | Daily Report | `write-ai-app-daily.py` |
-| 11:00 | Calibration Check | `prep-calibration-check.py` |
-| 23:00 | Daily Watchdog | `daily-watchdog.py` |
+| Time (Asia/Shanghai) | Job | Script | Verified |
+|---|---|---|---|
+| 07:00 | RSS Collect | `ai-app-rss-collect.py` | ✅ End-to-end (2653 fetched → 289 after keyword filter) |
+| 11:00 | Calibration Check | `prep-calibration-check.py` | ✅ End-to-end (40 signals matched against 5 hypotheses) |
 
-That's deliberately minimal. We **exclude** social-intel, SOTA tracker, release tracker, deep-dive, cross-domain, and biweekly jobs from the first deploy: those scripts read derived state that doesn't exist on day 1. Add them once `memory/` has a few days of accumulated signal — see [`docs/use-cases/README.md`](../../../docs/use-cases/README.md) for the "When to enable what" ladder.
+Both jobs are **verified to run cleanly** in a fresh sandbox `$HOME` after `quickstart.sh`. That is the bar this preset commits to — anything else is opt-in.
+
+### Why we excluded Daily Report and Watchdog from this preset
+
+The maintainer's full deployment has 33 cron jobs. We strip them down to 2 because the rest assume infrastructure that doesn't exist on a fresh ai-news install:
+
+- **Daily Report (`write-ai-app-daily.py`)** — in production this is **not** a direct script call; it's a multi-page LLM-agent prompt that reads RSS output, applies time-rules, dedups, and orchestrates write-ai-app-daily as a helper. The script alone requires `--date` and `--items-json` CLI args that the cron message doesn't supply. Adding it back means writing the agent prompt — see `config/jobs.template.json` for the production version.
+- **Daily Watchdog (`daily-watchdog.py`)** — 16 health checks, ~11 of which are VLA-specific (`vla_hotspots`, `vla_social`, `vla_sota`, …). On a pure ai-news deploy, those checks always FAIL and the watchdog hangs trying to self-heal by invoking missing VLA cron jobs.
+- **Social intel / SOTA / Release / Deep-dive / Cross-domain / Biweekly** — all read derived state that takes 7–60 days to accumulate. Add per the timeline in [`docs/use-cases/README.md`](../../../docs/use-cases/README.md#when-to-enable-what).
+
+### Re-adding excluded jobs
+
+When you're ready, copy entries from `config/jobs.template.json` into your `~/.openclaw/cron/jobs.json` (gateway stopped). Substitute `/home/admin` → `$HOME` and `YOUR_TELEGRAM_CHAT_ID` → your real ID. Restart the gateway. Start with one job at a time and watch `tail -F /tmp/moltbot-gateway.log`.
 
 ## Why scripts are named `ai-app-*`
 

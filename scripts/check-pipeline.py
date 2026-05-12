@@ -45,6 +45,20 @@ SMOKE_NEEDS_DATA = [
     {"name": "collect-github-issues.py", "expect_err": "no GITHUB_TOKEN found"},
 ]
 
+# Scripts the ai-news preset's cron jobs invoke. These have hardcoded
+# /home/admin paths that the install (setup.sh / quickstart.sh) is responsible
+# for substituting, so smoke-testing them here would falsely fail on an
+# un-substituted dev checkout. The preset_jobs_check() phase below validates
+# their EXISTENCE + that the preset's jobs.json references only scripts that
+# are in this list, catching the kind of drift that broke v1 of the preset
+# (Daily Report / Watchdog referenced but not actually runnable).
+PRESET_VERIFIED_CRON_SCRIPTS = {
+    "ai-news": [
+        "ai-app-rss-collect.py",
+        "prep-calibration-check.py",
+    ],
+}
+
 REQUIRED_HELPERS = [
     "_vla_expert.py",
     "_domain_loader.py",
@@ -134,6 +148,46 @@ def preset_check(quiet=False):
             files_str = ", ".join(f.name for f in json_files)
             print("  preset OK   %s  (%s)" % (preset_dir.name, files_str))
     return fails, total_checked, len(presets)
+
+
+def preset_jobs_check(quiet=False):
+    """For each preset with a jobs.json, verify every script referenced in a
+    cron message is on the verified-runnable allow-list. Catches drift like
+    'preset references Daily Report but Daily Report is broken end-to-end'.
+    """
+    import json, re
+    fails = []
+    if not PRESETS_DIR.exists():
+        return fails
+    cmd_re = re.compile(r"python3?\s+\S*?/?scripts/([a-zA-Z0-9_\-]+\.py)")
+    for preset_dir in sorted(p for p in PRESETS_DIR.iterdir() if p.is_dir()):
+        jobs_path = preset_dir / "jobs.json"
+        if not jobs_path.exists():
+            continue
+        allowed = set(PRESET_VERIFIED_CRON_SCRIPTS.get(preset_dir.name, []))
+        if not allowed:
+            if not quiet:
+                print("  preset-jobs SKIP %s — no verified-script allow-list defined" % preset_dir.name)
+            continue
+        try:
+            data = json.loads(jobs_path.read_text(encoding="utf-8"))
+        except Exception as e:
+            fails.append((preset_dir.name, "jobs.json unreadable: %s" % e))
+            continue
+        referenced = set()
+        for job in data.get("jobs", []):
+            msg = (job.get("payload", {}) or {}).get("message", "")
+            for m in cmd_re.findall(msg):
+                referenced.add(m)
+        unverified = referenced - allowed
+        if unverified:
+            fails.append((preset_dir.name, "unverified scripts: %s" % ", ".join(sorted(unverified))))
+            print("  preset-jobs FAIL %s — jobs.json references scripts not in allow-list: %s"
+                  % (preset_dir.name, ", ".join(sorted(unverified))))
+        elif not quiet:
+            print("  preset-jobs OK   %s  (%d job(s) referencing only verified scripts)"
+                  % (preset_dir.name, len(data.get("jobs", []))))
+    return fails
 
 
 def helper_check(quiet=False):
@@ -229,6 +283,7 @@ def main():
 
     if args.parse:
         preset_fails, preset_count, preset_total = [], 0, 0
+        preset_jobs_fails = []
         helper_fails = []
         smoke_fails = []
     else:
@@ -237,6 +292,9 @@ def main():
         preset_fails, _preset_files_checked, preset_total = preset_check(args.quiet)
         preset_count = preset_total - len({name.split("/")[0] for name, _ in preset_fails})
 
+        print("\n[check] preset jobs.json scripts are verified-runnable")
+        preset_jobs_fails = preset_jobs_check(args.quiet)
+
         print("\n[check] helper imports")
         helper_fails = helper_check(args.quiet)
         total_smoke = len(SMOKE_ALWAYS_OK) + len(SMOKE_NEEDS_DATA)
@@ -244,12 +302,17 @@ def main():
         smoke_fails = smoke_check(args.quiet)
 
     total = (len(parse_fails) + len(shell_fails) + len(preset_fails)
+             + len(preset_jobs_fails)
              + len(helper_fails) + len(smoke_fails))
     total_smoke = len(SMOKE_ALWAYS_OK) + len(SMOKE_NEEDS_DATA)
-    print("\n[check] summary: parse=%d/%d shell=%d/%d preset=%d/%d helpers=%d/%d smoke=%d/%d"
+    pjobs_total = sum(1 for n in PRESET_VERIFIED_CRON_SCRIPTS
+                      if (PRESETS_DIR / n / "jobs.json").exists())
+    print("\n[check] summary: parse=%d/%d shell=%d/%d preset=%d/%d preset-jobs=%d/%d "
+          "helpers=%d/%d smoke=%d/%d"
           % (len(parse_fails), len(list(SCRIPTS_DIR.glob('*.py'))),
              len(shell_fails), len(SHELL_SCRIPTS),
              preset_count, preset_total,
+             pjobs_total - len(preset_jobs_fails), pjobs_total,
              len(helper_fails), len(REQUIRED_HELPERS),
              len(smoke_fails), total_smoke))
     if total == 0:
