@@ -356,6 +356,26 @@ moltbot cron run <vla-hotspots-job-id> --force --timeout 180000 --expect-final
 
 Congratulations — Pulsar is live! 🎉
 
+#### 7. Verify the install
+
+After cloning (and any time you suspect drift), run the self-check:
+
+```bash
+python3 scripts/check-pipeline.py            # full check (~30 s)
+python3 scripts/check-pipeline.py --parse    # AST only, fast
+python3 scripts/check-pipeline.py --quiet    # suppress per-file OK lines
+```
+
+It does three things: AST-parses every script in `scripts/`, confirms the
+shared helpers (`_vla_expert.py`, `_domain_loader.py`, `_gh_issues_config.py`)
+are importable, and smoke-runs the leaf "mechanical" scripts (field-state,
+cross-domain, gh-adoption, community-context, gh-issues collector) against a
+temporary empty memory dir. Day-1 "no upstream data" exits are pinned to their
+expected error messages, so this check is meaningful even before your first
+real cron run.
+
+Exit code: `0` = all green, `1` = anything off.
+
 ---
 
 </details>
@@ -707,7 +727,7 @@ The included configuration tracks two domains simultaneously — VLA robotics re
 | Metric | Value |
 |--------|-------|
 | Scheduled jobs | **33** cron jobs across both domains |
-| Pipeline scripts | **55** across VLA and AI pipelines |
+| Pipeline scripts | **67** across VLA, AI, calibration, cross-domain, GH adoption, and semantic-memory pipelines |
 | Tracked hypotheses | **19** with monthly confidence auto-updates |
 | Watchdog checks | **16** health signals, **7** auto-recovery paths |
 | Cross-domain rules | **7** built-in rules (R001-R007) — VLA technique transfer, AI framework adoption, paradigm convergence, GitHub-repo convergence, hypothesis-driven transfer |
@@ -748,7 +768,9 @@ The table below reflects debate from three perspectives (product strategy, engin
 | **P0** | [**One-click deploy script**](docs/use-cases/one-click-deploy.md) | Interactive `setup.sh` that scaffolds `.env`, `active-config.json`, GitHub config, and first cron load in a single guided run | Reduces copy-and-adapt friction from ~1 hour to minutes; community adoption depends on this; first impression determines whether anyone clones beyond the original deployment | ✅ Done |
 | **P1** | [**Quality Drift Detector**](docs/use-cases/quality-drift-detector.md) | Track signal density, rating distribution, and LLM output quality per source; alert when metrics drop systematically over 3+ consecutive days | More fundamental than Spike Detector: a spike is a one-time event, drift is silent pipeline degradation. Watchdog already catches "did it run"; drift detection catches "is what it produces still meaningful" | ✅ Done |
 | **P1** | [**Agent Role-Switching**](docs/use-cases/agent-role-switching.md) *(requires 4 GB RAM)* | Refactor the three-stage chain into named roles — Reader, Analyst, Memory, Delivery — executed sequentially; each role can use a different model size | Sequential role-switching (not true parallel swarm) is the only architecture compatible with 2 GB servers. The value is model-level targeting: cheap model for Reader, strong model for Analyst, without rewriting the whole pipeline | ✅ Done |
-| **P1** | [**Cross-domain Rule Engine**](docs/use-cases/cross-domain-rule-engine.md) | User-defined deterministic rules for cross-domain signal bridging: `IF vla_rating:⚡ AND keyword IN ["diffusion", "flow matching"] THEN flag_for_ai_app_review` | LLM-generated cross-domain discovery produces too many false positives ("both domains mention transformers"). Deterministic rules are auditable, predictable, and encode the user's actual cross-domain hypotheses rather than letting the model guess | ✅ Done |
+| **P1** | [**Cross-domain Rule Engine**](docs/use-cases/cross-domain-rule-engine.md) → [v2](docs/use-cases/cross-domain-engine-v2.md) | User-defined deterministic rules for cross-domain signal bridging: `IF vla_rating:⚡ AND keyword IN ["diffusion", "flow matching"] THEN flag_for_ai_app_review` | LLM-generated cross-domain discovery produces too many false positives ("both domains mention transformers"). Deterministic rules are auditable, predictable, and encode the user's actual cross-domain hypotheses rather than letting the model guess | ✅ Done (v2: 7 rules + LLM significance) |
+| **P1** | [**Field-State Trigger**](docs/use-cases/field-state-trigger.md) | Zero-LLM gate that decides whether a daily deep-dive should run at all; 6 trigger types (breakthrough density, paradigm shift, consensus drift, silent decay, cross-domain pull, release clustering) | A pipeline that always generates a deep-dive eventually generates **noise deep-dives** on slow days. Field-state lets the system stay quiet with an auditable reason; bounds LLM cost without losing time-sensitive signals | ✅ Done |
+| **P2** | [**GitHub Issues Adoption Sensor**](docs/use-cases/gh-issues-adoption-sensor.md) | Watch OSS-repo issue/PR cadence (not stars) and infer adoption phase (incubation → growth → mainstream → maturity), Daily Field Index, and cross-repo convergence | Stars measure attention, not adoption. The maintainer-facing signal of "is this library winning" lives in issue cadence and contributor diversity; a 4-script pipeline turns that into a structured field map you can grep | ✅ Done |
 | **P2** | [**Spike Detector**](docs/use-cases/spike-detector.md) | Out-of-schedule alert when a keyword's signal density exceeds 3× its 7-day baseline within 24 hours; triggers push immediately, bypasses daily batch | Daily batch is insufficient for ⚡-level events: top-conference papers generate community debate within hours, not the next morning. Spike detection restores time-sensitivity without replacing the batch pipeline | ⏭️ Skipped |
 | **P2** | [**Devil's Advocate Report**](docs/use-cases/devils-advocate-report.md) | Each reasoning report appends a "Strongest Counterargument" section via a separate adversarial agent pass | Replaces "Debate mode": users don't need to read a full debate, they need the best objection in 2 sentences. Reduces confirmation bias in output without doubling report length; the prior framing added UX friction with no analytical gain | ✅ Done |
 | **P2** | [**Entity Tracker**](docs/use-cases/entity-tracker.md) | Extract `{author, lab, benchmark, method}` from every ⚡/🔧-rated signal into a structured JSON index, queried across the rolling 90-day window | Covers 80% of knowledge-graph use cases at a fraction of the cost. Answering "what has this lab published in 3 months?" requires an index, not full GraphRAG — and this index can be built incrementally with no upfront batch cost | ✅ Done |
@@ -771,6 +793,9 @@ The table below reflects debate from three perspectives (product strategy, engin
 | **MCP Server: 12 tools** | Docs and counts corrected: `list_domains`, `get_domain_config`, `search_memory` are documented alongside the original 9. Tool count was previously misstated as 11. |
 | **Watchdog: 16 checks** | Count corrected from 15 (added `quality_drift` and `ai_deep_dive` follow-up after Drift Detector and AI deep-dive shipped). |
 | **Architecture doc** | New `docs/architecture.md` documents the 4-layer model (INPUT → PROCESSING → OUTPUT → QUALITY) and the closed self-correction loop. |
+| **Self-check script** | New `scripts/check-pipeline.py` — AST-parses every script, confirms shared helpers import, smoke-runs the no-LLM leaves against an empty memory dir; day-1 expected exits are pinned to their error messages so the check is meaningful before first real cron run. |
+| **Roadmap rows** | Field-State Trigger and GitHub Issues Adoption Sensor added to the Roadmap as ✅ Done (previously surfaced only in Advanced Capabilities). |
+| **Bug fix** | `prep-community-context.py` had three broken string literals (literal newlines instead of `\n` escapes) — would raise `SyntaxError` on import. Same bug exists in the maintainer's private fork; this patch is OSS-template only. |
 
 ### 2026-02-28 — P0 Infrastructure Release
 
