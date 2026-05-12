@@ -49,6 +49,9 @@ REQUIRED_HELPERS = [
     "_gh_issues_config.py",
 ]
 
+# Non-Python artifacts to syntax-check
+SHELL_SCRIPTS = ["setup.sh"]
+
 
 def parse_check(quiet=False):
     fails = []
@@ -61,6 +64,35 @@ def parse_check(quiet=False):
         except SyntaxError as e:
             fails.append((f.name, "%s line %d" % (e.msg, e.lineno or 0)))
             print("  parse FAIL %s  — %s line %d" % (f.name, e.msg, e.lineno or 0))
+    return fails
+
+
+def shell_check(quiet=False):
+    """bash -n every shipped shell script."""
+    fails = []
+    for name in SHELL_SCRIPTS:
+        path = SCRIPTS_DIR / name
+        if not path.exists():
+            fails.append((name, "missing"))
+            print("  shell FAIL %s — file not found" % name)
+            continue
+        try:
+            proc = subprocess.run(
+                ["bash", "-n", str(path)], timeout=10,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                universal_newlines=True,
+            )
+            if proc.returncode != 0:
+                fails.append((name, "bash -n exit %d" % proc.returncode))
+                print("  shell FAIL %s — %s" % (name, (proc.stderr or '').strip()[:200]))
+            elif not quiet:
+                print("  shell OK   %s" % name)
+        except FileNotFoundError:
+            fails.append((name, "bash not installed"))
+            print("  shell SKIP %s — bash not available" % name)
+        except subprocess.TimeoutExpired:
+            fails.append((name, "timeout"))
+            print("  shell FAIL %s — timeout" % name)
     return fails
 
 
@@ -152,6 +184,9 @@ def main():
     print("[check] parse-check (%d scripts)" % len(list(SCRIPTS_DIR.glob("*.py"))))
     parse_fails = parse_check(args.quiet)
 
+    print("\n[check] shell syntax (bash -n)")
+    shell_fails = shell_check(args.quiet)
+
     if args.parse:
         helper_fails = []
         smoke_fails = []
@@ -162,10 +197,11 @@ def main():
         print("\n[check] smoke-run leaves (%d scripts, empty memory dir)" % total_smoke)
         smoke_fails = smoke_check(args.quiet)
 
-    total = len(parse_fails) + len(helper_fails) + len(smoke_fails)
+    total = len(parse_fails) + len(shell_fails) + len(helper_fails) + len(smoke_fails)
     total_smoke = len(SMOKE_ALWAYS_OK) + len(SMOKE_NEEDS_DATA)
-    print("\n[check] summary: parse=%d/%d helpers=%d/%d smoke=%d/%d"
+    print("\n[check] summary: parse=%d/%d shell=%d/%d helpers=%d/%d smoke=%d/%d"
           % (len(parse_fails), len(list(SCRIPTS_DIR.glob('*.py'))),
+             len(shell_fails), len(SHELL_SCRIPTS),
              len(helper_fails), len(REQUIRED_HELPERS),
              len(smoke_fails), total_smoke))
     if total == 0:
