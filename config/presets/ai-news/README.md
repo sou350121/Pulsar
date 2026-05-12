@@ -35,7 +35,23 @@ That's deliberately minimal. We **exclude** social-intel, SOTA tracker, release 
 
 ## Why scripts are named `ai-app-*`
 
-Historical. They were the first non-VLA pipeline shipped in Pulsar and the name stuck. The engine itself is domain-agnostic: every one of those scripts reads `active-config.json` (keywords, institutions, RSS sources, research directions) without any hard-coded "AI" assumption. Drop a different `active-config.json` into `$PULSAR_MEMORY_DIR/` and the same scripts will track that domain.
+Historical. They were the first non-VLA pipeline shipped in Pulsar and the name stuck.
+
+### What the engine reads from `active-config.json` today
+
+The `keywords_A` and `keywords_B` lists ARE live — they drive the rating filter end-to-end (verified: with the preset's 15+4 keyword set, an end-to-end test reduced 2653 fetched items to 289 after_filter ≈ 89% noise cut). This is what makes the preset's domain swap meaningful: change keywords, change what's rated relevant.
+
+### What's currently decorative (be honest)
+
+- **`rss_sources`** — `ai-app-rss-collect.py` has its RSS list **hard-coded** in `FEEDS_RSS` near the top of the file (~32 sources). The preset's seven `rss_sources` entries are documentation, not data flow. The hardcoded list happens to overlap with this preset's intent (HF blog, Lilian Weng, OpenAI, Anthropic, DeepMind, LangChain, BAIR, …) so AI-news adopters get good coverage anyway.
+- **`institutions`** — not consumed by any collector script in this repo today. The LLM rater can be prompted to weight these, but the rating engine itself doesn't grep them yet.
+
+### What this means in practice
+
+- **AI-news domain**: works out of the box. Hardcoded feeds happen to fit.
+- **Another domain (climate / biomed / fintech)**: copy `ai-app-rss-collect.py` → `your-domain-rss-collect.py`, edit `FEEDS_RSS` to point at your feeds, point the cron job at the new script. `keywords_A` / `keywords_B` flow through unchanged.
+
+A future change to make the collector read `rss_sources` from the config (eliminating the fork-and-edit step for new domains) is on the roadmap but not in this release.
 
 ## Install (3 lines)
 

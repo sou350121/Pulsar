@@ -100,6 +100,43 @@ for f in active-config.json assumptions.json; do
   fi
 done
 
+# Many core scripts (ai-app-rss-collect.py, daily-watchdog.py, etc.) hardcode
+# `ACTIVE_CONFIG_PATH = "ai-app-active-config.json"` rather than reading the
+# canonical `active-config.json`. Wire the preset through by also writing the
+# domain-specific filename so keywords_A/B actually apply at rating time.
+for alt in ai-app-active-config.json vla-active-config.json; do
+  alt_dest="$PULSAR_MEMORY_DIR/$alt"
+  [[ -f "$alt_dest" ]] || cp "$PRESET_DIR/active-config.json" "$alt_dest"
+done
+ok "Mirrored active-config to ai-app-active-config.json + vla-active-config.json"
+
+# Repo-wide path substitution (idempotent — re-running is a no-op once done).
+# 37 scripts hardcode `MEM_DIR = "/home/admin/clawd/memory"` and do not honour
+# PULSAR_MEMORY_DIR. Without this step, those scripts try to write to
+# /home/admin/... and crash on PermissionError for fresh adopters.
+if [[ "$HOME" != "/home/admin" ]]; then
+  SUBST_COUNT=0
+  for py in "$SCRIPT_DIR"/*.py; do
+    [[ -f "$py" ]] || continue
+    if grep -q '/home/admin' "$py" 2>/dev/null; then
+      sed -i "s|/home/admin|${HOME}|g" "$py"
+      SUBST_COUNT=$((SUBST_COUNT+1))
+    fi
+  done
+  if [[ $SUBST_COUNT -gt 0 ]]; then
+    ok "Path-substituted /home/admin → $HOME in $SUBST_COUNT script(s)"
+  else
+    info "No /home/admin references left in scripts/ (already substituted)"
+  fi
+  # Also patch MEM_DIR to use the user's PULSAR_MEMORY_DIR if it differs from
+  # $HOME/clawd/memory (the default after substitution).
+  if [[ "$PULSAR_MEMORY_DIR" != "$HOME/clawd/memory" ]]; then
+    warn "PULSAR_MEMORY_DIR=$PULSAR_MEMORY_DIR ≠ default $HOME/clawd/memory."
+    warn "Scripts reference $HOME/clawd/memory after substitution. To use a"
+    warn "custom memory dir, symlink it: ln -s $PULSAR_MEMORY_DIR $HOME/clawd/memory"
+  fi
+fi
+
 # ── Step 5: Stage jobs.json with path substitution ──────────────────────────
 info "Step 5/6 — Preparing cron jobs ..."
 mkdir -p "$CRON_DIR"

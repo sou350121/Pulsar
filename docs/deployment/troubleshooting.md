@@ -47,8 +47,32 @@ stopping the gateway, editing, and starting it again — the gateway reads
 **Symptom**: `ls memory/ai-app-rss-$(date +%Y-%m-%d).json` shows no file, or
 the file's `items[]` array is empty, or `after_filter == 0`.
 
-**Root cause**: one or more RSS feed URLs in `active-config.json` is stale,
+**Root cause A — wrong filename for keyword config**: `ai-app-rss-collect.py`
+reads keywords from `memory/ai-app-active-config.json` (specific filename), not
+`memory/active-config.json`. `quickstart.sh` mirrors the preset's
+`active-config.json` to that name automatically. If you bypassed the
+quickstart, copy it manually:
+
+```bash
+cp memory/active-config.json memory/ai-app-active-config.json
+```
+
+**Root cause B — path substitution skipped**: scripts hardcode
+`MEM_DIR = "/home/admin/clawd/memory"`. A fresh adopter on a different
+`$HOME` will get `PermissionError: '/home/admin/clawd'`. Fix:
+
+```bash
+# What setup.sh / quickstart.sh do automatically:
+find scripts/ -name "*.py" | xargs sed -i "s|/home/admin|$HOME|g"
+```
+
+**Root cause C — RSS feed URLs failing**: one or more RSS feed URLs is stale,
 behind a redirect, or returning 4xx/5xx.
+
+> Note: `ai-app-rss-collect.py` has its feed list hard-coded in `FEEDS_RSS` at
+> the top of the file, not driven by `active-config.json`'s `rss_sources`.
+> Editing `rss_sources` won't change which feeds are pulled — you must edit the
+> script for now. This is documented in `config/presets/ai-news/README.md`.
 
 **Fix**: probe each feed for a 2xx status. Anything not 200 is suspect:
 
