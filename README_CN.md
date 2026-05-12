@@ -6,7 +6,7 @@
 
 [English](README.md) / 中文
 
-<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">问题反馈</a> · <a href="docs/architecture.md">架构</a> · <a href="AGENTS.md">部署文档</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a> · <a href="docs/mcp.md">MCP API</a>
+<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">问题反馈</a> · <a href="docs/architecture.md">架构</a> · <a href="docs/deployment/README.md">部署</a> · <a href="AGENTS.md">部署文档</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a> · <a href="docs/mcp.md">MCP API</a>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://python.org)
@@ -112,6 +112,8 @@ bash ~/clawd/scripts/setup.sh --non-interactive --memory-dir /path/to/memory
 ```
 
 ---
+
+> **🚀 TL;DR**：想要 10 分鐘起步路径？[`docs/deployment/quickstart.md`](docs/deployment/quickstart.md) 一步步走完「克隆 → 套用预设 → 第一次 RSS 拉取」，用 `ai-news` 这个可立即验证的样板配置先跑通再改自己的领域。
 
 ### 前置要求
 
@@ -780,6 +782,7 @@ Pulsar 的内部分层参考认知有机体设计，而非传统数据管道：
 
 | 文档 | 内容 |
 |------|------|
+| [docs/deployment/README.md](docs/deployment/README.md) | 部署起步指南——快速预设、领域适配走读、常见问题排查 |
 | [AGENTS.md](AGENTS.md) | 完整部署指南：密钥配置 · 路径说明 · 常见问题 |
 | [docs/architecture.md](docs/architecture.md) | 4 层模型 · 三道去重 · 自我纠错闭环 · 端到端时序 |
 | [docs/use-cases/README.md](docs/use-cases/README.md) | 全部 14 项能力索引——每项做什么、状态、何时启用 |

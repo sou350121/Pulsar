@@ -6,7 +6,7 @@
 
 [中文](README_CN.md) / English
 
-<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">Issues</a> · <a href="docs/architecture.md">Architecture</a> · <a href="AGENTS.md">Deployment</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a> · <a href="docs/mcp.md">MCP API</a>
+<a href="https://github.com/sou350121/Pulsar">GitHub</a> · <a href="https://github.com/sou350121/Pulsar/issues">Issues</a> · <a href="docs/architecture.md">Architecture</a> · <a href="docs/deployment/README.md">Deploy</a> · <a href="AGENTS.md">Deployment</a> · <a href="scripts/SCRIPTS.md">Pipeline DAG</a> · <a href="docs/mcp.md">MCP API</a>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://python.org)
@@ -112,6 +112,8 @@ After reading the config files, ask me the questions needed to fill in the blank
 ```
 
 ---
+
+> **🚀 TL;DR**: Want the 10-minute path? [`docs/deployment/quickstart.md`](docs/deployment/quickstart.md) walks through clone → preset → first RSS pull with an `ai-news` working example you can verify before touching your real domain config.
 
 ### Prerequisites
 
@@ -810,6 +812,7 @@ The table below reflects debate from three perspectives (product strategy, engin
 
 | Document | Contents |
 |----------|---------|
+| [docs/deployment/README.md](docs/deployment/README.md) | Start-here deployment guide — quickstart preset, your-own-domain walkthrough, troubleshooting |
 | [AGENTS.md](AGENTS.md) | Full deployment guide: key config · path reference · troubleshooting |
 | [docs/architecture.md](docs/architecture.md) | 4-layer model · 3-pass dedup · closed self-correction loop · end-to-end timing |
 | [docs/use-cases/README.md](docs/use-cases/README.md) | Index of all 14 capabilities — what each does, status, when to enable |
