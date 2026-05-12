@@ -41,7 +41,7 @@ Pulsar is a server-side domain intelligence pipeline. **You define the domain; P
 - **Rate first, cut noise before LLM cost → solves signal overload**: A four-tier rating engine (⚡/🔧/📖/❌) evaluates every signal before it reaches the LLM. Raw signals → 3–5 selected for deep analysis, saving 80%+ inference cost
 - **Three-stage observable reasoning chain → transparent and reproducible**: `prep → agent → post`, each stage with defined I/O formats and intermediate artifacts written to disk; when something breaks, you see exactly which stage failed
 - **Structured knowledge written to Git → knowledge accumulates permanently**: All outputs are Markdown pushed to GitHub via the Contents API; full commit history, full-text grep, no SaaS dependency
-- **Watchdog self-healing → pipelines recover automatically**: 15 health checks, 7 failure categories handled automatically in DAG order, full run logs persisted to `memory/watchdog-log.json`
+- **Watchdog self-healing → pipelines recover automatically**: 16 health checks, 7 failure categories handled automatically in DAG order, full run logs persisted to `memory/watchdog-log.json`
 - **Biweekly predictions + mandatory ✅/❌ grading → forecast accuracy on record**: Every reasoning report must include verifiable predictions with explicit verification conditions. The *next* report grades each one ✅/❌. Accuracy history accumulates permanently in Git — the system cannot quietly revise past claims
 - **Self-evolving belief system → the pipeline finds and fixes its own blind spots**: The system maintains explicit domain hypotheses × confidence scores (0–1). Every month it identifies which beliefs are confirmed by data and which are drifting. Drifting hypotheses enter a watch-list and automatically receive boosted signal injection the next cycle — the system actively investigates what it might be wrong about, with no human prompting. Together with biweekly ✅/❌ grading, this forms a closed self-correction loop
 
@@ -421,7 +421,7 @@ Push script: `scripts/gh-contents-upload.py` (handles create/update, auto-resolv
 
 ### 4. Watchdog Self-Healing
 
-`scripts/daily-watchdog.py` runs daily and checks 15 health signals:
+`scripts/daily-watchdog.py` runs daily and checks 16 health signals:
 
 | Check | Pass condition | Self-healing action |
 |-------|---------------|---------------------|
@@ -522,6 +522,93 @@ This loop runs continuously. After enough cycles, the system's confidence scores
 
 ---
 
+## Advanced Capabilities
+
+These features are shipped in the public template but not surfaced in the bullet list above. Pick the ones relevant to your domain — they all run on the same 2 GB VPS profile.
+
+### Cross-domain Rule Engine v2 (7 built-in rules)
+
+`scripts/cross-domain-rule-engine.py` runs daily and surfaces signals that bridge two domains. Rules are deterministic (auditable, predictable) and the engine adds a one-sentence LLM "cross-domain significance" per insight batch.
+
+| ID | Direction | Trigger |
+|----|-----------|---------|
+| **R001** | VLA technique → AI App | Diffusion / flow matching / transformer / RLHF / quantization techniques crossing into AI app development |
+| **R002** | AI App framework → VLA | New agent frameworks (LangGraph, CrewAI, etc.) adopted in robotics stacks |
+| **R003** | AI embodied → VLA | Embodied-AI papers from generalist labs reaching VLA practitioners |
+| **R004** | VLA foundations → AI | Foundation-model and pre-training methods originating in robotics |
+| **R005** | Paradigm fusion | Both domains converging on the same paradigm in the same week |
+| **R006** | GitHub-repo convergence | Top issues / PRs touching shared dependencies (e.g. PyTorch, JAX, Triton) |
+| **R007** | Hypothesis-driven transfer | LLM-generated transfer hypotheses (AI → VLA), capped per cycle |
+
+Output: `memory/cross-domain-insight.json`; reports include the latest insights with their LLM significance.
+
+---
+
+### GitHub Issues Adoption Sensor (4 scripts)
+
+A mechanical signal pipeline that watches **OSS adoption** in your domain via issue/PR velocity, not just star counts.
+
+```
+collect-github-issues.py  (daily, all tier-1 repos)
+       ↓
+  memory/gh-issues-*.json
+       ↓
+compute-gh-adoption.py    (Fri 13:00 — tier-1 + tier-2)
+       ↓
+  Adoption phases · DFI (Daily Field Index) · Convergence signals
+       ↓
+update-gh-field-notes.py  (push to your knowledge-base repo)
+```
+
+- **Repo registry**: `scripts/_gh_issues_config.py` — edit to fit your domain (tier-1 = daily, tier-2 = weekly)
+- **Adoption phases**: incubation → growth → mainstream → maturity, detected from issue cadence + community-question density
+- **Convergence signals**: when ≥3 monitored repos hit the same dependency / method / benchmark in the same week
+- **Env override**: `PULSAR_FIELD_NOTES_REPO`, `PULSAR_FIELD_NOTES_PATH` — point at your own knowledge-base file
+
+---
+
+### Field-State Trigger (mechanical, zero LLM)
+
+`scripts/ai-field-state.py` evaluates the daily corpus against **6 trigger types** before any LLM step runs:
+
+| Trigger | Catches |
+|---------|---------|
+| `breakthrough_density` | Spike of ⚡ items in a 3-day window |
+| `paradigm_shift` | New family entering top-5 method share |
+| `consensus_drift` | An assumption being repeatedly contradicted |
+| `silent_decay` | A previously hot family dropping out for 14+ days |
+| `cross_domain_pull` | A foreign-domain technique entering rated signals |
+| `release_clustering` | ≥3 model releases targeting the same benchmark within 7 days |
+
+Field-state runs *before* deep-dive scheduling; only signals matching a trigger become deep-dive candidates. Mechanical filtering keeps LLM cost bounded and outputs auditable.
+
+---
+
+### Semantic Memory Search
+
+Pulsar maintains an embedding index over the rolling 60-day window:
+
+```bash
+# Build / refresh (incremental, batch=10)
+python3 scripts/semantic-index-builder.py
+
+# Pure-Python cosine query — no torch / numpy required
+python3 scripts/semantic-search.py "what contradicted assumption V-003 last month?"
+```
+
+- **Embedder**: DashScope `text-embedding-v3` (1024-dim); any OpenAI-compatible embedding endpoint works with a one-line URL swap
+- **Storage**: `memory/semantic-index/chunks.jsonl` + `memory/semantic-index/vectors.bin`
+- **Retrieval**: top-k cosine over chunk vectors, returns `{source, date, snippet, score}`
+- **MCP-ready**: also exposed as the `search_memory` MCP tool
+
+---
+
+### Multi-domain Routing
+
+`memory/domains.json` registry + `scripts/_domain_loader.py` shared loader let you add a 3rd or 4th research domain by editing one file. Per-domain `active-config.json`, hypotheses, and Telegram routing keep streams isolated.
+
+---
+
 ## Project Architecture
 
 ```
@@ -530,7 +617,17 @@ Pulsar/
 │   ├── prep-*.py               # Data collection (RSS, web search, GitHub API)
 │   ├── run-*-two-phase.py      # Two-phase execution (prep + LLM agent)
 │   ├── post-*.py               # Post-processing (validate + memory + GitHub + TG)
-│   ├── daily-watchdog.py       # Health monitoring + self-healing (15 checks)
+│   ├── daily-watchdog.py       # Health monitoring + self-healing (16 checks)
+│   ├── cross-domain-rule-engine.py  # 7 built-in rules (R001-R007) for cross-domain bridging
+│   ├── ai-field-state.py       # Mechanical field-state trigger (no LLM, 6 trigger types)
+│   ├── collect-github-issues.py     # Daily issues collector across tracked OSS repos
+│   ├── compute-gh-adoption.py       # Weekly adoption-phase analysis (DFI/convergence)
+│   ├── update-gh-field-notes.py     # Push field-notes back to your knowledge-base
+│   ├── prep-community-context.py    # Bundle community + adoption context for reports
+│   ├── semantic-index-builder.py    # DashScope text-embedding-v3, incremental
+│   ├── semantic-search.py      # Pure-Python cosine similarity over the index
+│   ├── entity-tracker.py       # Author/lab/method/benchmark index across 90-day window
+│   ├── upstream-signal-monitor.py   # Track 1-2 upstream domains for early signals
 │   ├── memory-janitor.py       # Periodic cleanup of expired files
 │   ├── memory-upsert.py        # Generic append-write tool for memory files
 │   ├── gh-contents-upload.py   # GitHub Contents API push
@@ -599,7 +696,7 @@ Pulsar's internal layers follow a cognitive organism model, not a traditional da
 | **Reasoning** | Cortical processing | Three-stage LLM: prep → agent → post |
 | **Memory** | Hippocampal encoding | Structured Markdown → GitHub |
 | **Metacognition** | Prefrontal reflection | Biweekly prediction reviews · monthly calibration |
-| **Immune system** | Autoimmune response | Watchdog: 15 health checks, 7 self-healing paths |
+| **Immune system** | Autoimmune response | Watchdog: 16 health checks, 7 self-healing paths |
 
 ---
 
@@ -612,7 +709,9 @@ The included configuration tracks two domains simultaneously — VLA robotics re
 | Scheduled jobs | **33** cron jobs across both domains |
 | Pipeline scripts | **55** across VLA and AI pipelines |
 | Tracked hypotheses | **19** with monthly confidence auto-updates |
-| Watchdog checks | **15** health signals, **7** auto-recovery paths |
+| Watchdog checks | **16** health signals, **7** auto-recovery paths |
+| Cross-domain rules | **7** built-in rules (R001-R007) — VLA technique transfer, AI framework adoption, paradigm convergence, GitHub-repo convergence, hypothesis-driven transfer |
+| MCP tools | **12** read-only tools (signals, knowledge, meta, search, domain registry) |
 | End-to-end latency | **< 2 hours**: RSS → rated signals → TG notification |
 | Knowledge retention | Social intel / hotspots **90-day** rolling · reports permanent in Git |
 | Hardware requirement | **2 GB RAM** — minimal VPS |
@@ -660,6 +759,18 @@ The table below reflects debate from three perspectives (product strategy, engin
 | **P4** | **Config & Domain Template Marketplace** | Community hub for sharing domain configs, assumption templates, keyword sets, and validated cron blueprints across Pulsar instances | Replaces "Federated Calibration" (hypothesis confidence scores are context-dependent and cannot be meaningfully shared across instances with different sources, keywords, and rating criteria). What *can* be shared — and immediately useful — is the *structure*: domain config templates, RSS feed lists, hypothesis starter sets | 📋 Planned |
 
 ## Changelog
+
+### 2026-05-12 — Deep Capability Sync
+
+| Feature | Description |
+|---------|-------------|
+| **Cross-domain Rule Engine v2** | Bumped `cross-domain-rule-engine.py` to 7 built-in rules (R001–R007) — covers VLA→AI technique transfer, AI→VLA framework adoption, embodied-AI bridging, foundation-model backflow, paradigm fusion, GitHub-repo convergence, and LLM-generated transfer hypotheses. Each insight batch is now annotated with a one-sentence LLM "cross-domain significance" line. |
+| **GitHub Issues Adoption Sensor** | New 4-script pipeline (`collect-github-issues.py`, `compute-gh-adoption.py`, `_gh_issues_config.py`, `update-gh-field-notes.py`) — watches a curated registry of OSS repos and infers adoption phases (incubation → growth → mainstream → maturity), the Daily Field Index (DFI), and cross-repo convergence signals. Output can be pushed back into your knowledge-base via env-configurable target. |
+| **Field-State Trigger** | New `ai-field-state.py` — mechanical, zero-LLM gate with 6 trigger types (breakthrough density, paradigm shift, consensus drift, silent decay, cross-domain pull, release clustering). Runs ahead of deep-dive scheduling to bound LLM cost. |
+| **Community Context Prep** | New `prep-community-context.py` — fetches compact summaries of community field notes + the latest adoption snapshot into a single tmp file weekly/biweekly reports can read. Target repo configurable via `PULSAR_FIELD_NOTES_REPO`. |
+| **MCP Server: 12 tools** | Docs and counts corrected: `list_domains`, `get_domain_config`, `search_memory` are documented alongside the original 9. Tool count was previously misstated as 11. |
+| **Watchdog: 16 checks** | Count corrected from 15 (added `quality_drift` and `ai_deep_dive` follow-up after Drift Detector and AI deep-dive shipped). |
+| **Architecture doc** | New `docs/architecture.md` documents the 4-layer model (INPUT → PROCESSING → OUTPUT → QUALITY) and the closed self-correction loop. |
 
 ### 2026-02-28 — P0 Infrastructure Release
 

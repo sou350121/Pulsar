@@ -12,7 +12,40 @@
 - Gateway log: `/tmp/moltbot-gateway.log`
 
 ## Pipeline Overview
-See `scripts/SCRIPTS.md` for full DAG.
+See `scripts/SCRIPTS.md` for full DAG and [`docs/architecture.md`](docs/architecture.md) for the 4-layer model + closed self-correction loop.
+
+## Cron Schedule (Reference)
+
+The shipped template defines **33 cron jobs**. Notable slots (Asia/Shanghai TZ):
+
+| Time | Job |
+|------|-----|
+| 00:50 | Upstream signal monitor (arxiv cs.CL / cs.AI / stat.ML) |
+| 07:30 | GitHub Issues daily collector (tier-1 repos) |
+| 09:05 | VLA RSS collect → 09:15 hotspots → 09:30 social → 09:50 SOTA |
+| 09:55 | Entity tracker |
+| 09:56 | Field-state trigger (`ai-field-state.py`) |
+| 10:10 | Drift detector (7-day rolling + 30-day decay) |
+| 10:20 | Cross-domain rule engine v2 (R001-R007) |
+| 10:30 | Daily watchdog (16 checks, DAG-ordered self-healing) |
+| 11:00 | Calibration check — hypothesis trigger scan |
+| 11:15 | Semantic index incremental refresh |
+| Fri 13:00 | GitHub adoption analysis (tier-1 + tier-2) |
+| Fri 16:30 | VLA weekly deep dive |
+| Mon/Wed/Fri/Sun 15:45 | AI workflow inspiration |
+| 28th monthly | Calibration aggregation — confidence updates |
+
+Deep-dive slots are FIFO-queued with water-level quota gates; on Fridays the daytime deep-dive slots skip in favor of weekly deep-dive runs.
+
+## Key Scripts Added in Recent Releases
+
+- `cross-domain-rule-engine.py` — v2 with 7 built-in rules
+- `ai-field-state.py` — mechanical trigger gate (zero LLM)
+- `collect-github-issues.py` + `compute-gh-adoption.py` + `_gh_issues_config.py` + `update-gh-field-notes.py` — GitHub Issues Adoption Sensor
+- `prep-community-context.py` — community + adoption context bundler
+- `semantic-index-builder.py` + `semantic-search.py` — DashScope embedding index
+- `entity-tracker.py` — author/lab/method/benchmark index
+- `upstream-signal-monitor.py` — upstream-domain early signals
 
 ## Environment
 - API keys in `~/.clawdbot/.env` or system environment
