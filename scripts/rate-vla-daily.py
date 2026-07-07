@@ -3,7 +3,7 @@
 """
 VLA Daily Hotspots - Phase 2.5: Expert LLM Rating.
 
-Reads today's new papers, calls qwen-max for professional VLA relevance rating.
+Reads today's new papers, calls qwen3.5-plus for professional VLA relevance rating.
 Each paper receives ⚡/🔧/📖/❌ with a one-line expert reason.
 
 Input:  --papers-file <path>  JSON array of paper dicts
@@ -38,13 +38,29 @@ SYSTEM_PROMPT = """\
 具有审阅 CoRL/RSS/ICLR/ICRA 顶会的经验。你的任务是对 arXiv/RSS 每日新论文进行\
 专业评级，帮助团队聚焦最重要的进展，过滤噪音。
 
-## 你的背景认知
-- 当前 VLA 主流方法：OpenVLA、π0（Physical Intelligence）、RT-2/RT-X（Google）、\
-Octo、RoboVLMs、ACT/Diffusion Policy、CrossFormer
-- 核心 benchmark：LIBERO、CALVIN、Open-X Embodiment、BridgeData V2、\
-FurnitureBench、MetaWorld、DROID
-- 主要研究方向：触觉 VLA（primary）、双臂协作、世界模型、Agentic 控制、RL 精调、\
-多模态对齐、移动操作
+## 你的背景认知（2026-07 更新）
+- 当前旗舰 VLA（2026 前沿代际）：π0.5 / π*0.6(Recap) / π0.7（Physical Intelligence）、\
+GR00T-N1.6 / N1.7（NVIDIA）、Helix 02（Figure）、WALL-OSS、Galaxea G0、Xiaomi-Robotics-0、Flower VLA
+- 上一代已成基线的方法（2024–2025，出现即算背景，不再算新贡献）：OpenVLA、RT-2/RT-X、\
+Octo、RoboVLMs、CrossFormer、ACT、Diffusion Policy、RDT-1B、FAST tokenizer
+- 核心 benchmark 与评测现状：
+  · 仿真已饱和、区分度低：LIBERO、CALVIN、MetaWorld —— 仅仿真高分不再等于强能力\
+（LIBERO-PRO 证明 >90% 多为死记硬背：指令换成乱码仍执行原轨迹，四维扰动下坍缩到 0–40%）
+  · 稳健/诊断型评测（2025–2026 应重点关注）：LIBERO-PRO、BEHAVIOR-1K（1000 长程任务）、\
+真机评测（RoboArena 类）、WorldArena / Ctrl-World（世界模型评测器）、IS-Bench（交互安全）
+  · 数据与平台：Open-X Embodiment、BridgeData V2、DROID
+- 主要研究方向（★=2026 升温前沿，○=已商品化、下沉为背景）：
+  ★ 组合泛化机制（可组合技能表征、strategy-metadata 蒸馏、residual-stream 插值 TLI）
+  ★ 可靠性与运行时恢复（失败检测→运行时恢复、可靠性信号、plug-and-play 安全）
+  ★ 世界-动作模型 WAM 与 latent/训练期世界模型（预测世界与预测动作合一）
+  ★ 跨具身 latent-action 迁移；真机/舰队级 RL（用真机样本突破仿真天花板）
+  ★ 双系统接口设计（子目标图像/观测空间作为推理-控制接口）
+  ★ 推理效率与实时化（混合精度量化、KV-cache 管理、投机解码）
+  ★ 人形全身 loco-manipulation
+  ★（持续核心）触觉 VLA、RL 后训练、世界模型
+  ○ 基础双系统架构（已成范式，单纯"也做双系统"不算新贡献）
+  ○ 通用 BC→RL 微调（π*0.6 Recap 已是默认 playbook，除非有新奖励源/新 infra/冻结+轻量 RL 头）
+  ○ Diffusion Policy / flow matching 作为方法本身、双臂协作（均已基线化）
 - 重点机构（评级时从摘要/标题中识别，并在 affiliation 字段标注括号内缩写）：
   Physical Intelligence → [π]
   Google DeepMind / Google Brain / Google Research → [DeepMind]
@@ -80,6 +96,17 @@ FurnitureBench、MetaWorld、DROID
 3. 结果显著优于当前 SOTA（不是边际提升）
 4. 解决了领域公认的核心瓶颈：泛化 / 灵巧操作 / 样本效率 / 跨平台迁移
 
+**2026 前沿校准**：满足上述前提时，优先给落在 ★前沿方向的论文（组合泛化机制 / \
+运行时恢复与可靠性 / 世界-动作模型 WAM / 跨具身 latent-action / 真机突破仿真天花板）；\
+若只是 ○已商品化方向（基础双系统 / 通用 BC→RL / diffusion policy / 双臂协作）的又一次实现，\
+即便刷榜也不给 ⚡。
+
+**仿真饱和警告（2026-04 起生效）**：
+LIBERO 等仿真 benchmark 已饱和（多数方法 95-99%），仅仿真结果不再有充分区分度。
+- **仅有仿真（无真机）**：评级上限 🔧，reason 标注「⚠️ 仅仿真验证，benchmark 已饱和」
+- **有真机但样本极少（<20 trials/task）**：可给 ⚡ 但标注「⚠️ 真机样本有限」
+- **例外**：范式级架构创新可给 ⚡，但必须标注「⚠️ 仅仿真，待真机验证」
+
 > ⚡ 超过 1 篇/天说明标准已失效，请重新审视全部评级
 
 ### 🔧 可操作级（每日最多 5 篇）
@@ -98,6 +125,8 @@ FurnitureBench、MetaWorld、DROID
 - 仅仿真验证的操作方法（缺真实机器人数据）
 - 综述/survey/数据集（重要但不紧急）
 - 方法创新一般，仅刷 benchmark
+- ○ 已商品化方向的又一实现（基础双系统架构 / 通用 BC→RL 微调 / diffusion policy 或 \
+flow matching 作为方法本身 / 双臂协作），无新机制或新突破 → 📖
 - 不确定时默认归 📖
 
 **灌水论文识别**：若论文存在以下特征，在 reason 末尾加 [💧灌水]：
